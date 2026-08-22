@@ -28,6 +28,9 @@ jobs:
 
   windows-powershell-51:
     runs-on: windows-latest
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,8 +38,6 @@ jobs:
           python-version: "3.12"
       - name: Install Windows runtime requirements and run the full plugin suite
         shell: powershell
-        env:
-          PYTHONUTF8: "1"
         run: |
           python -m pip install --disable-pip-version-check --requirement requirements-windows.txt
           if ($LASTEXITCODE -ne 0) { throw "Could not install Windows runtime requirements" }
