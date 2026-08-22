@@ -173,3 +173,29 @@ jobs:
           $plugins = (& $env:GOLDHANDBLOG_CODEX_PATH plugin list --json) | ConvertFrom-Json
           $installed = $plugins.installed | Where-Object { $_.pluginId -eq "goldhand-clinic-blog@goldhand-clinic-windows" } | Select-Object -First 1
           if (-not $installed.enabled -or $installed.marketplaceSource.sourceType -ne "local") { throw "Managed update was not enabled locally" }
+
+      - name: Install through the published public one-file route
+        if: github.event_name == 'workflow_dispatch'
+        shell: powershell
+        env:
+          CODEX_HOME: ${{ runner.temp }}\public-codex-home
+          GOLDHANDBLOG_EDITABLE_ROOT: ${{ runner.temp }}\GoldhandBlog-public
+          GOLDHANDBLOG_SKIP_DESKTOP_SHORTCUT: "1"
+          GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION: "1"
+          GOLDHANDBLOG_SKIP_PAUSE: "1"
+        run: |
+          $isolated = Join-Path $env:RUNNER_TEMP "published-one-file"
+          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
+          $downloadedCmd = Join-Path $isolated "INSTALL-WINDOWS.cmd"
+          $publicCmdUrl = "https://github.com/seojun03/goldhand-clinic-blog-windows/releases/latest/download/INSTALL-WINDOWS.cmd"
+          Invoke-WebRequest -Uri $publicCmdUrl -OutFile $downloadedCmd -UseBasicParsing
+          if ((Get-FileHash -LiteralPath $downloadedCmd -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath "INSTALL-WINDOWS.cmd" -Algorithm SHA256).Hash) {
+              throw "The published standalone CMD does not match the validated repository file"
+          }
+          $env:GOLDHANDBLOG_CODEX_PATH = Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP "codex-path.txt") -Raw -Encoding UTF8
+          & cmd.exe /d /c $downloadedCmd
+          if ($LASTEXITCODE -ne 0) { throw "Published one-file install failed with exit code $LASTEXITCODE" }
+          $plugins = (& $env:GOLDHANDBLOG_CODEX_PATH plugin list --json) | ConvertFrom-Json
+          $installed = $plugins.installed | Where-Object { $_.pluginId -eq "goldhand-clinic-blog@goldhand-clinic-windows" } | Select-Object -First 1
+          if (-not $installed.enabled -or $installed.marketplaceSource.sourceType -ne "local") { throw "Published one-file install was not enabled locally" }
+          if ($installed.version -notlike "*+codex.managed.install.*") { throw "Published one-file version was not cache-busted: $($installed.version)" }
