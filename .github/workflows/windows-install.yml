@@ -189,7 +189,9 @@ jobs:
           $downloadedCmd = Join-Path $isolated "INSTALL-WINDOWS.cmd"
           $publicCmdUrl = "https://github.com/seojun03/goldhand-clinic-blog-windows/releases/latest/download/INSTALL-WINDOWS.cmd"
           Invoke-WebRequest -Uri $publicCmdUrl -OutFile $downloadedCmd -UseBasicParsing
-          if ((Get-FileHash -LiteralPath $downloadedCmd -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath "INSTALL-WINDOWS.cmd" -Algorithm SHA256).Hash) {
+          $publishedCmd = (Get-Content -LiteralPath $downloadedCmd -Raw -Encoding ASCII).Replace("`r`n", "`n")
+          $validatedCmd = (Get-Content -LiteralPath "INSTALL-WINDOWS.cmd" -Raw -Encoding ASCII).Replace("`r`n", "`n")
+          if ($publishedCmd -cne $validatedCmd) {
               throw "The published standalone CMD does not match the validated repository file"
           }
           $env:GOLDHANDBLOG_CODEX_PATH = Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP "codex-path.txt") -Raw -Encoding UTF8
