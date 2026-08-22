@@ -1585,7 +1585,10 @@ class BuilderTests(unittest.TestCase):
             )
             article = re.sub(
                 r'(<table\b(?=[^>]*data-native-table-purpose="clinic-info"))',
-                f'<img src="data:," data-local-image="{image_path}" alt="사용자 이미지" />\\1',
+                lambda match: (
+                    f'<img src="data:," data-local-image="{image_path}" alt="사용자 이미지" />'
+                    f"{match.group(1)}"
+                ),
                 valid_article(),
                 count=1,
             )

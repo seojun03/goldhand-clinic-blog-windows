@@ -10,7 +10,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 ## 운영체제별 실행기
 
 - 플러그인은 macOS와 Windows에서 같은 글쓰기·검수·HTML 계약을 사용한다.
-- Python 명령은 현재 운영체제에서 실제로 종료 코드 0으로 실행되는 Python 3 실행기를 먼저 확인한다. Windows에서는 `py -3`, 다음으로 `python`을 사용하고, macOS에서는 `python3`을 사용한다. 아래 예시의 `python3`는 이렇게 확인한 실행기로 치환한다.
+- Python 명령은 현재 운영체제에서 실제로 종료 코드 0으로 실행되는 Python 3 실행기를 먼저 확인한다. Windows에서는 한글 JSON 출력을 보존하도록 `py -3 -X utf8`, 다음으로 `python -X utf8`을 사용하고, macOS에서는 `python3`을 사용한다. 아래 예시의 `python3`는 이렇게 확인한 실행기로 치환한다.
 - Windows 출력 폴더는 레지스트리에 등록된 실제 바탕화면을 우선 사용하므로 OneDrive 바탕화면도 따른다. 복사 안내는 Windows에서 `Ctrl+V`, macOS에서 `⌘V`로 표시한다.
 - GPT Image 생성·본문 배치는 두 운영체제에서 동일하다. 네이버가 읽을 공개 HTTPS 주소로 게시할 때 Windows에서는 npm의 `vercel.cmd`·`vercel.exe`·`vercel` 순서로 실제 실행 파일을 찾고, macOS에서는 `vercel`을 사용한다.
 
