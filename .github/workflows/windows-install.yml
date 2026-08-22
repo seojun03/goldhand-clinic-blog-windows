@@ -30,6 +30,29 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Windows runtime requirements and run the full plugin suite
+        shell: powershell
+        run: |
+          python -m pip install --disable-pip-version-check --requirement requirements-windows.txt
+          if ($LASTEXITCODE -ne 0) { throw "Could not install Windows runtime requirements" }
+          python -m unittest discover -s "plugins/goldhand-clinic-blog/skills/goldhand-clinic-blog/tests" -v
+          if ($LASTEXITCODE -ne 0) { throw "Goldhand plugin tests failed on Windows" }
+
+      - name: Verify the production GPT image host from Windows PowerShell 5.1
+        shell: powershell
+        env:
+          GOLDHAND_GPT_IMAGE_FIXTURE_URL: https://goldhand-blog-images.vercel.app/media/b285d40f4977e39544d10002f10179d0a82a8fa9fa5b06c01c59ebefa5edc85f.png
+        run: |
+          $response = Invoke-WebRequest -Uri $env:GOLDHAND_GPT_IMAGE_FIXTURE_URL -UseBasicParsing -Headers @{ Range = "bytes=0-0"; "User-Agent" = "goldhand-windows-ci/1.0" }
+          if ($response.StatusCode -notin @(200, 206)) { throw "Unexpected image host status: $($response.StatusCode)" }
+          $contentType = [string]$response.Headers["Content-Type"]
+          if (-not $contentType.StartsWith("image/", [System.StringComparison]::OrdinalIgnoreCase)) {
+              throw "Unexpected image host content type: $contentType"
+          }
+
       - name: Require Windows PowerShell 5.1 and parse installers
         shell: powershell
         run: |
