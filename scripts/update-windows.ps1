@@ -65,12 +65,15 @@ try {
         if (-not $installer) { throw "The validated release ZIP is missing install-from-download-windows.ps1." }
         $previousTag = $env:GOLDHANDBLOG_RELEASE_TAG
         $previousSkip = $env:GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION
+        $previousImageSetupSkip = $env:GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP
         try {
             $env:GOLDHANDBLOG_RELEASE_TAG = $release.Tag
+            $env:GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP = "1"
             & $installer.FullName -CodexPath $CodexPath -EditableRoot $EditableRoot
         } finally {
             if ($null -eq $previousTag) { Remove-Item Env:GOLDHANDBLOG_RELEASE_TAG -ErrorAction SilentlyContinue } else { $env:GOLDHANDBLOG_RELEASE_TAG = $previousTag }
             if ($null -eq $previousSkip) { Remove-Item Env:GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION -ErrorAction SilentlyContinue } else { $env:GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION = $previousSkip }
+            if ($null -eq $previousImageSetupSkip) { Remove-Item Env:GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP -ErrorAction SilentlyContinue } else { $env:GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP = $previousImageSetupSkip }
         }
         $installedTag = if (Test-Path -LiteralPath $StatePath -PathType Leaf) { (Get-Content -LiteralPath $StatePath -Raw -Encoding UTF8).Trim() } else { "" }
         if ($installedTag -ne $release.Tag) { throw "The managed release state was not updated to $($release.Tag)." }

@@ -36,6 +36,7 @@ def main() -> int:
 
     required = [
         ROOT / "INSTALL-WINDOWS.cmd",
+        ROOT / "SETUP-IMAGES-WINDOWS.cmd",
         ROOT / "install-from-download-windows.ps1",
         ROOT / "requirements-windows.txt",
         ROOT / "scripts" / "apply-local-edits-windows.ps1",
@@ -66,6 +67,8 @@ def main() -> int:
     require(not long_paths, "Windows-safe relative path limit exceeded: " + ", ".join(long_paths))
 
     launcher = (ROOT / "INSTALL-WINDOWS.cmd").read_text(encoding="ascii")
+    image_setup_launcher = (ROOT / "SETUP-IMAGES-WINDOWS.cmd").read_text(encoding="ascii")
+    image_setup_python = (PLUGIN_ROOT / "skills" / PLUGIN_NAME / "scripts" / "setup_image_host.py").read_text(encoding="utf-8")
     installer = (ROOT / "install-from-download-windows.ps1").read_text(encoding="ascii")
     updater = (ROOT / "scripts" / "update-windows.ps1").read_text(encoding="ascii")
     helper_bytes = (ROOT / "scripts" / "apply-local-edits-windows.ps1").read_bytes()
@@ -81,9 +84,18 @@ def main() -> int:
     require("function Ensure-VercelCli" in installer and "vercel.cmd" in installer, "Vercel CLI executable handling is missing")
     require("install --global vercel --no-fund --no-audit" in installer, "Vercel CLI npm installation is missing")
     require("Test-VersionCommand" in installer and "Ensure-VercelCli" in installer, "Vercel CLI execution verification is missing")
+    require("Invoke-ImageHostSetupBestEffort" in installer, "automatic first-time image-host setup is missing")
+    require("Write-ImageSetupDesktopLauncher" in installer and "Goldhand Image Setup.lnk" in installer, "one-click image setup retry shortcut is missing")
+    require("setup_image_host.py" in image_setup_launcher, "standalone image setup launcher is missing the Python setup entrypoint")
+    require((PLUGIN_ROOT / "skills" / PLUGIN_NAME / "scripts" / "setup_image_host.py").is_file(), "packaged image-host setup script is missing")
+    require('run_vercel(["login"]' in image_setup_python, "one-time browser Vercel login is missing")
+    require('run_vercel(["project", "add"' in image_setup_python and 'run_vercel(["link"' in image_setup_python, "automatic Vercel project creation or linking is missing")
+    require('"publicBaseUrl"' in image_setup_python and 'write_config(' in image_setup_python, "automatic image-host configuration persistence is missing")
+    require("GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP" in updater, "background updates must skip interactive image-host setup")
     installer_lower = installer.lower()
-    require("vercel login" not in installer_lower, "public installer must not start an interactive Vercel login")
+    setup_lower = image_setup_python.lower()
     require("--token" not in installer_lower and "vercel_token=" not in installer_lower, "public installer must not bundle a Vercel credential")
+    require("--token" not in setup_lower and "vercel_token=" not in setup_lower, "image setup must not bundle a Vercel credential")
     require("plugin --help" in installer, "functional Codex CLI probe is missing")
     require("https://chatgpt.com/codex/install.ps1" in installer, "official Codex installer fallback is missing")
     require("Get-AppxPackage" not in installer and '-Filter "codex.exe"' not in installer, "protected Appx Codex discovery must not be used")

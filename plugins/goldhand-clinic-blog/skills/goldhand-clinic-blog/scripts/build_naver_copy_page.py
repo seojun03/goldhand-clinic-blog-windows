@@ -175,6 +175,19 @@ def resolve_vercel_cli(platform_name: str | None = None) -> str:
         resolved = shutil.which(candidate)
         if resolved:
             return resolved
+    if (platform_name or os.name) == "nt":
+        explicit_roots = [
+            os.environ.get("NPM_CONFIG_PREFIX", ""),
+            str(Path(os.environ["APPDATA"]) / "npm") if os.environ.get("APPDATA") else "",
+            str(Path(os.environ["LOCALAPPDATA"]) / "npm") if os.environ.get("LOCALAPPDATA") else "",
+        ]
+        for root in explicit_roots:
+            if not root:
+                continue
+            for candidate in ("vercel.cmd", "vercel.exe"):
+                path = Path(root) / candidate
+                if path.is_file():
+                    return str(path)
     expected = "vercel.cmd 또는 vercel.exe" if (platform_name or os.name) == "nt" else "vercel"
     raise ValueError(f"금손 이미지 게시용 Vercel CLI를 찾을 수 없습니다: {expected}")
 

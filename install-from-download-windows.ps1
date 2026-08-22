@@ -243,7 +243,9 @@ function Test-PluginTree([string]$Root) {
     $skill = Join-Path $Root "plugins\$PluginName\skills\$PluginName\SKILL.md"
     $updater = Join-Path $Root "scripts\update-windows.ps1"
     $requirements = Join-Path $Root "requirements-windows.txt"
-    return ((Test-Path -LiteralPath $marketplace) -and (Test-Path -LiteralPath $manifest) -and (Test-Path -LiteralPath $skill) -and (Test-Path -LiteralPath $updater) -and (Test-Path -LiteralPath $requirements))
+    $imageSetup = Join-Path $Root "SETUP-IMAGES-WINDOWS.cmd"
+    $imageSetupPython = Join-Path $Root "plugins\$PluginName\skills\$PluginName\scripts\setup_image_host.py"
+    return ((Test-Path -LiteralPath $marketplace) -and (Test-Path -LiteralPath $manifest) -and (Test-Path -LiteralPath $skill) -and (Test-Path -LiteralPath $updater) -and (Test-Path -LiteralPath $requirements) -and (Test-Path -LiteralPath $imageSetup) -and (Test-Path -LiteralPath $imageSetupPython))
 }
 
 function Test-CodexExecutable([string]$Candidate) {
@@ -389,7 +391,7 @@ function Copy-ManagedTree {
             if (-not (Test-Path -LiteralPath $source -PathType Container)) { throw "The release ZIP is missing the $directory directory." }
             Copy-Item -LiteralPath $source -Destination $staging -Recurse -Force
         }
-        foreach ($file in @("README.md", "INSTALL-WINDOWS.cmd", "install-from-download-windows.ps1", "requirements-windows.txt")) {
+        foreach ($file in @("README.md", "INSTALL-WINDOWS.cmd", "SETUP-IMAGES-WINDOWS.cmd", "install-from-download-windows.ps1", "requirements-windows.txt")) {
             $source = Join-Path $SourceRoot $file
             if (Test-Path -LiteralPath $source -PathType Leaf) { Copy-Item -LiteralPath $source -Destination $staging -Force }
         }
@@ -437,6 +439,63 @@ function Remove-LegacyDesktopShortcut {
     if (-not $desktop) { return }
     $shortcut = Join-Path $desktop "goldhand-clinic-blog-apply-my-edits.cmd"
     if (Test-Path -LiteralPath $shortcut -PathType Leaf) { Remove-Item -LiteralPath $shortcut -Force -ErrorAction SilentlyContinue }
+}
+
+function Write-ImageSetupDesktopLauncher {
+    if ($env:GOLDHANDBLOG_SKIP_DESKTOP_SHORTCUT -eq "1") { return }
+    $desktop = [Environment]::GetFolderPath("Desktop")
+    if ([string]::IsNullOrWhiteSpace($desktop)) { return }
+    if (-not (Test-Path -LiteralPath $desktop -PathType Container)) { return }
+    $target = Join-Path $EditableRoot "SETUP-IMAGES-WINDOWS.cmd"
+    if (-not (Test-Path -LiteralPath $target -PathType Leaf)) { return }
+    $launcher = Join-Path $desktop "Goldhand Image Setup.lnk"
+    try {
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($launcher)
+        $shortcut.TargetPath = $target
+        $shortcut.WorkingDirectory = $EditableRoot
+        $shortcut.Description = "Connect automatic GPT image hosting for Goldhand Clinic Blog"
+        $shortcut.Save()
+        Write-Step "Created the one-click image setup shortcut on the Desktop."
+    } catch {
+        Write-Warning "The Desktop image setup shortcut could not be created: $($_.Exception.Message)"
+    }
+}
+
+function Invoke-ImageHostSetupBestEffort {
+    if ($env:GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP -eq "1") {
+        Write-Step "Automatic image-host setup was skipped for this test or update run."
+        return
+    }
+    $setupScript = Join-Path $EditableRoot "plugins\$PluginName\skills\$PluginName\scripts\setup_image_host.py"
+    if (-not (Test-Path -LiteralPath $setupScript -PathType Leaf)) {
+        Write-Warning "The automatic image setup script is missing. Rerun INSTALL-WINDOWS.cmd."
+        return
+    }
+    $python = Get-PythonCommand
+    if (-not $python) {
+        Write-Warning "Python is unavailable for the automatic image setup. Rerun INSTALL-WINDOWS.cmd."
+        return
+    }
+    Write-Host ""
+    Write-Step "One-time image setup is starting. Approve the Vercel login in the browser if it opens."
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $global:LASTEXITCODE = $null
+        & $python -X utf8 $setupScript
+        $exitCode = $LASTEXITCODE
+    } catch {
+        $exitCode = 1
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+        $global:LASTEXITCODE = 0
+    }
+    if ($null -eq $exitCode -or $exitCode -ne 0) {
+        Write-Warning "Automatic images are not connected yet. Double-click Goldhand Image Setup on the Desktop after signing in to Vercel."
+        return
+    }
+    Write-Step "Automatic GPT image hosting is connected."
 }
 
 function Register-AutoUpdate {
@@ -532,10 +591,12 @@ function Install-DownloadedPlugin {
     if ($treeResult -and $treeResult.BackupRoot) { try { [void](Remove-TempDirectoryBestEffort -LiteralPath ([string]$treeResult.BackupRoot)) } catch {
     } }
     Remove-LegacyDesktopShortcut
+    Write-ImageSetupDesktopLauncher
+    Invoke-ImageHostSetupBestEffort
     Write-Host ""
     Write-Step "INSTALLATION COMPLETE"
     Write-Step "Open ChatGPT, start a new task, and select the Goldhand Clinic Blog plugin."
-    Write-Step "Vercel CLI is installed. Vercel account login and image-project connection remain a one-time user-approved setup."
+    Write-Step "Vercel CLI is installed. After one browser approval, the image project and plugin settings are configured automatically."
     Write-Step "Future validated releases will update automatically on Windows."
 }
 

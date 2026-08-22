@@ -47,6 +47,7 @@ NATURAL_SPEECH_SUITE_VALIDATOR = load_module("validate_natural_speech_suite")
 FINAL_WRITING_VOICE_VALIDATOR = load_module("validate_final_voice_review")
 WIPARK_CONTENT_SELECTOR = load_module("select_wipark_content_reference")
 REFERENCE_LEARNING_VALIDATOR = load_module("validate_reference_learning")
+IMAGE_HOST_SETUP = load_module("setup_image_host")
 
 KEYWORD = "동천동 한의원"
 TITLE = f"{KEYWORD} 통증이 반복되는 움직임과 생활 기준"
@@ -1714,6 +1715,141 @@ class BuilderTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass", result)
 
 
+class ImageHostSetupTests(unittest.TestCase):
+    def test_windows_setup_uses_the_vercel_cmd_shim(self) -> None:
+        with mock.patch.object(
+            IMAGE_HOST_SETUP.shutil,
+            "which",
+            side_effect=lambda name: r"C:\Users\tester\AppData\Roaming\npm\vercel.cmd"
+            if name == "vercel.cmd"
+            else None,
+        ):
+            command = IMAGE_HOST_SETUP.vercel_command(["whoami", "--format", "json"], platform_name="nt")
+        self.assertEqual(
+            command,
+            [
+                "cmd.exe",
+                "/d",
+                "/s",
+                "/c",
+                r"C:\Users\tester\AppData\Roaming\npm\vercel.cmd",
+                "whoami",
+                "--format",
+                "json",
+            ],
+        )
+
+    def test_first_setup_logs_in_creates_project_deploys_and_writes_config(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            project_dir = root / "image-host-project"
+            config_path = root / "state" / "image-host.json"
+            calls: list[tuple[str, ...]] = []
+            whoami_count = 0
+
+            def fake_run(arguments, cwd, **kwargs):
+                nonlocal whoami_count
+                calls.append(tuple(arguments))
+                if arguments[:1] == ["whoami"]:
+                    whoami_count += 1
+                    return subprocess.CompletedProcess(arguments, 1 if whoami_count == 1 else 0, "{}", "")
+                if arguments == ["login"]:
+                    self.assertTrue(kwargs.get("interactive"))
+                    return subprocess.CompletedProcess(arguments, 0, "", "")
+                if arguments[:2] == ["project", "inspect"]:
+                    return subprocess.CompletedProcess(arguments, 1, "", "missing")
+                if arguments[:2] == ["project", "add"]:
+                    return subprocess.CompletedProcess(arguments, 0, "", "")
+                if arguments[:1] == ["link"]:
+                    link_dir = Path(cwd) / ".vercel"
+                    link_dir.mkdir(parents=True, exist_ok=True)
+                    (link_dir / "project.json").write_text(
+                        json.dumps(
+                            {
+                                "projectId": "prj_test",
+                                "orgId": "team_test",
+                                "projectName": "goldhand-blog-images",
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                    return subprocess.CompletedProcess(arguments, 0, "", "")
+                if arguments[:1] == ["deploy"]:
+                    return subprocess.CompletedProcess(
+                        arguments,
+                        0,
+                        json.dumps({"url": "goldhand-blog-images-random-owner.vercel.app"}),
+                        "",
+                    )
+                if arguments[:1] == ["inspect"]:
+                    return subprocess.CompletedProcess(
+                        arguments,
+                        0,
+                        json.dumps(
+                            {
+                                "aliases": [
+                                    "goldhand-blog-images.vercel.app",
+                                    "goldhand-blog-images-owner.vercel.app",
+                                ]
+                            }
+                        ),
+                        "",
+                    )
+                raise AssertionError(f"unexpected Vercel command: {arguments}")
+
+            with mock.patch.object(IMAGE_HOST_SETUP, "run_vercel", side_effect=fake_run), mock.patch.object(
+                IMAGE_HOST_SETUP,
+                "verify_public_base_url",
+            ) as verify:
+                payload = IMAGE_HOST_SETUP.setup_image_host(
+                    config_path,
+                    project_dir,
+                    "goldhand-blog-images",
+                )
+
+            self.assertEqual(payload["publicBaseUrl"], "https://goldhand-blog-images.vercel.app")
+            self.assertEqual(json.loads(config_path.read_text(encoding="utf-8")), payload)
+            self.assertTrue((project_dir / "vercel.json").is_file())
+            self.assertTrue((project_dir / ".vercel" / "project.json").is_file())
+            self.assertIn(("login",), calls)
+            self.assertIn(("project", "add", "goldhand-blog-images"), calls)
+            self.assertIn(("link", "--yes", "--project", "goldhand-blog-images"), calls)
+            self.assertIn(("deploy", "--prod", "--yes", "--format", "json"), calls)
+            verify.assert_called_once_with("https://goldhand-blog-images.vercel.app")
+
+    def test_existing_valid_setup_is_reused_without_redeploy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            project_dir = root / "project"
+            config_path = root / "image-host.json"
+            IMAGE_HOST_SETUP.write_host_template(project_dir)
+            link_dir = project_dir / ".vercel"
+            link_dir.mkdir(parents=True)
+            (link_dir / "project.json").write_text(
+                json.dumps({"projectId": "prj_test", "projectName": "goldhand-blog-images"}),
+                encoding="utf-8",
+            )
+            expected = {
+                "projectDir": str(project_dir.resolve()),
+                "publicBaseUrl": "https://goldhand-blog-images.example",
+                "projectName": "goldhand-blog-images",
+            }
+            config_path.write_text(json.dumps(expected), encoding="utf-8")
+            with mock.patch.object(
+                IMAGE_HOST_SETUP,
+                "run_vercel",
+                return_value=subprocess.CompletedProcess([], 0, "{}", ""),
+            ) as run_vercel, mock.patch.object(IMAGE_HOST_SETUP, "verify_public_base_url") as verify:
+                actual = IMAGE_HOST_SETUP.setup_image_host(
+                    config_path,
+                    project_dir,
+                    "goldhand-blog-images",
+                )
+            self.assertEqual(actual, expected)
+            self.assertEqual(run_vercel.call_count, 1)
+            verify.assert_called_once_with(expected["publicBaseUrl"])
+
+
 class StateAndMediaTests(unittest.TestCase):
     def test_state_keeps_only_latest_three_without_body(self) -> None:
         state: dict[str, object] = {}
@@ -2298,6 +2434,7 @@ class SkillPackageTests(unittest.TestCase):
             "scripts/validate_final_voice_review.py",
             "scripts/sync_official_media_assets.py",
             "scripts/recommend_media.py",
+            "scripts/setup_image_host.py",
             "../writing-voice/SKILL.md",
         ):
             self.assertTrue((SKILL_DIR / relative).is_file(), relative)

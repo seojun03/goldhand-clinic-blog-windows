@@ -12,7 +12,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 - 플러그인은 macOS와 Windows에서 같은 글쓰기·검수·HTML 계약을 사용한다.
 - Python 명령은 현재 운영체제에서 실제로 종료 코드 0으로 실행되는 Python 3 실행기를 먼저 확인한다. Windows에서는 한글 JSON 출력을 보존하도록 `py -3 -X utf8`, 다음으로 `python -X utf8`을 사용하고, macOS에서는 `python3`을 사용한다. 아래 예시의 `python3`는 이렇게 확인한 실행기로 치환한다.
 - Windows 출력 폴더는 레지스트리에 등록된 실제 바탕화면을 우선 사용하므로 OneDrive 바탕화면도 따른다. 복사 안내는 Windows에서 `Ctrl+V`, macOS에서 `⌘V`로 표시한다.
-- GPT Image 생성·본문 배치는 두 운영체제에서 동일하다. 공유용 Windows 설치기는 Node.js LTS와 Vercel CLI를 자동으로 준비하되, Vercel 토큰과 계정 정보를 플러그인에 넣지 않고 최초 로그인·프로젝트 연결은 사용자 승인으로 남겨 둔다. 네이버가 읽을 공개 HTTPS 주소로 게시할 때 Windows에서는 npm의 `vercel.cmd`·`vercel.exe`·`vercel` 순서로 실제 실행 파일을 찾고, macOS에서는 `vercel`을 사용한다.
+- GPT Image 생성·본문 배치는 두 운영체제에서 동일하다. 공유용 Windows 설치기는 Node.js LTS와 Vercel CLI를 자동으로 준비한다. 최초 설치 또는 첫 글에서 이미지 호스트 설정이 없으면 `scripts/setup_image_host.py`를 실행한다. 사용자는 브라우저에서 본인 Vercel 로그인만 승인하고, 프로젝트 생성·연결·첫 배포·고정 공개 주소 선택·`image-host.json` 저장은 스크립트가 맡는다. Vercel 토큰과 계정 정보는 플러그인에 넣지 않는다. 네이버가 읽을 공개 HTTPS 주소로 게시할 때 Windows에서는 npm의 `vercel.cmd`·`vercel.exe`·`vercel` 순서로 실제 실행 파일을 찾고, macOS에서는 `vercel`을 사용한다.
 
 ## 절대 계약
 
@@ -186,7 +186,8 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 - 의료 개념·동작 설명 이미지는 사용자 소유 callilife OGQ 작품을 레퍼런스로 우선한다. `assets/callilife-ogq-media-library.json`에서 주제와 직접 연결된 작품 1~3개를 고르고 `safeAuto=true`와 `ownershipBasis=user-confirmed-2026-08-21`을 확인한다.
 - 작품 미리보기는 GPT Image 입력에만 사용한다. 최종 원고에는 `data-media-provider="gpt-image"`, 생성본 `data-local-image`, callilife 작품 상세 URL, `data-generation-owner-authorization="user-confirmed"`, `data-generation-content-preservation="medical-information-layout"`, 그리고 `data-generation-variation-mode="person-identity-subtle-variation"` 또는 `nonperson-style-subtle-variation`을 가진 이미지 1~3개만 넣는다.
 - 각 GPT Image `<figure>`에는 `data-image-placement="after-related-paragraph"`와 `data-image-anchor="핵심어1|핵심어2"`를 둔다. 직전의 `data-mobile-group="true"` 문단에는 anchor 가운데 하나가 실제로 있어야 한다. 생성본은 이 figure로 최종 article에 들어가야 하며 별도 파일 링크만 전달하면 실패다.
-- `build_naver_copy_page.py`는 `~/.codex/state/goldhand-clinic-blog/image-host.json`의 금손 전용 호스트 설정을 읽어 로컬 생성본을 콘텐츠 해시 파일명으로 게시한다. 게시된 각 URL이 HTTP 200·이미지 MIME인지 확인한 뒤에만 HTML을 저장하며, 게시 실패 시 base64로 우회하지 않고 빌드를 중단한다.
+- HTML 조립 전에 `~/.codex/state/goldhand-clinic-blog/image-host.json`이 없거나 연결 프로젝트가 없으면 확인 질문으로 멈추지 말고 현재 운영체제의 Python으로 `scripts/setup_image_host.py`를 실행한다. 로그인되지 않은 경우 브라우저 승인 안내를 사용자에게 한 번 보여 주고, 승인 완료까지 같은 실행을 기다린다. 프로젝트 이름·폴더·공개 주소·JSON 입력을 사용자에게 요구하지 않는다. 사용자가 로그인을 취소하거나 외부 연결이 실패했을 때만 생성된 로컬 이미지를 보존하고 자동 이미지 연결이 끝나지 않았다고 정확히 알린다.
+- `build_naver_copy_page.py`는 설정된 금손 전용 호스트를 읽어 로컬 생성본을 콘텐츠 해시 파일명으로 게시한다. 게시된 각 URL이 HTTP 200·이미지 MIME인지 확인한 뒤에만 HTML을 저장하며, 게시 실패 시 base64로 우회하지 않고 빌드를 중단한다.
 - GPT Image와 별도로 실제 금손 사진 6~12장을 항상 사용한다. `scripts/recommend_media.py`가 플러그인 `assets/official-media` 내장본 중 `safeAuto: true`이며 파일·해시·원본 URL이 모두 일치하는 사진만 선택한다.
 - 실제 사진은 `personInteraction: true`, `directorVisible: true`, `sceneType: director-patient-*`로 검수된 원장-환자 치료·진찰·상담·검사 장면만 사용한다. 로고·건물·약·장비·제품·빈 원내 공간은 절대 사용하지 않는다.
 - 실제 사진과 GPT 이미지 모두 이미지 아래에 보이는 설명, 출처, `AI 생성 이미지`, 장면 이름을 쓰지 않는다. `<figcaption>`이 하나라도 있으면 발행하지 않는다. 장면 의미와 출처는 `alt`와 검수용 `data-*`로만 관리한다.
