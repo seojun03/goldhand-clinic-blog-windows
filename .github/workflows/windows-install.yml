@@ -1,0 +1,149 @@
+name: Windows installer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check --requirement requirements-windows.txt
+      - run: python scripts/validate_distribution.py
+      - name: Run plugin content contract tests when present
+        shell: bash
+        run: |
+          if [ -d "plugins/goldhand-clinic-blog/skills/goldhand-clinic-blog/tests" ]; then
+            python -m unittest discover -s "plugins/goldhand-clinic-blog/skills/goldhand-clinic-blog/tests" -v
+          fi
+
+  windows-powershell-51:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require Windows PowerShell 5.1 and parse installers
+        shell: powershell
+        run: |
+          if ($PSVersionTable.PSEdition -ne "Desktop" -or $PSVersionTable.PSVersion.Major -ne 5) {
+              throw "Expected Windows PowerShell 5.1"
+          }
+          foreach ($path in @("install-from-download-windows.ps1", "scripts\apply-local-edits-windows.ps1", "scripts\update-windows.ps1")) {
+              $tokens = $null
+              $errors = $null
+              [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path), [ref]$tokens, [ref]$errors) | Out-Null
+              if (@($errors).Count -gt 0) { throw "PowerShell parse failure in ${path}: $($errors -join '; ')" }
+          }
+          python scripts/validate_distribution.py
+
+      - name: Keep the primary error when cleanup is blocked
+        shell: powershell
+        run: |
+          $installer = Get-Content -LiteralPath "install-from-download-windows.ps1" -Raw -Encoding ASCII
+          $match = [regex]::Match($installer, "(?ms)^function Remove-TempDirectoryBestEffort(?:\([^)]*\))? \{.*?^\}")
+          if (-not $match.Success) { throw "Cleanup helper was not found" }
+          Invoke-Expression $match.Value
+          $root = Join-Path $env:RUNNER_TEMP ("cleanup-lock-" + [Guid]::NewGuid().ToString("N"))
+          $file = Join-Path $root "locked.bin"
+          New-Item -ItemType Directory -Path $root -Force | Out-Null
+          [IO.File]::WriteAllText($file, "locked")
+          $stream = $null
+          try {
+              $stream = [IO.File]::Open($file, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+              $observed = $null
+              try {
+                  try { throw "PRIMARY_INSTALLER_FAILURE" }
+                  finally { [void](Remove-TempDirectoryBestEffort -LiteralPath $root -RetryDelaysMilliseconds @(0, 10, 20)) }
+              } catch { $observed = $_.Exception.Message }
+              if ($observed -ne "PRIMARY_INSTALLER_FAILURE") { throw "Cleanup masked the primary error: $observed" }
+          } finally {
+              if ($stream) { $stream.Dispose() }
+              Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Install from a complete archive with an invalid Codex candidate
+        shell: powershell
+        env:
+          CODEX_HOME: ${{ runner.temp }}\full-codex-home
+          CODEX_INSTALL_DIR: ${{ runner.temp }}\codex-bin
+          GOLDHANDBLOG_EDITABLE_ROOT: ${{ runner.temp }}\GoldhandBlog-full
+          GOLDHANDBLOG_SKIP_DESKTOP_SHORTCUT: "1"
+          GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION: "1"
+        run: |
+          Remove-Item -LiteralPath $env:CODEX_HOME -Recurse -Force -ErrorAction SilentlyContinue
+          $invalid = Join-Path $env:RUNNER_TEMP "protected-appx-codex.exe"
+          Set-Content -LiteralPath $invalid -Value "not executable" -Encoding ASCII
+          $env:GOLDHANDBLOG_CODEX_PATH = $invalid
+          $archive = Join-Path $env:RUNNER_TEMP "source.zip"
+          $expanded = Join-Path $env:RUNNER_TEMP "source-expanded"
+          git archive --format=zip --prefix=source-main/ --output=$archive HEAD
+          if ($LASTEXITCODE -ne 0) { throw "Could not create source archive" }
+          Expand-Archive -LiteralPath $archive -DestinationPath $expanded
+          & (Join-Path $expanded "source-main\install-from-download-windows.ps1")
+          if (-not (Test-Path -LiteralPath $env:CODEX_HOME -PathType Container)) { throw "Installer did not create CODEX_HOME" }
+          $codex = Join-Path $env:CODEX_INSTALL_DIR "codex.exe"
+          if (-not (Test-Path -LiteralPath $codex -PathType Leaf)) { throw "Official standalone Codex was not installed" }
+          & $codex plugin --help | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "Installed Codex does not support plugins" }
+          $plugins = (& $codex plugin list --json) | ConvertFrom-Json
+          $installed = $plugins.installed | Where-Object { $_.pluginId -eq "goldhand-clinic-blog@goldhand-clinic-windows" } | Select-Object -First 1
+          if (-not $installed.enabled -or $installed.marketplaceSource.sourceType -ne "local") { throw "Complete archive install was not enabled locally" }
+          if ($installed.version -notlike "*+codex.managed.install.*") { throw "Installed version was not cache-busted: $($installed.version)" }
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          [IO.File]::WriteAllText((Join-Path $env:RUNNER_TEMP "codex-path.txt"), $codex, $utf8)
+
+      - name: Install when only the standalone CMD is present
+        shell: powershell
+        env:
+          CODEX_HOME: ${{ runner.temp }}\cmd-codex-home
+          GOLDHANDBLOG_EDITABLE_ROOT: ${{ runner.temp }}\GoldhandBlog-cmd
+          GOLDHANDBLOG_SKIP_DESKTOP_SHORTCUT: "1"
+          GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION: "1"
+          GOLDHANDBLOG_SKIP_PAUSE: "1"
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP "cmd-source.zip"
+          git archive --format=zip --prefix=source-main/ --output=$archive HEAD
+          if ($LASTEXITCODE -ne 0) { throw "Could not create CMD source archive" }
+          $isolated = Join-Path $env:RUNNER_TEMP "isolated-cmd"
+          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
+          Copy-Item -LiteralPath "INSTALL-WINDOWS.cmd" -Destination $isolated
+          $env:GOLDHANDBLOG_BOOTSTRAP_ARCHIVE = $archive
+          $env:GOLDHANDBLOG_CODEX_PATH = Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP "codex-path.txt") -Raw -Encoding UTF8
+          & cmd.exe /d /c (Join-Path $isolated "INSTALL-WINDOWS.cmd")
+          if ($LASTEXITCODE -ne 0) { throw "Isolated CMD failed with exit code $LASTEXITCODE" }
+          $plugins = (& $env:GOLDHANDBLOG_CODEX_PATH plugin list --json) | ConvertFrom-Json
+          $installed = $plugins.installed | Where-Object { $_.pluginId -eq "goldhand-clinic-blog@goldhand-clinic-windows" } | Select-Object -First 1
+          if (-not $installed.enabled -or $installed.marketplaceSource.sourceType -ne "local") { throw "Isolated CMD install was not enabled locally" }
+          if ($installed.version -notlike "*+codex.managed.install.*") { throw "Isolated CMD version was not cache-busted: $($installed.version)" }
+
+      - name: Replace an existing managed install from a validated archive
+        shell: powershell
+        env:
+          CODEX_HOME: ${{ runner.temp }}\full-codex-home
+          GOLDHANDBLOG_EDITABLE_ROOT: ${{ runner.temp }}\GoldhandBlog-full
+          GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION: "1"
+          GOLDHANDBLOG_FORCE_UPDATE: "1"
+          GOLDHANDBLOG_RELEASE_TAG: "ci-managed-update"
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP "managed-update.zip"
+          git archive --format=zip --prefix=release/ --output=$archive HEAD
+          if ($LASTEXITCODE -ne 0) { throw "Could not create managed update archive" }
+          $env:GOLDHANDBLOG_UPDATE_ARCHIVE = $archive
+          $env:GOLDHANDBLOG_CODEX_PATH = Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP "codex-path.txt") -Raw -Encoding UTF8
+          $stale = Join-Path $env:GOLDHANDBLOG_EDITABLE_ROOT "stale-file-that-must-disappear.txt"
+          Set-Content -LiteralPath $stale -Value "stale" -Encoding ASCII
+          & (Join-Path $env:GOLDHANDBLOG_EDITABLE_ROOT "scripts\update-windows.ps1") -CodexPath $env:GOLDHANDBLOG_CODEX_PATH -EditableRoot $env:GOLDHANDBLOG_EDITABLE_ROOT
+          if (Test-Path -LiteralPath $stale) { throw "Managed update preserved a stale file" }
+          $state = (Get-Content -LiteralPath (Join-Path $env:GOLDHANDBLOG_EDITABLE_ROOT ".goldhand-clinic-blog-managed-release") -Raw -Encoding UTF8).Trim()
+          if ($state -ne "ci-managed-update") { throw "Managed release state mismatch: $state" }
+          $plugins = (& $env:GOLDHANDBLOG_CODEX_PATH plugin list --json) | ConvertFrom-Json
+          $installed = $plugins.installed | Where-Object { $_.pluginId -eq "goldhand-clinic-blog@goldhand-clinic-windows" } | Select-Object -First 1
+          if (-not $installed.enabled -or $installed.marketplaceSource.sourceType -ne "local") { throw "Managed update was not enabled locally" }
