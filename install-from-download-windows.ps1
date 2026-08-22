@@ -77,7 +77,7 @@ function Test-PythonAvailable {
 
 function Install-WingetPackage([string]$Id) {
     if (-not (Get-Command winget.exe -ErrorAction SilentlyContinue)) {
-        throw "Python is required. Install Python from https://www.python.org/downloads/windows/ and run this installer again."
+        throw "Required package $Id is missing and winget is unavailable. Install App Installer from the Microsoft Store, then run this installer again."
     }
     Write-Step "Installing required package $Id."
     $previousErrorActionPreference = $ErrorActionPreference
@@ -125,6 +125,116 @@ function Install-PythonRequirements {
         $global:LASTEXITCODE = 0
     }
     if ($null -eq $exitCode -or $exitCode -ne 0) { throw "The plugin's Python requirements could not be installed (exit code $exitCode)." }
+}
+
+function Test-VersionCommand([string]$Candidate) {
+    if ([string]::IsNullOrWhiteSpace($Candidate)) { return $false }
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        if (-not (Test-Path -LiteralPath $Candidate -PathType Leaf)) { return $false }
+        $resolved = (Resolve-Path -LiteralPath $Candidate).Path
+        $ErrorActionPreference = "Continue"
+        $global:LASTEXITCODE = $null
+        & $resolved --version *> $null
+        return $LASTEXITCODE -eq 0
+    } catch {
+        return $false
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+        $global:LASTEXITCODE = 0
+    }
+}
+
+function Get-NpmCommand {
+    $candidates = @()
+    foreach ($name in @("npm.cmd", "npm.exe", "npm")) {
+        foreach ($command in @(Get-Command $name -All -ErrorAction SilentlyContinue)) {
+            if ($command.Source) { $candidates += $command.Source }
+        }
+    }
+    if ($env:ProgramFiles) { $candidates += (Join-Path $env:ProgramFiles "nodejs\npm.cmd") }
+    if (${env:ProgramFiles(x86)}) { $candidates += (Join-Path ${env:ProgramFiles(x86)} "nodejs\npm.cmd") }
+
+    $seen = @{}
+    foreach ($candidate in $candidates) {
+        if ([string]::IsNullOrWhiteSpace([string]$candidate)) { continue }
+        $key = ([string]$candidate).ToLowerInvariant()
+        if ($seen.ContainsKey($key)) { continue }
+        $seen[$key] = $true
+        if (Test-VersionCommand -Candidate ([string]$candidate)) {
+            return (Resolve-Path -LiteralPath ([string]$candidate)).Path
+        }
+    }
+    return $null
+}
+
+function Get-VercelCommand {
+    $candidates = @()
+    foreach ($name in @("vercel.cmd", "vercel.exe", "vercel")) {
+        foreach ($command in @(Get-Command $name -All -ErrorAction SilentlyContinue)) {
+            if ($command.Source) { $candidates += $command.Source }
+        }
+    }
+    if ($env:NPM_CONFIG_PREFIX) { $candidates += (Join-Path $env:NPM_CONFIG_PREFIX "vercel.cmd") }
+    if ($env:APPDATA) { $candidates += (Join-Path $env:APPDATA "npm\vercel.cmd") }
+    if ($env:LOCALAPPDATA) { $candidates += (Join-Path $env:LOCALAPPDATA "npm\vercel.cmd") }
+
+    $seen = @{}
+    foreach ($candidate in $candidates) {
+        if ([string]::IsNullOrWhiteSpace([string]$candidate)) { continue }
+        $key = ([string]$candidate).ToLowerInvariant()
+        if ($seen.ContainsKey($key)) { continue }
+        $seen[$key] = $true
+        if (Test-VersionCommand -Candidate ([string]$candidate)) {
+            return (Resolve-Path -LiteralPath ([string]$candidate)).Path
+        }
+    }
+    return $null
+}
+
+function Ensure-NodeAndNpm {
+    $script:NpmExecutable = Get-NpmCommand
+    if ($script:NpmExecutable) {
+        Write-Step "Node.js and npm are available."
+        return
+    }
+    Install-WingetPackage -Id "OpenJS.NodeJS.LTS"
+    $script:NpmExecutable = Get-NpmCommand
+    if (-not $script:NpmExecutable) {
+        throw "Node.js LTS was installed but npm is not available yet. Close this window, reopen PowerShell, and run INSTALL-WINDOWS.cmd again."
+    }
+}
+
+function Ensure-VercelCli {
+    $script:VercelExecutable = Get-VercelCommand
+    if ($script:VercelExecutable) {
+        Write-Step "Vercel CLI is available at $script:VercelExecutable"
+        return
+    }
+
+    Ensure-NodeAndNpm
+    Write-Step "Installing the Vercel CLI."
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $global:LASTEXITCODE = $null
+        $installOutput = @(& $script:NpmExecutable install --global vercel --no-fund --no-audit 2>&1)
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+        $global:LASTEXITCODE = 0
+    }
+    if ($null -eq $exitCode -or $exitCode -ne 0) {
+        $details = if ($installOutput) { "`n$($installOutput -join [Environment]::NewLine)" } else { "" }
+        throw "The Vercel CLI could not be installed with npm (exit code $exitCode).$details"
+    }
+
+    Refresh-ProcessPath
+    $script:VercelExecutable = Get-VercelCommand
+    if (-not $script:VercelExecutable) {
+        throw "The Vercel CLI was installed but could not be executed. Close this window, reopen PowerShell, and run INSTALL-WINDOWS.cmd again."
+    }
+    Write-Step "Vercel CLI is ready at $script:VercelExecutable"
 }
 
 function Test-PluginTree([string]$Root) {
@@ -357,6 +467,7 @@ function Install-DownloadedPlugin {
     Write-Step "Installing the managed plugin without changing the ChatGPT app or Git."
     Ensure-Python
     Install-PythonRequirements
+    Ensure-VercelCli
 
     if ($env:CODEX_HOME -and -not (Test-Path -LiteralPath $env:CODEX_HOME)) {
         New-Item -ItemType Directory -Path $env:CODEX_HOME -Force | Out-Null
@@ -424,6 +535,7 @@ function Install-DownloadedPlugin {
     Write-Host ""
     Write-Step "INSTALLATION COMPLETE"
     Write-Step "Open ChatGPT, start a new task, and select the Goldhand Clinic Blog plugin."
+    Write-Step "Vercel CLI is installed. Vercel account login and image-project connection remain a one-time user-approved setup."
     Write-Step "Future validated releases will update automatically on Windows."
 }
 

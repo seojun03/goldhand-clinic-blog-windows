@@ -24,7 +24,7 @@
 
 - 공유용 Windows 설치본은 짧은 영문 폴더에 전체 플러그인을 설치하고 `requirements-windows.txt`의 고정된 Python 패키지와 Windows용 `Asia/Seoul` 시간대 데이터를 설치해야 합니다.
 - 결과 HTML은 Windows의 실제 바탕화면 위치를 사용하며 OneDrive 바탕화면도 인식합니다. 복사 안내는 `Ctrl+V`로 표시됩니다.
-- GPT Image 생성과 본문 배치는 그대로 유지됩니다. 공개 HTTPS 게시 단계에서는 Windows npm shim인 `vercel.cmd`를 우선 인식합니다.
+- GPT Image 생성과 본문 배치는 그대로 유지됩니다. 공유용 Windows 설치기는 Node.js LTS가 없으면 함께 설치하고 Vercel CLI까지 자동 설치·실행 확인합니다. 계정 로그인과 이미지 프로젝트 연결은 토큰을 배포본에 넣지 않고 최초 1회 사용자 승인으로 분리합니다. 공개 HTTPS 게시 단계에서는 Windows npm shim인 `vercel.cmd`를 우선 인식합니다.
 - 글쓰기·말투·표·이미지·HTML 규칙은 운영체제별로 나누지 않습니다. 같은 콘텐츠 계약 검사를 Windows 배포 CI에서도 실행해야 합니다.
 
 ## 단일 원본과 업데이트

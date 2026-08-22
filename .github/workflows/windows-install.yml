@@ -31,11 +31,25 @@ jobs:
     env:
       PYTHONUTF8: "1"
       PYTHONDONTWRITEBYTECODE: "1"
+      NPM_CONFIG_PREFIX: ${{ runner.temp }}\goldhand-npm
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Start from a clean Vercel CLI prefix
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path $env:NPM_CONFIG_PREFIX -Force | Out-Null
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $env:NPM_CONFIG_PREFIX -Encoding UTF8
+          $env:Path = "$env:NPM_CONFIG_PREFIX;$env:Path"
+          & npm.cmd uninstall --global vercel --no-fund --no-audit | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "Could not clear the isolated Vercel CLI prefix" }
+          $existing = @(Get-Command vercel.cmd, vercel.exe, vercel -All -ErrorAction SilentlyContinue)
+          if ($existing.Count -ne 0) { throw "The runner unexpectedly started with a Vercel CLI: $($existing.Source -join ', ')" }
       - name: Install Windows runtime requirements and run the full plugin suite
         shell: powershell
         run: |
@@ -115,6 +129,10 @@ jobs:
           Expand-Archive -LiteralPath $archive -DestinationPath $expanded
           & (Join-Path $expanded "source-main\install-from-download-windows.ps1")
           if (-not (Test-Path -LiteralPath $env:CODEX_HOME -PathType Container)) { throw "Installer did not create CODEX_HOME" }
+          $vercel = Join-Path $env:NPM_CONFIG_PREFIX "vercel.cmd"
+          if (-not (Test-Path -LiteralPath $vercel -PathType Leaf)) { throw "Installer did not install the Vercel CLI" }
+          & $vercel --version | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "Installed Vercel CLI did not execute successfully" }
           $codex = Join-Path $env:CODEX_INSTALL_DIR "codex.exe"
           if (-not (Test-Path -LiteralPath $codex -PathType Leaf)) { throw "Official standalone Codex was not installed" }
           & $codex plugin --help | Out-Null
