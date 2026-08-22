@@ -76,6 +76,16 @@ def resolve_vercel_cli(platform_name: str | None = None) -> str:
                 path = Path(root) / candidate
                 if path.is_file():
                     return str(path)
+    else:
+        explicit_paths = [
+            codex_home_dir() / "state" / "goldhand-clinic-blog" / "bin" / "vercel",
+            Path.home() / ".local" / "bin" / "vercel",
+            Path("/opt/homebrew/bin/vercel"),
+            Path("/usr/local/bin/vercel"),
+        ]
+        for path in explicit_paths:
+            if path.is_file() and os.access(path, os.X_OK):
+                return str(path)
     expected = "vercel.cmd 또는 vercel.exe" if windows else "vercel"
     raise SetupError(f"Vercel CLI를 찾을 수 없습니다: {expected}")
 
