@@ -31,7 +31,6 @@ jobs:
     env:
       PYTHONUTF8: "1"
       PYTHONDONTWRITEBYTECODE: "1"
-      NPM_CONFIG_PREFIX: ${{ runner.temp }}\goldhand-npm
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,6 +42,8 @@ jobs:
       - name: Start from a clean Vercel CLI prefix
         shell: powershell
         run: |
+          $env:NPM_CONFIG_PREFIX = Join-Path $env:RUNNER_TEMP "goldhand-npm"
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "NPM_CONFIG_PREFIX=$env:NPM_CONFIG_PREFIX" -Encoding UTF8
           New-Item -ItemType Directory -Path $env:NPM_CONFIG_PREFIX -Force | Out-Null
           Add-Content -LiteralPath $env:GITHUB_PATH -Value $env:NPM_CONFIG_PREFIX -Encoding UTF8
           $env:Path = "$env:NPM_CONFIG_PREFIX;$env:Path"
