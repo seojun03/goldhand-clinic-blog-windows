@@ -45,6 +45,13 @@ def main() -> int:
     for path in required:
         require(path.is_file(), f"missing required file: {path.relative_to(ROOT)}")
 
+    root_requirements = (ROOT / "requirements-windows.txt").read_bytes()
+    plugin_requirements = (PLUGIN_ROOT / "requirements-windows.txt").read_bytes()
+    require(
+        root_requirements == plugin_requirements,
+        "top-level Windows requirements must exactly match the packaged plugin requirements",
+    )
+
     forbidden = []
     long_paths = []
     for path in ROOT.rglob("*"):
