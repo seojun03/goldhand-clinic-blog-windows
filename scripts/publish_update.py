@@ -65,6 +65,24 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def tree_fingerprint(root: Path) -> str:
+    """Fingerprint a plugin tree while ignoring generated Python bytecode."""
+    digest = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root)
+        if "__pycache__" in relative.parts or path.suffix == ".pyc":
+            continue
+        encoded = relative.as_posix().encode("utf-8")
+        if path.is_symlink():
+            digest.update(b"L\0" + encoded + b"\0" + path.readlink().as_posix().encode("utf-8"))
+        elif path.is_file():
+            digest.update(b"F\0" + encoded + b"\0")
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(chunk)
+    return digest.hexdigest()
+
+
 def require_tools() -> None:
     missing = [name for name in ("git", "gh") if shutil.which(name) is None]
     if missing:
@@ -406,21 +424,24 @@ def main() -> int:
         if args.preflight_only:
             print(f"publish preflight passed: {PLUGIN_NAME} {version}")
             return 0
-        sync_canonical_plugin(plugin_root, distribution_root)
-        distributed_version = plugin_version(distribution_root / "plugins" / PLUGIN_NAME)
-        if distributed_version != version:
-            raise PublishError(
-                f"동기화 버전 불일치: canonical={version}, distribution={distributed_version}"
-            )
         tag = release_tag(version)
         latest = latest_release_tag(distribution_root)
+        distributed_plugin = distribution_root / "plugins" / PLUGIN_NAME
         if latest == tag:
             if git_status(distribution_root):
                 raise PublishError("배포할 변경이 있지만 manifest 버전이 기존 공개 버전과 같습니다.")
+            if tree_fingerprint(plugin_root) != tree_fingerprint(distributed_plugin):
+                raise PublishError("원본이 공개본과 다르지만 manifest 버전이 기존 공개 버전과 같습니다.")
             print(f"already published: {tag}")
             return 0
         if latest and tag <= latest:
             raise PublishError(f"새 버전이 기존 공개 버전보다 높지 않습니다: {tag} <= {latest}")
+        sync_canonical_plugin(plugin_root, distribution_root)
+        distributed_version = plugin_version(distributed_plugin)
+        if distributed_version != version:
+            raise PublishError(
+                f"동기화 버전 불일치: canonical={version}, distribution={distributed_version}"
+            )
         sha = commit_and_push(version, distribution_root)
         push_run = wait_for_run(distribution_root, sha, "push")
         tag, hashes = release_with_verified_assets(
