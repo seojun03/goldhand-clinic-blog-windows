@@ -16,8 +16,10 @@ SKILL_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_PROFILE = SKILL_DIR / "assets" / "goldhand-official-voice-profile.json"
 DEFAULT_BRIEFS = SKILL_DIR / "assets" / "wipark-content-briefs.json"
 DEFAULT_FINAL_VOICE_CONTRACT = SKILL_DIR / "assets" / "writing-voice-final-review-contract.json"
+DEFAULT_HUMANIZE_CONTRACT = SKILL_DIR / "assets" / "humanize-korean-final-review-contract.json"
 VOICE_VALIDATOR_PATH = Path(__file__).with_name("validate_goldhand_voice.py")
 FINAL_VOICE_VALIDATOR_PATH = Path(__file__).with_name("validate_final_voice_review.py")
+HUMANIZE_VALIDATOR_PATH = Path(__file__).with_name("validate_humanize_final_review.py")
 EXACT_GREETING = "안녕하세요, 금손한의원 박준희 원장입니다."
 STACKED_ABSTRACT_HOOK = re.compile(r"(?:피로|기분|불편|증상).{0,28}(?:이어지|겹치|반복되)나요\?")
 
@@ -35,6 +37,15 @@ def load_final_voice_validator() -> Any:
     spec = importlib.util.spec_from_file_location("final_voice_review_validator", FINAL_VOICE_VALIDATOR_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError("validate_final_voice_review.py를 불러올 수 없습니다.")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_humanize_validator() -> Any:
+    spec = importlib.util.spec_from_file_location("humanize_final_review_validator", HUMANIZE_VALIDATOR_PATH)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("validate_humanize_final_review.py를 불러올 수 없습니다.")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -119,6 +130,7 @@ def validate_suite(
 ) -> dict[str, Any]:
     voice = load_voice_validator()
     final_voice = load_final_voice_validator()
+    humanize = load_humanize_validator()
     issues: list[dict[str, Any]] = []
     results: list[dict[str, Any]] = []
     cases = suite.get("cases")
@@ -136,6 +148,11 @@ def validate_suite(
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         add("writing-voice-contract-load", f"writing-voice 최종 검수 계약을 읽지 못했습니다: {exc}")
         final_voice_contract = {}
+    try:
+        humanize_contract = json.loads(DEFAULT_HUMANIZE_CONTRACT.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        add("humanize-contract-load", f"humanize-korean 최종 검수 계약을 읽지 못했습니다: {exc}")
+        humanize_contract = {}
 
     if not isinstance(cases, list) or not cases:
         add("suite-cases-missing", "cases 배열에 한 편 이상의 원고가 필요합니다.")
@@ -199,10 +216,10 @@ def validate_suite(
         if not keyword or title.count(keyword) != 1:
             add("title-keyword-count", "제목의 정확 키워드는 한 번이어야 합니다.", iteration)
         body_keyword_count = text.count(keyword) if keyword else 0
-        if body_keyword_count not in {2, 3}:
+        if body_keyword_count not in {1, 2}:
             add(
                 "body-keyword-count",
-                f"평문 후처리 원고의 정확 키워드는 2~3회여야 합니다. 현재 {body_keyword_count}회입니다.",
+                f"평문 후처리 원고의 정확 키워드는 1~2회여야 합니다. 현재 {body_keyword_count}회입니다.",
                 iteration,
             )
 
@@ -271,12 +288,35 @@ def validate_suite(
                     str(voice_issue.get("detail", "말투 검사 실패")),
                     iteration,
                 )
-        final_voice_result = final_voice.validate_case(raw_case, final_voice_contract)
+        final_reviewer = str(raw_case.get("finalVoiceReviewerSkill", "")).strip()
+        if not final_reviewer:
+            final_reviewer = "humanize-korean" if "humanizeKoreanReview" in raw_case else "writing-voice"
+        if final_reviewer == "writing-voice":
+            final_voice_result = final_voice.validate_case(raw_case, final_voice_contract)
+            issue_prefix = "writing-voice"
+            fallback_detail = "writing-voice 최종 재청취 실패"
+        elif final_reviewer == "humanize-korean":
+            final_voice_result = humanize.validate_case(raw_case, humanize_contract)
+            issue_prefix = "humanize-korean"
+            fallback_detail = "humanize-korean 최종 윤문 실패"
+        else:
+            final_voice_result = {
+                "status": "fail",
+                "metrics": {"errors": 1},
+                "issues": [
+                    {
+                        "code": "final-reviewer-unsupported",
+                        "detail": f"지원하지 않는 최종 윤문기입니다: {final_reviewer}",
+                    }
+                ],
+            }
+            issue_prefix = "final-reviewer"
+            fallback_detail = "최종 윤문기 선택 실패"
         if final_voice_result.get("status") != "pass":
             for review_issue in final_voice_result.get("issues", []):
                 add(
-                    f"writing-voice:{review_issue.get('code', 'unknown')}",
-                    str(review_issue.get("detail", "writing-voice 최종 재청취 실패")),
+                    f"{issue_prefix}:{review_issue.get('code', 'unknown')}",
+                    str(review_issue.get("detail", fallback_detail)),
                     iteration,
                 )
         results.append(
@@ -290,7 +330,10 @@ def validate_suite(
                 "dominantParagraphSentenceCountRatio": round(dominant_ratio, 3),
                 "longestUniformParagraphRun": uniform_run,
                 "voice": voice_result,
-                "finalWritingVoiceReview": final_voice_result,
+                "finalVoiceReviewerSkill": final_reviewer,
+                "finalVoiceReview": final_voice_result,
+                "finalWritingVoiceReview": final_voice_result if final_reviewer == "writing-voice" else None,
+                "finalHumanizeReview": final_voice_result if final_reviewer == "humanize-korean" else None,
             }
         )
 
@@ -309,7 +352,7 @@ def validate_suite(
                 1
                 for result in results
                 if result["voice"].get("status") == "pass"
-                and result["finalWritingVoiceReview"].get("status") == "pass"
+                and result["finalVoiceReview"].get("status") == "pass"
             ),
             "briefIds": [result["briefId"] for result in results],
             "crossDraftRepeatedPhraseGroups": len(repeated_phrases),

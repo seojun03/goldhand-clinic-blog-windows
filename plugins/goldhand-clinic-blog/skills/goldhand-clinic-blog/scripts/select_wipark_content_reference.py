@@ -21,7 +21,16 @@ DEFAULT_PROFILES = SKILL_DIR / "assets" / "reference-master-profiles.json"
 DEFAULT_INTELLIGENCE = SKILL_DIR / "assets" / "reference-writing-intelligence.json"
 VOICE_PROFILE_ID = "goldhand-official-voice-v1"
 VOICE_PROTOCOL = "natural-speech-rewrite-protocol-v1"
-FINAL_VOICE_REVIEW_ID = "writing-voice-final-rehear-v1"
+FINAL_VOICE_REVIEWERS = {
+    "writing-voice": {
+        "contractId": "writing-voice-final-rehear-v1",
+        "receiptField": "writingVoiceReview",
+    },
+    "humanize-korean": {
+        "contractId": "humanize-korean-final-pass-v1",
+        "receiptField": "humanizeKoreanReview",
+    },
+}
 SOURCE_ROLE = "editorial-reasoning-content-flow-and-expression-principles"
 
 
@@ -137,7 +146,11 @@ def select(
     intelligence: dict[str, Any] | None = None,
     excluded_master_ids: set[str] | None = None,
     preferred_master_id: str = "",
+    final_voice_reviewer: str = "writing-voice",
 ) -> list[dict[str, Any]]:
+    if final_voice_reviewer not in FINAL_VOICE_REVIEWERS:
+        raise ValueError(f"지원하지 않는 최종 윤문기입니다: {final_voice_reviewer}")
+    final_review = FINAL_VOICE_REVIEWERS[final_voice_reviewer]
     intelligence = intelligence or load_intelligence()
     learning_profiles = intelligence.get("profiles", {})
     if not isinstance(learning_profiles, dict):
@@ -212,8 +225,9 @@ def select(
                 "voiceAuthority": "goldhand7582_ official 74-post voice corpus",
                 "voiceFunction": "naturalize-the-adapted-reference-reasoning-without-erasing-it",
                 "finalVoiceReviewRequired": True,
-                "finalVoiceReviewerSkill": "writing-voice",
-                "finalVoiceReviewContractId": FINAL_VOICE_REVIEW_ID,
+                "finalVoiceReviewerSkill": final_voice_reviewer,
+                "finalVoiceReviewContractId": final_review["contractId"],
+                "finalVoiceReviewReceiptField": final_review["receiptField"],
                 "finalVoiceReviewStage": "after-complete-visible-prose-and-seo-before-production-assembly",
                 "finalVoiceReviewScope": "sentence-expression-only-no-content-or-structure-changes",
                 "designSystemId": "goldhand-naver-native-v4",
@@ -330,6 +344,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--count", type=int, default=1)
     parser.add_argument("--seed", default="")
     parser.add_argument("--preferred-master-id", default="")
+    parser.add_argument(
+        "--final-reviewer",
+        choices=tuple(FINAL_VOICE_REVIEWERS),
+        default="writing-voice",
+        help="완성 산문의 마지막 윤문기. 기본은 writing-voice입니다.",
+    )
     parser.add_argument("--briefs", type=Path, default=DEFAULT_BRIEFS)
     parser.add_argument("--profiles", type=Path, default=DEFAULT_PROFILES)
     parser.add_argument("--intelligence", type=Path, default=DEFAULT_INTELLIGENCE)
@@ -379,6 +399,7 @@ def main() -> int:
                 intelligence=intelligence,
                 excluded_master_ids=active,
                 preferred_master_id=args.preferred_master_id.strip(),
+                final_voice_reviewer=args.final_reviewer,
             )
             run_id = args.run_id.strip() or str(uuid.uuid4())
             results: list[dict[str, Any]] = []
@@ -408,6 +429,7 @@ def main() -> int:
                 seed=args.seed,
                 intelligence=intelligence,
                 preferred_master_id=args.preferred_master_id.strip(),
+                final_voice_reviewer=args.final_reviewer,
             )
     except (OSError, UnicodeError, json.JSONDecodeError, KeyError, ValueError) as exc:
         print(f"레퍼런스 선택 실패: {exc}", file=sys.stderr)

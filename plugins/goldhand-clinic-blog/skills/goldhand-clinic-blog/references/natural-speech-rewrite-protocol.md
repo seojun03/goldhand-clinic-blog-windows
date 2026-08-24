@@ -110,6 +110,6 @@ HTML, 모바일 줄바꿈, 이미지, 하이라이트, 정확 키워드 횟수�
 
 ## 후처리 경계
 
-생활어 초안과 발화 편집이 끝난 뒤 SEO를 반영한다. 그 다음 [final-writing-voice-review.md](final-writing-voice-review.md)의 `writing-voice-final-rehear-v1`로 완성 산문 전체를 다시 듣는다. 이 최종 패스는 내용·순서·사실·의료 경계·확신 강도·레퍼런스 장치를 바꾸지 않고 보이는 표현만 고친다.
+생활어 초안과 발화 편집이 끝난 뒤 SEO를 반영한다. 기본 원고는 [final-writing-voice-review.md](final-writing-voice-review.md)의 `writing-voice-final-rehear-v1`로 완성 산문 전체를 다시 듣는다. 사용자가 동일 공통 원고의 A/B 최종 윤문 비교를 명시한 경우에만 같은 검수 직전 원고를 복제해 A안은 writing-voice, B안은 [final-humanize-korean-review.md](final-humanize-korean-review.md)의 `humanize-korean-final-pass-v1`로 분기한다. B안에서는 writing-voice를 호출하거나 A안의 수정 결과를 입력으로 쓰지 않는다. 어느 경로든 내용·순서·사실·의료 경계·확신 강도·레퍼런스 장치를 바꾸지 않고 보이는 표현만 고친다.
 
-최종 재청취까지 끝난 뒤에만 모바일 줄바꿈, 강조, 이미지, 표, HTML을 적용한다. 제작 후처리 때문에 문장이 어색해지면 키워드나 줄 위치를 옮기고, 자연스러운 문장을 추상어로 바꾸지 않는다. 제작 단계에서 문장을 다시 썼다면 writing-voice 최종 재청취부터 다시 실행한다.
+기본 원고는 최종 재청취까지 끝난 뒤에만 모바일 줄바꿈, 강조, 이미지, 표, HTML을 적용한다. A/B 비교는 두 평문과 검수 영수증을 먼저 보여 주고 사용자가 선택한 안에만 제작 요소를 적용한다. 제작 후처리 때문에 문장이 어색해지면 키워드나 줄 위치를 옮기고, 자연스러운 문장을 추상어로 바꾸지 않는다. 제작 단계에서 문장을 다시 썼다면 선택된 최종 윤문기부터 다시 실행한다.

@@ -346,6 +346,41 @@ def validate_html(raw: str, *, max_megabytes: float = 30.0) -> dict[str, object]
                     flags=re.I | re.S,
                 )
             )
+            if len(neutral_matches) != 1:
+                add(issues, "error", "reference-closing-count", f"복사용 HTML의 neutral-close는 정확히 1개여야 합니다. 현재 {len(neutral_matches)}개입니다.")
+            else:
+                closing_html = neutral_matches[0].group(0)
+                closing_headings = list(
+                    re.finditer(
+                        r"<(?P<tag>[a-z][\w:-]*)\b(?=[^>]*\bdata-reference-role\s*=\s*['\"]closing-heading['\"])(?=[^>]*\bdata-naver-native-component\s*=\s*['\"]subheading['\"])[^>]*>.*?</(?P=tag)>",
+                        closing_html,
+                        flags=re.I | re.S,
+                    )
+                )
+                closing_dividers = list(
+                    re.finditer(
+                        r"<hr\b(?=[^>]*\bdata-naver-native-component\s*=\s*['\"]divider['\"])[^>]*>",
+                        closing_html,
+                        flags=re.I | re.S,
+                    )
+                )
+                closing_invitations = list(
+                    re.finditer(
+                        r"<(?P<tag>[a-z][\w:-]*)\b(?=[^>]*\bdata-reference-role\s*=\s*['\"]closing-invitation['\"])[^>]*>.*?</(?P=tag)>",
+                        closing_html,
+                        flags=re.I | re.S,
+                    )
+                )
+                if len(closing_headings) != 1:
+                    add(issues, "error", "closing-heading-count", f"복사용 HTML의 글별 마무리 소제목은 정확히 1개여야 합니다. 현재 {len(closing_headings)}개입니다.")
+                if len(closing_dividers) != 1:
+                    add(issues, "error", "closing-divider-count", f"마무리 소제목 뒤 순정 구분선은 정확히 1개여야 합니다. 현재 {len(closing_dividers)}개입니다.")
+                if len(closing_invitations) != 1:
+                    add(issues, "error", "closing-invitation-count", f"복사용 HTML의 부담 없는 진료 안내는 정확히 1개여야 합니다. 현재 {len(closing_invitations)}개입니다.")
+                if len(closing_headings) == len(closing_dividers) == len(closing_invitations) == 1 and not (
+                    closing_headings[0].end() <= closing_dividers[0].start() < closing_dividers[0].end() <= closing_invitations[0].start()
+                ):
+                    add(issues, "error", "closing-component-order", "마무리는 글별 소제목, 순정 구분선, 핵심 회수, 부담 없는 진료 안내 순서여야 합니다.")
             section_heading_matches = explanatory_heading_candidates(article_html)
             clinic_heading_matches = list(
                 re.finditer(

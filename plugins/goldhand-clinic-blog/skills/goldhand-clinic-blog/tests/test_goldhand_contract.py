@@ -46,6 +46,7 @@ EDITORIAL_PROFILE_VALIDATOR = load_module("validate_editorial_master_profiles")
 GOLDHAND_VOICE_VALIDATOR = load_module("validate_goldhand_voice")
 NATURAL_SPEECH_SUITE_VALIDATOR = load_module("validate_natural_speech_suite")
 FINAL_WRITING_VOICE_VALIDATOR = load_module("validate_final_voice_review")
+HUMANIZE_FINAL_REVIEW_VALIDATOR = load_module("validate_humanize_final_review")
 WIPARK_CONTENT_SELECTOR = load_module("select_wipark_content_reference")
 REFERENCE_LEARNING_VALIDATOR = load_module("validate_reference_learning")
 IMAGE_HOST_SETUP = load_module("setup_image_host")
@@ -384,6 +385,56 @@ def writing_voice_review(
     }
 
 
+def humanize_korean_review(
+    title: str,
+    before_body: list[str],
+    final_body: list[str],
+    *,
+    rule_ids: dict[int, list[str]] | None = None,
+) -> dict[str, object]:
+    rule_ids = rule_ids or {}
+    revisions = [
+        {
+            "paragraphIndex": index,
+            "before": before,
+            "after": after,
+            "ruleIds": rule_ids.get(index, ["A-7"]),
+        }
+        for index, (before, after) in enumerate(zip(before_body, final_body), start=1)
+        if before != after
+    ]
+    return {
+        "contractId": "humanize-korean-final-pass-v1",
+        "skillName": "humanize-korean",
+        "stage": "after-complete-visible-prose-and-seo-before-production-assembly",
+        "beforeTitle": title,
+        "beforeBody": before_body,
+        "decision": "revised" if revisions else "no-change-needed",
+        "changeRatePercent": HUMANIZE_FINAL_REVIEW_VALIDATOR.computed_change_rate(before_body, final_body),
+        "grade": "B",
+        "s1Remaining": 0,
+        "s2Remaining": 2,
+        "selfChecks": {
+            "contentAnchorsPreserved": True,
+            "changeRateWithinLimit": True,
+            "genrePreserved": True,
+            "registerPreserved": True,
+            "s1PatternsCleared": True,
+            "noInventedRhetoric": True,
+        },
+        "frozenMaterial": {
+            "contentAndOrderPreserved": True,
+            "factsAndMedicalBoundariesPreserved": True,
+            "claimStrengthPreserved": True,
+            "referenceMechanismsPreserved": True,
+            "keywordAndTitlePromisePreserved": True,
+            "htmlComponentsAndLinksPreserved": True,
+        },
+        "revisions": revisions,
+        "finalStatus": "pass",
+    }
+
+
 def valid_article() -> str:
     paragraphs = [
         "안녕하세요, 금손한의원 박준희 원장입니다.",
@@ -579,7 +630,7 @@ def editorial_close_article(*, include_summary: bool = True, one_question: bool 
         'data-editorial-profile-status="ready"',
         1,
     )
-    article = article.replace(KEYWORD, "동천동 진료", 2)
+    article = article.replace(KEYWORD, "동천동 진료", 3)
     article = article.replace(
         '<section data-reference-role="solution-preview">',
         '<section data-reference-role="solution-preview" '
@@ -587,9 +638,22 @@ def editorial_close_article(*, include_summary: bool = True, one_question: bool 
         'data-reader-payoff="다른 검사를 먼저 생각할 신호">',
         1,
     )
+    article = article.replace('data-reference-role="neutral-close"', "", 1)
+    closing_contract = (
+        '<section data-reference-role="neutral-close" data-closing-payoff="몸의 신호">'
+        '<p data-reference-role="closing-heading" data-naver-native-component="subheading" '
+        'style="text-align:center;font-size:19px;font-weight:700;">몸의 신호를 다시 볼 때</p>'
+        '<hr data-reference-role="divider" data-naver-native-component="divider">'
+        + mobile_markup("몸의 신호는 아픈 곳과 다시 불편해지는 동작을 함께 볼 때 더 잘 이해할 수 있습니다.")
+        + mobile_markup(
+            "불편이 계속되면 진료에서 현재 상태와 몸의 신호를 함께 살펴볼 수 있습니다.",
+            first_role="closing-invitation",
+        )
+        + "</section>"
+    )
     article = article.replace(
-        'data-reference-role="neutral-close"',
-        'data-reference-role="neutral-close" data-closing-payoff="몸의 신호"',
+        '<p data-reference-role="clinic-hours-heading"',
+        closing_contract + '<p data-reference-role="clinic-hours-heading"',
         1,
     )
     reading_hook = (
@@ -1099,7 +1163,7 @@ class ArticleTests(unittest.TestCase):
         result = ARTICLE_VALIDATOR.validate_article(article, TITLE, KEYWORD)
         self.assertIn("mobile-group-marker-missing", {item["code"] for item in result["issues"]})
 
-    def test_editorial_close_allows_two_or_three_body_keywords(self) -> None:
+    def test_editorial_close_allows_one_or_two_body_keywords(self) -> None:
         evidence = (SKILL_DIR / "references" / "clinic-facts.md").read_text(encoding="utf-8")
         article = editorial_close_article()
         result = ARTICLE_VALIDATOR.validate_article(
@@ -1111,10 +1175,77 @@ class ArticleTests(unittest.TestCase):
             media_library=editorial_fixture_media_library(),
         )
         self.assertEqual(result["status"], "pass", result)
-        self.assertEqual(result["metrics"]["bodyKeywordCount"], 3)
+        self.assertEqual(result["metrics"]["bodyKeywordCount"], 2)
         self.assertEqual(result["metrics"]["editorialMasterId"], "BM224231647991")
         self.assertEqual(result["metrics"]["generatedImages"], 3)
         self.assertEqual(result["metrics"]["realPhotos"], 1)
+
+        one_keyword = article.replace(KEYWORD, "동천동 진료", 1)
+        one_result = ARTICLE_VALIDATOR.validate_article(
+            one_keyword,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            evidence=evidence,
+            editorial_close=True,
+            media_library=editorial_fixture_media_library(),
+        )
+        self.assertEqual(one_result["status"], "pass", one_result)
+        self.assertEqual(one_result["metrics"]["bodyKeywordCount"], 1)
+
+        three_keywords = article.replace("통증은 한 지점에", f"{KEYWORD}에서 통증은 한 지점에", 1)
+        three_result = ARTICLE_VALIDATOR.validate_article(
+            three_keywords,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            evidence=evidence,
+            editorial_close=True,
+            media_library=editorial_fixture_media_library(),
+        )
+        self.assertIn("body-keyword-count", {item["code"] for item in three_result["issues"]}, three_result)
+
+    def test_editorial_close_requires_topic_heading_divider_recap_and_invitation(self) -> None:
+        article = editorial_close_article()
+        missing_heading = re.sub(
+            r'<p\b(?=[^>]*data-reference-role="closing-heading")[^>]*>.*?</p>',
+            "",
+            article,
+            count=1,
+            flags=re.I | re.S,
+        )
+        heading_result = ARTICLE_VALIDATOR.validate_article(
+            missing_heading,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            editorial_close=True,
+            media_library=editorial_fixture_media_library(),
+        )
+        self.assertIn("closing-heading-count", {item["code"] for item in heading_result["issues"]}, heading_result)
+
+        copied_heading = article.replace("몸의 신호를 다시 볼 때", "25년 경험이 전하는 한 가지", 1)
+        copied_result = ARTICLE_VALIDATOR.validate_article(
+            copied_heading,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            editorial_close=True,
+            media_library=editorial_fixture_media_library(),
+        )
+        self.assertIn("closing-heading-template", {item["code"] for item in copied_result["issues"]}, copied_result)
+
+        missing_invitation = re.sub(
+            r'<p\b(?=[^>]*data-reference-role="closing-invitation")[^>]*>.*?</p>',
+            "",
+            article,
+            count=1,
+            flags=re.I | re.S,
+        )
+        invitation_result = ARTICLE_VALIDATOR.validate_article(
+            missing_invitation,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            editorial_close=True,
+            media_library=editorial_fixture_media_library(),
+        )
+        self.assertIn("closing-invitation-count", {item["code"] for item in invitation_result["issues"]}, invitation_result)
 
     def test_specific_number_intro_requires_one_reading_time_hook(self) -> None:
         article = re.sub(
@@ -1578,6 +1709,52 @@ class ArticleTests(unittest.TestCase):
         codes = {item["code"] for item in result["issues"]}
         self.assertIn("writing-voice-review-missing", codes, result)
         self.assertIn("writing-voice-status-not-pass", codes, result)
+
+    def test_wipark_article_accepts_humanize_korean_final_review(self) -> None:
+        article = wipark_editorial_close_article().replace(
+            'data-writing-voice-review="writing-voice-final-rehear-v1"',
+            'data-final-prose-reviewer="humanize-korean" '
+            'data-final-prose-review="humanize-korean-final-pass-v1"',
+            1,
+        ).replace(
+            'data-writing-voice-status="pass"',
+            'data-final-prose-status="pass"',
+            1,
+        )
+        result = ARTICLE_VALIDATOR.validate_article(
+            article,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            editorial_close=True,
+        )
+        codes = {item["code"] for item in result["issues"]}
+        self.assertNotIn("writing-voice-review-missing", codes, result)
+        self.assertNotIn("writing-voice-status-not-pass", codes, result)
+        self.assertNotIn("humanize-review-missing", codes, result)
+        self.assertEqual(result["metrics"]["finalVoiceReviewerSkill"], "humanize-korean")
+        self.assertEqual(result["metrics"]["finalVoiceReviewId"], "humanize-korean-final-pass-v1")
+        self.assertEqual(result["metrics"]["finalHumanizeStatus"], "pass")
+        self.assertEqual(result["metrics"]["finalWritingVoiceReviewId"], "")
+
+    def test_wipark_article_rejects_mixed_final_reviewers(self) -> None:
+        article = wipark_editorial_close_article().replace(
+            'data-writing-voice-status="pass"',
+            'data-writing-voice-status="pass" '
+            'data-final-prose-reviewer="humanize-korean" '
+            'data-final-prose-review="humanize-korean-final-pass-v1" '
+            'data-final-prose-status="pass"',
+            1,
+        )
+        result = ARTICLE_VALIDATOR.validate_article(
+            article,
+            EDITORIAL_TITLE,
+            KEYWORD,
+            editorial_close=True,
+        )
+        self.assertIn(
+            "final-prose-reviewer-conflict",
+            {item["code"] for item in result["issues"]},
+        )
 
 
 class ReferenceMasterTests(unittest.TestCase):
@@ -3135,6 +3312,7 @@ class SkillPackageTests(unittest.TestCase):
             "references/goldhand-official-voice.md",
             "references/natural-speech-rewrite-protocol.md",
             "references/final-writing-voice-review.md",
+            "references/final-humanize-korean-review.md",
             "assets/media-library.json",
             "assets/topic-idea-library.json",
             "assets/beomeo-topic-idea-library.json",
@@ -3150,6 +3328,7 @@ class SkillPackageTests(unittest.TestCase):
             "assets/wipark-content-briefs.json",
             "assets/goldhand-official-voice-profile.json",
             "assets/writing-voice-final-review-contract.json",
+            "assets/humanize-korean-final-review-contract.json",
             "scripts/select_topic_idea.py",
             "scripts/validate_topic_source_library.py",
             "scripts/select_reference_master.py",
@@ -3159,6 +3338,7 @@ class SkillPackageTests(unittest.TestCase):
             "scripts/validate_goldhand_voice.py",
             "scripts/validate_natural_speech_suite.py",
             "scripts/validate_final_voice_review.py",
+            "scripts/validate_humanize_final_review.py",
             "scripts/sync_official_media_assets.py",
             "scripts/recommend_media.py",
             "scripts/recommend_closing_trust_media.py",
@@ -3222,6 +3402,12 @@ class SkillPackageTests(unittest.TestCase):
             design["finalWritingVoiceReview"]["contractId"],
             "writing-voice-final-rehear-v1",
         )
+        self.assertEqual(design["finalProseReview"]["defaultReviewer"], "writing-voice")
+        self.assertEqual(
+            design["finalProseReview"]["allowedReviewers"]["humanize-korean"]["contractId"],
+            "humanize-korean-final-pass-v1",
+        )
+        self.assertTrue(design["finalProseReview"]["humanizeVariantMustExcludeWritingVoice"])
         self.assertEqual(design["generatedReferenceMedia"]["contentPreservation"], "medical-information-layout")
         self.assertEqual(
             design["generatedReferenceMedia"]["allowedVariationModes"],
@@ -3255,12 +3441,19 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn("validate_goldhand_voice.py", skill)
         self.assertIn("validate_natural_speech_suite.py", skill)
         self.assertIn("validate_final_voice_review.py", skill)
+        self.assertIn("validate_humanize_final_review.py", skill)
         self.assertIn("final-writing-voice-review.md", skill)
+        self.assertIn("final-humanize-korean-review.md", skill)
         self.assertIn("writing-voice-final-rehear-v1", skill)
+        self.assertIn("humanize-korean-final-pass-v1", skill)
         self.assertIn("`before-credential`은 해결 방향 예고 뒤", skill)
         self.assertIn("`closing-trust`는 다른 사진을 우선하되", skill)
         self.assertIn("질환·부위·본문 문맥과 맞지 않아도", skill)
         self.assertIn("GPT Image 3~4장", skill)
+        self.assertIn("시스템 `$imagegen`", skill)
+        self.assertIn("내장 `image_gen` 모드로만", skill)
+        self.assertIn("`scripts/image_gen.py`·CLI/API 대체 경로", skill)
+        self.assertIn("`OPENAI_API_KEY`를 묻거나 확인하거나 저장하지 않는다", skill)
         self.assertIn("placementTerms", skill)
         self.assertIn("approvedAlt", skill)
         self.assertIn("assets/official-media", skill)
@@ -3292,6 +3485,12 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn("separate spoken-editor pass", openai_yaml)
         self.assertIn("final writing-voice rehear pass", openai_yaml)
         self.assertIn("$writing-voice", openai_yaml)
+        self.assertIn("$humanize-korean", openai_yaml)
+        self.assertIn("system $imagegen skill", openai_yaml)
+        self.assertIn("use only its built-in image_gen mode", openai_yaml)
+        self.assertIn("Never invoke scripts/image_gen.py or any CLI/API fallback", openai_yaml)
+        self.assertIn("never ask for, inspect, or store OPENAI_API_KEY", openai_yaml)
+        self.assertIn("same-draft A/B finalizer test", openai_yaml)
         self.assertIn("data-mobile-group", skill)
         self.assertNotIn("Notion TOP 5", skill)
 
@@ -3605,6 +3804,54 @@ class SkillPackageTests(unittest.TestCase):
         )
         self.assertIn("writing-voice-review-missing", {item["code"] for item in result["issues"]})
 
+    def test_humanize_final_review_accepts_rule_mapped_local_revision(self) -> None:
+        contract = json.loads(
+            (SKILL_DIR / "assets" / "humanize-korean-final-review-contract.json").read_text(encoding="utf-8")
+        )
+        title = "광주 한의원 팔을 들 때 아픈 이유"
+        before = [
+            "어깨는 넓은 움직임 범위를 가지고 있습니다.",
+            "통증이 심해지면 운동을 멈추셔야 합니다.",
+        ]
+        final = [
+            "어깨는 움직이는 범위가 넓습니다.",
+            "통증이 심해지면 운동을 멈추셔야 합니다.",
+        ]
+        case = {
+            "title": title,
+            "finalBody": final,
+            "finalVoiceReviewerSkill": "humanize-korean",
+            "humanizeKoreanReview": humanize_korean_review(
+                title,
+                before,
+                final,
+                rule_ids={1: ["A-7"]},
+            ),
+        }
+        result = HUMANIZE_FINAL_REVIEW_VALIDATOR.validate_case(case, contract)
+        self.assertEqual(result["status"], "pass", result)
+        self.assertEqual(result["metrics"]["changedParagraphs"], 1)
+
+    def test_humanize_final_review_rejects_writing_voice_contamination_or_unmapped_edit(self) -> None:
+        contract = json.loads(
+            (SKILL_DIR / "assets" / "humanize-korean-final-review-contract.json").read_text(encoding="utf-8")
+        )
+        title = "광주 한의원 어깨 통증"
+        before = ["어깨는 넓은 움직임 범위를 가지고 있습니다."]
+        final = ["어깨는 움직이는 범위가 넓습니다."]
+        review = humanize_korean_review(title, before, final)
+        review["revisions"][0]["ruleIds"] = []
+        case = {
+            "title": title,
+            "finalBody": final,
+            "humanizeKoreanReview": review,
+            "writingVoiceReview": writing_voice_review(title, before, final),
+        }
+        result = HUMANIZE_FINAL_REVIEW_VALIDATOR.validate_case(case, contract)
+        codes = {item["code"] for item in result["issues"]}
+        self.assertIn("humanize-writing-voice-contamination", codes, result)
+        self.assertIn("humanize-revision-rule-ids", codes, result)
+
     def test_plain_draft_suite_rejects_three_sentence_paragraph_template(self) -> None:
         profile = json.loads((SKILL_DIR / "assets" / "goldhand-official-voice-profile.json").read_text(encoding="utf-8"))
         briefs = json.loads((SKILL_DIR / "assets" / "wipark-content-briefs.json").read_text(encoding="utf-8"))
@@ -3649,6 +3896,49 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn("paragraph-cadence-run", codes)
         self.assertFalse(any(code.startswith("writing-voice:") for code in codes), result)
 
+    def test_plain_draft_suite_routes_humanize_without_writing_voice(self) -> None:
+        profile = json.loads((SKILL_DIR / "assets" / "goldhand-official-voice-profile.json").read_text(encoding="utf-8"))
+        briefs = json.loads((SKILL_DIR / "assets" / "wipark-content-briefs.json").read_text(encoding="utf-8"))
+        atom_ids = [atom["id"] for atom in briefs["briefs"]["INFO01"]["orderedContentAtoms"]]
+        paragraph = "광주 한의원에서 모니터를 봅니다. 오후에는 목이 뻐근합니다. 어깨도 같이 올라가죠."
+        final_body = [
+            "모니터를 오래 보고 나면 오후마다 목이 뻐근해지나요?",
+            "고개를 돌릴 때 어깨까지 같이 당기시나요?",
+            "안녕하세요, 금손한의원 박준희 원장입니다.",
+            *[paragraph for _ in range(10)],
+        ]
+        title = "광주 한의원 목 통증을 볼 2가지"
+        case = {
+            "iteration": 1,
+            "briefId": "INFO01",
+            "keyword": "광주 한의원",
+            "title": title,
+            "finalBody": final_body,
+            "atomCoverage": {atom_id: "모니터를 봅니다" for atom_id in atom_ids},
+            "manualReview": {
+                "soundsSpoken": True,
+                "onePassMeaning": True,
+                "sceneIsVisible": True,
+                "noTemplateFlow": True,
+                "finalStatus": "pass",
+                "revisionHistory": ["검수"],
+            },
+            "finalVoiceReviewerSkill": "humanize-korean",
+            "humanizeKoreanReview": humanize_korean_review(title, final_body, final_body),
+        }
+        result = NATURAL_SPEECH_SUITE_VALIDATOR.validate_suite(
+            {"cases": [case]},
+            profile,
+            briefs,
+            expected_count=1,
+        )
+        codes = {item["code"] for item in result["issues"]}
+        self.assertFalse(any(code.startswith("humanize-korean:") for code in codes), result)
+        self.assertFalse(any(code.startswith("writing-voice:") for code in codes), result)
+        self.assertEqual(result["cases"][0]["finalVoiceReviewerSkill"], "humanize-korean")
+        self.assertIsNone(result["cases"][0]["finalWritingVoiceReview"])
+        self.assertEqual(result["cases"][0]["finalHumanizeReview"]["status"], "pass")
+
     def test_plain_draft_suite_rejects_cross_draft_eight_word_copy(self) -> None:
         repeated = NATURAL_SPEECH_SUITE_VALIDATOR.repeated_cross_case_phrases(
             [
@@ -3682,6 +3972,23 @@ class SkillPackageTests(unittest.TestCase):
         self.assertEqual(selected["voiceProfileId"], "goldhand-official-voice-v1")
         self.assertEqual(selected["voiceProtocolId"], "natural-speech-rewrite-protocol-v1")
         self.assertEqual(selected["contentAtomIds"], [atom["id"] for atom in selected["orderedContentAtoms"]])
+
+    def test_wipark_selector_can_emit_humanize_finalizer_contract(self) -> None:
+        briefs = json.loads((SKILL_DIR / "assets" / "wipark-content-briefs.json").read_text(encoding="utf-8"))
+        profiles = json.loads((SKILL_DIR / "assets" / "reference-master-profiles.json").read_text(encoding="utf-8"))
+        selected = WIPARK_CONTENT_SELECTOR.select(
+            "광주 한의원",
+            "",
+            briefs,
+            profiles,
+            {"entries": []},
+            count=1,
+            seed="humanize-finalizer-contract",
+            final_voice_reviewer="humanize-korean",
+        )[0]
+        self.assertEqual(selected["finalVoiceReviewerSkill"], "humanize-korean")
+        self.assertEqual(selected["finalVoiceReviewContractId"], "humanize-korean-final-pass-v1")
+        self.assertEqual(selected["finalVoiceReviewReceiptField"], "humanizeKoreanReview")
 
     def test_two_active_tasks_reserve_different_references_for_same_keyword(self) -> None:
         selector = SCRIPTS / "select_wipark_content_reference.py"

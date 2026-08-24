@@ -1,6 +1,6 @@
 ---
 name: goldhand-clinic-blog
-description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직접 본문까지 검토한 위석부부한의원 정보글 11편 중 한 편을 고르고, 그 글의 제목 장치·독자 심리·도입 설득·정보 흐름·전환·디테일한 표현 기능·마무리 감정을 먼저 해석한 뒤 확인된 금손한의원 사실과 박준희 원장의 실제 생활어로 자연스럽게 재구성한다. 원문 완성 문장·업체 사실·경력·환자 수·사례·성과·프로그램·사진은 복사하지 않는다. 구체적인 읽기 시간 숫자는 모든 글의 공식이 아니라 부담을 낮추고 주제별 보상을 약속할 때만 1~5분에서 판단한다. 완성 산문과 SEO가 끝나면 writing-voice로 전체 글을 다시 듣고, 사실·순서·확신 강도·레퍼런스 장치를 보존한 채 문장 표현만 최종 검수한다. 동시 작업은 레퍼런스를 선점해 같은 글이 나오지 않게 한다. 꾸밈과 고정 자격·운영정보는 goldhand-naver-native-v4 계약을 유지하며, 글은 clinic-info 운영정보 표에서 끝낸다.
+description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직접 본문까지 검토한 위석부부한의원 정보글 11편 중 한 편을 고르고, 그 글의 제목 장치·독자 심리·도입 설득·정보 흐름·전환·디테일한 표현 기능·마무리 감정을 먼저 해석한 뒤 확인된 금손한의원 사실과 박준희 원장의 실제 생활어로 자연스럽게 재구성한다. 원문 완성 문장·업체 사실·경력·환자 수·사례·성과·프로그램·사진은 복사하지 않는다. 구체적인 읽기 시간 숫자는 모든 글의 공식이 아니라 부담을 낮추고 주제별 보상을 약속할 때만 1~5분에서 판단한다. 기본 완성 산문은 writing-voice로 최종 검수한다. 사용자가 같은 원고의 A/B 윤문 비교를 명시하면 동일한 검수 직전 원고에서 writing-voice판과 humanize-korean판을 따로 만들어 마지막 윤문기 차이만 비교한다. 동시 작업은 레퍼런스를 선점해 같은 글이 나오지 않게 한다. 글마다 제목과 본문에 맞는 마무리 소제목·핵심 회수·부담 없는 진료 안내를 새로 쓴다. 꾸밈과 고정 자격·운영정보는 goldhand-naver-native-v4 계약을 유지하며, 글은 clinic-info 운영정보 표에서 끝낸다.
 ---
 
 # 금손한의원 블로그 자동화
@@ -12,7 +12,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 - 플러그인은 macOS와 Windows에서 같은 글쓰기·검수·HTML 계약을 사용한다.
 - Python 명령은 현재 운영체제에서 실제로 종료 코드 0으로 실행되는 Python 3 실행기를 먼저 확인한다. Windows에서는 한글 JSON 출력을 보존하도록 `py -3 -X utf8`, 다음으로 `python -X utf8`을 사용한다. macOS 공유 설치본에서는 먼저 `${CODEX_HOME:-$HOME/.codex}/state/goldhand-clinic-blog/bin/python3`, 다음으로 `python3`을 사용한다. 아래 예시의 `python3`는 이렇게 확인한 실행기로 치환한다.
 - Windows 출력 폴더는 레지스트리에 등록된 실제 바탕화면을 우선 사용하므로 OneDrive 바탕화면도 따른다. 복사 안내는 Windows에서 `Ctrl+V`, macOS에서 `⌘V`로 표시한다.
-- GPT Image 생성·본문 배치는 두 운영체제에서 동일하다. 공유용 설치기는 필요한 Node.js와 Vercel CLI를 자동으로 준비한다. 최초 설치 또는 첫 글에서 이미지 호스트 설정이 없으면 `scripts/setup_image_host.py`를 실행한다. 사용자는 브라우저에서 본인 Vercel 로그인만 승인하고, 프로젝트 생성·연결·첫 배포·고정 공개 주소 선택·`image-host.json` 저장은 스크립트가 맡는다. Vercel 토큰과 계정 정보는 플러그인에 넣지 않는다. 네이버가 읽을 공개 HTTPS 주소로 게시할 때 Windows에서는 npm의 `vercel.cmd`·`vercel.exe`·`vercel` 순서로 실제 실행 파일을 찾는다. macOS에서는 `${CODEX_HOME:-$HOME/.codex}/state/goldhand-clinic-blog/bin/vercel`을 먼저 확인한 뒤 `vercel`을 사용한다.
+- GPT Image 생성·본문 배치는 두 운영체제에서 동일하다. 설명 이미지는 시스템 `$imagegen`을 명시적으로 호출하고 내장 `image_gen` 모드로만 생성한다. `scripts/image_gen.py`·CLI/API 대체 경로는 사용하지 않으며 `OPENAI_API_KEY`를 묻거나 확인하거나 저장하지 않는다. 내장 도구가 현재 작업에 없으면 이미지 없는 불완전 HTML이나 API 키 안내를 만들지 말고, 최신 ChatGPT 데스크톱 앱의 새 작업에서 `$imagegen` 단독 생성을 먼저 확인하라고 알린 뒤 중단한다. 공유용 설치기는 필요한 Node.js와 Vercel CLI를 자동으로 준비한다. 최초 설치 또는 첫 글에서 이미지 호스트 설정이 없으면 `scripts/setup_image_host.py`를 실행한다. 사용자는 브라우저에서 본인 Vercel 로그인만 승인하고, 프로젝트 생성·연결·첫 배포·고정 공개 주소 선택·`image-host.json` 저장은 스크립트가 맡는다. Vercel 토큰과 계정 정보는 플러그인에 넣지 않는다. 네이버가 읽을 공개 HTTPS 주소로 게시할 때 Windows에서는 npm의 `vercel.cmd`·`vercel.exe`·`vercel` 순서로 실제 실행 파일을 찾는다. macOS에서는 `${CODEX_HOME:-$HOME/.codex}/state/goldhand-clinic-blog/bin/vercel`을 먼저 확인한 뒤 `vercel`을 사용한다.
 
 ## 절대 계약
 
@@ -38,7 +38,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 20. 제목은 선택 프로필의 `titleMechanism`이 맡은 독자 심리를 금손 내용으로 옮긴다. 권위 숫자는 `clinic-facts.md`에서 확인되고 주제와 관련 있을 때만 쓰며, 위석의 경력·환자 수·원장 수는 버린다. `2가지`, `3가지` 같은 답 개수를 실제로 약속한 제목에서만 같은 개수의 번호 답을 둔다. 숫자 제목은 필수가 아니다.
 21. `solution-preview`에는 `data-intro-persuasion-device`와 보이는 `data-reader-payoff`를 둔다. `specific-number-low-friction-topic-payoff`를 선택한 경우에만 `reading-time-hook`을 한 번 쓰고, 실제 분량에 맞는 1~5분의 숫자와 제목·독자 고민에 직접 연결되는 보상을 함께 제시한다. 3분을 모든 글에 반복하거나 숫자 뒤에 막연한 도움만 약속하면 실패다.
 22. 도입에서 오십견 핵심 또는 독자의 불편을 설명하는 한 구절을 노란색으로 표시한다. 노란 하이라이트 3개 가운데 1개는 반드시 `solution-preview`에, 나머지 2개는 서로 다른 본문 구간에 둔다.
-23. 시각 자료는 사용자가 본인 소유라고 확인한 [네이버 OGQ마켓 callilife](https://ogqmarket.naver.com/creators/callilife?type=STOCK_IMAGE)에서 주제와 직접 맞는 작품 3~4개를 찾는다. 작품마다 내장 GPT Image를 별도로 호출한다. 인물 중심 그림은 동작·자세·구도·화살표·각도·표기·그림체를 유지하고 얼굴형·이목구비·헤어·피부색·의상 색이나 디테일 가운데 2~3개만 미세하게 바꾼다. 비인물 중심 그림은 핵심 사물·정보·구도·표기를 유지하고 선 굵기·채색·명암·질감 가운데 1~2개만 살짝 바꾼다.
+23. 시각 자료는 사용자가 본인 소유라고 확인한 [네이버 OGQ마켓 callilife](https://ogqmarket.naver.com/creators/callilife?type=STOCK_IMAGE)에서 주제와 직접 맞는 작품 3~4개를 찾는다. 작품마다 시스템 `$imagegen`을 명시적으로 호출하고 내장 `image_gen`을 한 번씩 별도로 사용한다. 인물 중심 그림은 동작·자세·구도·화살표·각도·표기·그림체를 유지하고 얼굴형·이목구비·헤어·피부색·의상 색이나 디테일 가운데 2~3개만 미세하게 바꾼다. 비인물 중심 그림은 핵심 사물·정보·구도·표기를 유지하고 선 굵기·채색·명암·질감 가운데 1~2개만 살짝 바꾼다.
 24. 원고 article에는 OGQ 미리보기나 원본을 넣지 않고 GPT Image 생성본의 절대 로컬 경로만 넣는다. 빌드할 때는 생성본을 금손 전용 HTTPS 이미지 호스트에 게시하고, 청년통신 복사 페이지와 동일하게 공개 HTTPS 주소를 `<img src>`와 `data-reference-source-url`에 넣는다. 네이버가 제외하는 `data:image/...;base64`는 만들지 않는다. 실제 진료 사진·마무리 신뢰 사진·GPT 이미지 모두 `<figcaption>`이나 이미지 아래 설명 문단을 만들지 않는다. 작품 상세 URL·사용자 소유 확인·의학 정보 및 배치 보존·허용된 변형 모드는 보이지 않는 검수용 `data-*`와 `alt`에만 남기며 네이버 복사 본문에서는 내부 `data-*`를 제거한다. 인물 중심 그림의 그림체 변경, 비인물 중심 그림의 내용·배치 변경은 실패다. 구매·가격 확인·라이선스 요청 단계는 없다.
 25. 생성한 이미지는 별도 첨부로 끝내지 않고 최종 `<article>`과 네이버 복사용 HTML 안에 반드시 삽입한다. 각 이미지는 그 그림이 직접 설명하는 증상·동작·치료 원칙을 적은 모바일 문단 바로 뒤에 한 장씩 둔다. 3~4장 모두 원장 소개표 뒤 첫 두 개 설명 섹션 안에 배치하고, 그중 최소 1장은 첫 번째 설명 섹션에 둔다. 각 figure에는 `data-image-zone="early-explanatory-body"`를 표시한다. 세 번째 설명 섹션 이후, 도입과 본문 사이, 소제목 직후, 관련 없는 문단 뒤, 글 끝에 몰아넣는 배치는 금지한다. `<figure>`에는 `data-image-placement="after-related-paragraph"`와 직전 문단에서 실제로 확인되는 `data-image-anchor`를 둔다.
 26. GPT Image 3~4장과 별도로 실제 **진료 사진**은 두 배치 중 하나만 사용한다. `before-credential`은 해결 방향 예고 뒤·`금손한의원 소개` 표 바로 위에 정확히 1장, `closing-trust`는 `neutral-close` 뒤의 마지막 신뢰 구간에 정확히 2장이다. 진료 사진을 설명 본문 중간에 분산하거나 두 배치를 섞으면 실패다. 공식 블로그에서 수집한 113장 전부는 플러그인 `assets/official-media`에 들어 있으며, `assets/media-library.json`에서 진료 사진으로 `safeAuto: true`이고 번들 파일·해시가 확인된 6장만 이 수량에 사용할 수 있다. 사용자 바탕화면이나 개인별 사진 폴더를 요구하지 않는다.
@@ -47,7 +47,8 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 29. `before-credential` 진료 사진은 `placementTerms`·`approvedAlt`를 정확히 사용하고 바로 앞 문단과 `data-image-anchor`가 같은 승인 장면을 가리켜야 한다. `closing-trust` 진료 사진 2장은 질환·부위·본문 문맥과 맞지 않아도 되며, `data-image-placement="closing-clinical-gallery"`로 두고 `data-image-anchor`나 관련 문단을 요구하지 않는다. 다만 자산의 정확한 `approvedAlt`는 유지한다. 별도 마무리 신뢰 사진은 정확한 `closingTrustApprovedAlt`·원본 URL·ID·SHA256을 유지하고 `data-image-placement="closing-credential-trust"`로 단독 배치한다. 이 사진 앞뒤에 협약·수료·기부·봉사 장면을 설명하는 보이는 문장, `credential-trust-context` 문단, `<figcaption>`을 만들지 않는다. 환자·가족 얼굴, 이름, 연락처, 차트, 처방전, 검사결과가 식별되거나 시각 검수를 통과하지 않은 사진은 사용하지 않는다.
 30. `before-credential`의 문맥 일치 승인 사진 1장을 고르지 못하거나, 시각 검수된 실제 진료 사진 풀 자체가 `closing-trust` 2장에 못 미치거나, 별도 마무리 신뢰 사진 1장을 고르지 못하면 자동모드라도 HTML 조립과 발행을 중단한다. `closing-trust`에서는 주제 불일치나 직전 글 사용 이력만으로 중단하지 않고 승인 사진을 재사용해 정확히 2장을 넣는다. 두 사진 풀은 서로 대체하지 않는다.
 31. 모든 글의 고정 운영정보는 공휴일 행이 없는 `clinic-hours` 진료시간 3열 표 다음, 위치·찾아오는 길·전화만 담은 `clinic-info` 1열 다행 표 순서로 둔다. 카카오톡·네이버 예약은 출력하지 않는다. 글은 `clinic-info` 표에서 끝내며, 그 뒤에는 `<함께 보면 좋은 글>` 문구, 최신 블로그 글 링크·카드, 네이버 지도·장소 컴포넌트, 해당 자리표시자를 넣지 않는다.
-32. 완성 산문과 정확 키워드 배치가 끝나면 [references/final-writing-voice-review.md](references/final-writing-voice-review.md)를 읽고 `writing-voice-final-rehear-v1` 최종 재청취를 실행한다. 이 패스는 글 전체를 말하는 속도로 다시 듣고 generic한 연결·평평한 리듬·독자 초점 이탈·근거 없는 윤색만 국소 수정한다. 특히 첫 질문 2~3개를 한 세트로 소리 내어 읽고, `증상명 때문에 …나요?` 틀을 연속 복제하거나 증상을 쉼표로 묶어 `이어지나요?`로 끝내는 요약형 질문을 생활 장면 질문으로 다시 쓴다. 내용 추가·삭제·순서 변경, 사실·의료 경계·확신 강도·제목·도입·흐름·마무리 장치 변경, SEO 약속·고정 HTML 구성 변경은 금지한다. 고칠 곳이 없으면 `no-change-needed`로 통과시키며 억지로 수정하지 않는다.
+32. 정보 본문 뒤에는 `neutral-close`를 정확히 한 번 둔다. 내부 순서는 `글별 마무리 소제목 → 순정 구분선 → 제목에서 약속한 핵심 답 회수 → 불편이 계속될 때의 부담 없는 진료 안내`다. 소제목은 제목·증상·본문 결론에 맞춰 매번 새로 쓰며 `25년 경험이 전하는 한 가지`, `오늘의 결론`, `마무리` 같은 고정 공식으로 만들지 않는다. 진료 안내는 예약을 재촉하거나 결과를 약속하지 않고, 어떤 불편이 계속될 때 현재 상태를 함께 살펴볼 수 있는지 자연스럽게 말한다.
+33. 완성 산문과 정확 키워드 배치가 끝나면 기본적으로 [references/final-writing-voice-review.md](references/final-writing-voice-review.md)를 읽고 `writing-voice-final-rehear-v1` 최종 재청취를 실행한다. 사용자가 동일 공통 원고의 A/B 윤문 비교를 명시한 경우에만 이 검수 직전 원고를 두 벌로 복제해 A안은 writing-voice, B안은 [references/final-humanize-korean-review.md](references/final-humanize-korean-review.md)의 `humanize-korean-final-pass-v1`을 적용한다. B안에서는 writing-voice나 A안 수정 결과를 사용하지 않는다. 어느 경로든 내용 추가·삭제·순서 변경, 사실·의료 경계·확신 강도·제목·도입·흐름·마무리 장치 변경, SEO 약속·고정 HTML 구성 변경은 금지한다.
 
 ### 진료실 발화 가능성 검사
 
@@ -61,6 +62,17 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 
 수정한 문단마다 `더 자연스럽게`가 아니라 `환자가 어느 동작에서 아픈지 바로 떠올리게 함`, `지나친 유보 때문에 흐려진 안전 지시를 직접 들리게 함`처럼 표현이 수행할 일을 내부 기록에 남긴다. 부분 수정 뒤에는 글 전체를 다시 읽는다. `assets/writing-voice-final-review-contract.json`과 `scripts/validate_final_voice_review.py`를 통과하지 못하면 HTML 조립이나 완료 보고로 넘어가지 않는다.
 
+### 동일 공통 원고 A/B 최종 윤문 테스트
+
+사용자가 같은 주제의 최종 윤문기 차이를 테스트한다고 명시하면 레퍼런스와 예약, 제목, 내용 원자, 흐름, 금손 사실, 의료 경계, 생활어 초안, 발화 편집, SEO 완성은 한 번만 수행한다. SEO까지 끝난 같은 `sharedBeforeBody`를 복제한 뒤 마지막 단계만 분기한다.
+
+- A안: 번들 `$writing-voice`와 `writing-voice-final-rehear-v1`
+- B안: 설치된 `$humanize-korean`과 `humanize-korean-final-pass-v1`. B안에는 `$writing-voice`, A안 수정문, `writingVoiceReview`, writing-voice article 속성을 넣지 않는다.
+
+B안은 `$humanize-korean`의 `SKILL.md`와 `references/quick-rules.md`를 읽고 장르 `블로그`, 강도 `기본`, 최소심각도 `S1`로 실행한다. quick-rules ID가 있는 표현만 고치고, 변경률 30% 이하·잔존 S1 0건·자체검증 6/6·등급 A 또는 B를 요구한다. `assets/humanize-korean-final-review-contract.json`, `scripts/validate_humanize_final_review.py`, [references/final-humanize-korean-review.md](references/final-humanize-korean-review.md)를 모두 따른다.
+
+두 안은 공통 초안을 의도적으로 공유하므로 `validate_natural_speech_suite.py --expected-count 1`을 각각 실행한다. 비교 단계에서는 평문 두 안과 검수 영수증까지만 만들고, 모바일·이미지·표·HTML·최근 글 이력은 사용자가 선택한 한 안에만 적용한다.
+
 ## 필요한 자료만 읽기
 
 - 금손 사실·운영·진료 태도: [references/clinic-facts.md](references/clinic-facts.md)
@@ -70,6 +82,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 - 금손 공식 말투: [references/goldhand-official-voice.md](references/goldhand-official-voice.md), `assets/goldhand-official-voice-profile.json`
 - 모든 초안의 내용 분리·생활어 재작성: [references/natural-speech-rewrite-protocol.md](references/natural-speech-rewrite-protocol.md)
 - 완성 산문·SEO 뒤 마지막 문장 검수: 플러그인에 함께 들어 있는 `$writing-voice`, [references/final-writing-voice-review.md](references/final-writing-voice-review.md), `assets/writing-voice-final-review-contract.json`. 외부 사용자 스킬 폴더의 동명 스킬에 의존하지 않는다.
+- 명시적 A/B 비교의 B안: 설치된 `$humanize-korean`, [references/final-humanize-korean-review.md](references/final-humanize-korean-review.md), `assets/humanize-korean-final-review-contract.json`. B안에서는 writing-voice를 사용하지 않는다.
 - 레퍼런스 역할·복사 거리 대조: [references/reference-exact-reconstruction.md](references/reference-exact-reconstruction.md)
 - 치료·인증·수치·의학 표현: [references/medical-writing-guardrails.md](references/medical-writing-guardrails.md)
 - 모바일 문단·네이버 순정 꾸밈: [references/mobile-readability-and-brand-boxes.md](references/mobile-readability-and-brand-boxes.md), `assets/goldhand-naver-native-design-system.json`
@@ -98,14 +111,14 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 2. `scripts/select_wipark_content_reference.py --reserve`로 본문 검토 완료 위석 정보글 11편 중 한 편을 원자적으로 선점한다. 최근 3개와 같은 레퍼런스·핵심 대상·검색 의도뿐 아니라 다른 진행 중 작업이 예약한 레퍼런스도 제외한다. 새 후보가 없으면 중복으로 되돌아가지 않는다.
 3. `광주 한의원`, `광주 한의원 추천`처럼 포괄적인 지역·업종 키워드는 SEO 앵커일 뿐 글의 주제가 아니다. 선택된 위석 글의 실제 건강 문제를 주제로 쓴다.
 4. 선택 결과의 `topic`, `readerConcerns`, `orderedContentAtoms`, `referenceWritingIntelligence`, `approvedWritingLessons`, `blockedFromSource`를 한 묶음으로 고정한다. 제목 장치만 빌리고 다른 흐름을 쓰거나 여러 글을 섞지 않는다.
-5. `sourceProseWithheld=true`, `contentAtomCoverageRequired=true`, `sourceSentenceImitationBlocked=true`, `referenceEditorialReasoningEnabled=true`, `goldhandFactReplacementRequired=true`, `voiceProtocolId=natural-speech-rewrite-protocol-v1`, `voiceProfileId=goldhand-official-voice-v1`, `finalVoiceReviewRequired=true`, `finalVoiceReviewerSkill=writing-voice`, `finalVoiceReviewContractId=writing-voice-final-rehear-v1`을 확인한 뒤에만 초안을 쓴다.
+5. `sourceProseWithheld=true`, `contentAtomCoverageRequired=true`, `sourceSentenceImitationBlocked=true`, `referenceEditorialReasoningEnabled=true`, `goldhandFactReplacementRequired=true`, `voiceProtocolId=natural-speech-rewrite-protocol-v1`, `voiceProfileId=goldhand-official-voice-v1`, `finalVoiceReviewRequired=true`를 확인한 뒤에만 초안을 쓴다. 기본 원고는 `finalVoiceReviewerSkill=writing-voice`, `finalVoiceReviewContractId=writing-voice-final-rehear-v1`이다. 명시적 A/B 비교의 B안은 같은 선택 결과를 공유하되 `humanize-korean`, `humanize-korean-final-pass-v1`으로만 분기한다.
 6. [references/reference-editorial-reasoning.md](references/reference-editorial-reasoning.md)에 따라 `독자 상태 → 제목 장치와 이유 → 도입 장치와 이유 → 주제별 보상 → 흐름 비트별 역할과 전환 → 원문 사실 슬롯을 금손 사실로 교체하거나 생략 → 마무리 감정` 판단 카드를 내부적으로 만든다. 이어 `내용 원자 ID → 확인된 금손 사실·권위 정보 → 환자가 겪는 장면`을 대응한다.
 7. `referenceWritingIntelligence.titleMechanism.allowedIds` 중 한 장치를 골라 제목을 만든다. 답 개수 숫자를 실제로 약속한 경우에만 `--answer-count N`을 추가하고, 항상 `scripts/validate_title.py --editorial-close --reference-master-id 선택ID --title-mechanism-id 선택장치`로 검사한다. 위석의 환자 수·경력·원장 수·성과 숫자는 가져오지 않는다.
-8. `orderedContentAtoms`의 사실 순서와 `flowBeats`의 독자 심리·전환을 함께 사용해 SEO·HTML·이미지·모바일 줄바꿈이 없는 평문을 먼저 쓴다. `microExpressionPatterns`의 기능을 금손 내용으로 새로 표현하고, 별도 발화 편집 패스에서 이 기능을 지우지 않은 채 반복·추상어·대칭형 안전 문장·치료명 나열을 고친다. 모든 원자와 흐름 비트가 대응된 뒤 선택한 도입 설득 장치·주제별 보상·프로필별 마무리와 정확 키워드 2~3회를 반영한다. 완성 산문을 `writing-voice-final-rehear-v1`로 최종 재청취해 표현만 국소 수정하고 전체를 다시 읽은 다음에만 모바일 줄바꿈·강조·이미지·순정 꾸밈을 적용한다.
+8. `orderedContentAtoms`의 사실 순서와 `flowBeats`의 독자 심리·전환을 함께 사용해 SEO·HTML·이미지·모바일 줄바꿈이 없는 평문을 먼저 쓴다. `microExpressionPatterns`의 기능을 금손 내용으로 새로 표현하고, 별도 발화 편집 패스에서 이 기능을 지우지 않은 채 반복·추상어·대칭형 안전 문장·치료명 나열을 고친다. 모든 원자와 흐름 비트가 대응된 뒤 선택한 도입 설득 장치·주제별 보상·프로필별 맞춤 마무리와 정확 키워드 1~2회를 반영한다. 기본 원고는 `writing-voice-final-rehear-v1`로 최종 재청취한다. 명시적 A/B 비교는 이 시점의 동일 평문을 복제해 A안과 B안을 각각 윤문하고, 사용자가 선택한 뒤에만 모바일 줄바꿈·강조·이미지·순정 꾸밈을 적용한다.
 9. callilife에서 주제에 맞는 작품 3~4개를 고르고 작품 상세 미리보기를 생성 레퍼런스로 확보한다. 각 작품이 인물 중심인지 비인물 중심인지 먼저 분류한다. 인물 중심이면 표현·그림체를 유지하고 인물만 미세하게 바꾸며, 비인물 중심이면 내용·배치를 유지하고 그림체만 미세하게 바꾼다. 생성본만 로컬에 저장하고, 원장 소개표 뒤 첫 두 개 설명 섹션에서 각 생성본이 설명하는 핵심 단어가 실제로 들어간 모바일 문단 바로 뒤에 한 장씩 삽입한다. 최소 1장은 첫 번째 설명 섹션에 둔다. 세 번째 설명 섹션 이후나 글 끝에 모아 두지 않는다. 구매·가격·라이선스 선택은 묻지 않는다.
 10. 진료 사진 배치를 `before-credential` 1장 또는 `closing-trust` 2장 중 하나로 정한다. `before-credential`은 `recommend_media.py`가 주제의 실제 장면과 맞고 바로 직전 완료 글에 쓰지 않은 사진만 고른다. `closing-trust`는 질환·부위·본문 문맥을 비교하지 않고 시각 검수된 원장-환자 치료·진찰·상담·검사 사진 2장을 고른다. 직전 글 미사용 사진을 먼저 쓰고 부족하면 직전 글 승인 사진도 재사용한다. 모든 후보는 `bundledPath`·SHA256·공식 원본 URL·`approvedAlt`가 일치해야 한다.
 11. 진료 사진과 별도로 `recommend_closing_trust_media.py --json`을 실행해 검수된 협약·수료증·기부·봉사 사진 1장을 고른다. 진료 사진은 `data-real-photo="true"`와 `data-real-photo-slot="before-credential|closing-trust"`, 마무리 신뢰 사진은 `data-trust-photo="true"`와 `data-trust-photo-slot="closing-credential-trust"`로 완전히 분리한다. 신뢰 사진은 별도 소개·맥락·캡션 문장 없이 `data-image-placement="closing-credential-trust"`로 두고 진료시간 안내 전 마지막 이미지로 삼는다. 이 별도 신뢰 사진은 바로 직전 완료 글과 겹치지 않게 회전한다.
-12. `validate_reference_learning.py`, `validate_final_voice_review.py`, `validate_natural_speech_suite.py`, `validate_reference_reconstruction.py --editorial-close`, `validate_copy_overlap.py`, `validate_goldhand_voice.py`, `validate_article.py --editorial-close`를 모두 통과한 원고만 완성한다. 최종 article에는 `data-writing-voice-review="writing-voice-final-rehear-v1"`과 `data-writing-voice-status="pass"`를 둔다. 최근 3개 이력에는 선택한 위석 레퍼런스, 제목·도입·마무리 장치와 의미 주제, 진료 사진 ID·파일 해시(`realMedia*`), 마무리 신뢰 사진 ID·파일 해시(`trustMedia*`)를 따로 기록한다. `record_article_state.py`에 선택기의 reservation master ID와 run ID를 함께 넘겨 완료 시 예약을 해제한다. 실패로 중단하면 선택기의 `--release-master-id`·`--release-run-id`로 예약을 해제한다.
+12. `validate_reference_learning.py`, 선택 윤문기에 맞는 `validate_final_voice_review.py` 또는 `validate_humanize_final_review.py`, `validate_natural_speech_suite.py`, `validate_reference_reconstruction.py --editorial-close`, `validate_copy_overlap.py`, `validate_goldhand_voice.py`, `validate_article.py --editorial-close`를 모두 통과한 원고만 완성한다. writing-voice article은 기존 두 속성을, humanize-korean article은 `data-final-prose-reviewer="humanize-korean"`, `data-final-prose-review="humanize-korean-final-pass-v1"`, `data-final-prose-status="pass"`를 사용한다. 최근 3개 이력에는 사용자가 선택한 한 원고만 기록하고 예약도 한 번만 해제한다.
 13. `build_naver_copy_page.py`가 글을 `clinic-info` 운영정보 표에서 끝내고, 운영정보 뒤의 `<함께 보면 좋은 글>`·최신 블로그 링크·네이버 지도를 만들지 않는지 확인한다. 복사 미리보기는 `relatedLinks=0`, `maps=0`, `nativeModules=0`, `inputBuffer=true`, `requiresNativeFinisher=false`여야 하며 다른 본문 출력은 이전 계약과 같아야 한다.
 14. 제목의 실제 답을 만들 필수 사실이 없거나, `before-credential` 문맥 사진·전체 승인 진료 사진 풀·별도 마무리 신뢰 사진 풀의 절대 수량이 부족할 때만 필요한 결정을 짧게 묻는다. `closing-trust`는 주제와 안 맞거나 직전 글에 썼다는 이유로 멈추지 않는다. 두 풀은 서로 대체하지 않는다.
 
@@ -153,17 +166,17 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 8. **독립 발화 편집**: 새 패스에는 편집 판단 카드·내용 원자표·금손 사실 팩·평문 초안을 전달한다. 문장마다 `박준희 원장이 환자를 앞에 두고 실제로 이렇게 말할까?`, `환자가 듣자마자 어느 동작에서 어디가 어떻게 불편한지 떠올릴 수 있을까?`, `앞 문장과 다른 새 정보를 주는가?`, `레퍼런스에서 배운 설득 기능이 금손식 표현 안에 남아 있는가?`를 묻는다. 번역투·작문체·감성 문장·추상 압축 표현·대칭형 안전 문장·치료명 나열은 단어만 바꾸지 말고 문장 구조부터 다시 쓴다.
 9. **독립 검수**: 제목, 편집 판단 카드, 사실 팩, 원자·흐름 비트별 본문 대응, 금손 말투 프로필, 발화 편집이 끝난 평문을 새 패스에서 읽는다. 원문 완성 문장을 대조 자료로만 보고 7어절 이상 복사를 막되, 제목 심리·도입 보상·전환·마무리 감정이 사라졌다면 다시 쓴다.
 10. **사전 평문 검수와 부분 수정**: 같은 세 문장 문단 연속, `먼저`·`반대로` 남용, 8어절 문장 틀 복제, 원자 누락, 같은 의미 반복을 찾는다. 실패 문장과 필요한 앞뒤 문장만 고치며 문제가 없는 문단은 고정한다.
-11. **SEO 산문 완성**: 자연스러운 글의 새 정보를 늘리지 않고 정확 키워드를 2~3회 넣는다. 제목 약속, 공백 제외 분량, 각 원자 근거 구절이 모두 남았는지 확인한다.
-12. **writing-voice 최종 재청취**: 내부 JSON에 `iteration`, `briefId`, `keyword`, `title`, 검수 직전 전체 문단 `writingVoiceReview.beforeBody`, 최종 문단 `finalBody`, 원자별 정확 구절 `atomCoverage`, 직접 낭독 결과 `manualReview`, `writingVoiceReview`를 기록한다. [references/final-writing-voice-review.md](references/final-writing-voice-review.md)에 따라 전체를 말하는 속도로 읽고 필요한 표현만 국소 수정한다. 바뀐 문단마다 수정 전·후 문장과 표현의 일을 기록하고 전체를 다시 읽는다. `validate_final_voice_review.py`와 `validate_natural_speech_suite.py --expected-count 1`을 모두 통과시킨다. 여러 후보는 같은 suite에 생성 순서대로 추가해 교차 원고 중복도 검사한다.
+11. **SEO 산문 완성**: 자연스러운 글의 새 정보를 늘리지 않고 정확 키워드를 일반 본문에 1~2회 넣는다. 제목 약속, 공백 제외 분량, 각 원자 근거 구절이 모두 남았는지 확인한다.
+12. **최종 윤문**: 기본 원고는 내부 JSON의 `writingVoiceReview`에 writing-voice 최종 재청취 기록을 남기고 기존 계약을 통과시킨다. 명시적 A/B 비교에서는 동일한 검수 직전 `beforeBody`를 A안과 B안에 넣는다. A안은 `writingVoiceReview`, B안은 `humanizeKoreanReview`만 기록한다. B안의 변경 문단에는 quick-rules ID, 계산 변경률, 등급, 자체검증 6항과 동결값을 남긴다. 두 안은 각자 `validate_natural_speech_suite.py --expected-count 1`을 통과시키며, 의도적으로 같은 공통 초안을 공유한 두 안 사이에는 교차 원고 복제 검사를 적용하지 않는다.
 13. **모바일·이미지·순정 컴포넌트·HTML 조립**: 최종 재청취가 끝난 문장의 표현을 바꾸지 않은 채 모바일 시각 줄로 나눈다. GPT Image 생성본 3~4장은 원장 소개표 뒤 첫 두 개 설명 섹션에 관련 문단별로 배치하고 최소 1장은 첫 섹션에 둔다. 승인 원장-환자 실제 사진은 원장 소개표 바로 위 1장 또는 글마무리 신뢰 구간 2장 중 한 방식만 쓴다. 원장 소개표 위 1장은 바로 앞 문단·anchor·승인 장면을 맞춘다. 글마무리 2장은 본문과 장면이 달라도 되며 `closing-clinical-gallery`로 이어 붙이고, 직전 글 미사용 사진을 우선한 뒤 부족하면 승인 사진을 재사용한다. 모든 글을 중앙 정렬하고 필요한 순정 컴포넌트를 배치한다.
-14. **발행 게이트·이력 기록**: 최종 writing-voice 상태, 내용 순서, 금손 말투, 진료실 발화 가능성, 원문 문장 중복, 의료·업체 사실, 실제 진료 사진 1장 또는 2장·별도 마무리 신뢰 사진 1장·GPT Image 3~4장, 각 이미지 구간, 안전·무결성·수량, 별도 신뢰 사진의 직전 글 중복 0장을 검사한 뒤 제목·키워드·주제·콘텐츠 레퍼런스·두 종류 사진의 ID·해시를 최근 3개 이력에 따로 기록한다.
+14. **발행 게이트·이력 기록**: 선택된 최종 윤문기의 pass 상태, 내용 순서, 금손 말투, 진료실 발화 가능성, 원문 문장 중복, 의료·업체 사실, 실제 진료 사진 1장 또는 2장·별도 마무리 신뢰 사진 1장·GPT Image 3~4장, 각 이미지 구간, 안전·무결성·수량, 별도 신뢰 사진의 직전 글 중복 0장을 검사한 뒤 제목·키워드·주제·콘텐츠 레퍼런스·윤문기·두 종류 사진의 ID·해시를 최근 3개 이력에 한 번 기록한다.
 
 ## 본문과 SEO 계약
 
 - 제목과 실제 본문을 합쳐 공백 제외 1,400~1,800자다.
-- 정확 메인키워드는 제목 1회, 일반 본문 2회 또는 3회다.
+- 정확 메인키워드는 제목 1회, 일반 본문 1회 또는 2회다.
 - 표, 이미지 `alt`, 고정 운영정보, 연락처, CTA는 키워드 횟수에서 제외한다.
-- 한 문단에는 정확 키워드를 한 번만 쓰며 도입·중반·후반 중 자연스러운 2~3곳에 분산한다.
+- 한 문단에는 정확 키워드를 한 번만 쓰며 도입·중반·후반 가운데 자연스러운 1~2곳에 둔다.
 - 키워드 수를 맞추려고 의미 없는 문장이나 요약 블록을 덧붙이지 않는다.
 - 일반 본문은 `data-mobile-group="true"` 한 묶음에 시각 줄 2개 또는 3개를 두고 `<br>`로 나눈다.
 - 한 시각 줄은 공백 제외 10~20자를 목표로 하고 4~24자를 벗어나지 않는다. 글자 수보다 조사·체언·서술어가 어색하게 끊기지 않는 것이 우선이다.
@@ -185,6 +198,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 
 ## 이미지와 HTML 계약
 
+- 설명 이미지 3~4장은 시스템 `$imagegen`의 기본 내장 `image_gen` 모드로만 만든다. `scripts/image_gen.py`, CLI/API fallback, `OPENAI_API_KEY` 환경변수 요청은 금지한다. 내장 도구를 현재 작업에서 호출할 수 없으면 API 경로로 바꾸지 말고 앱 업데이트·새 작업의 `$imagegen` 단독 테스트가 필요하다고 정확히 알린 뒤 HTML 조립 전에 중단한다.
 - 의료 개념·동작 설명 이미지는 사용자 소유 callilife OGQ 작품을 레퍼런스로 우선한다. `assets/callilife-ogq-media-library.json`에서 주제와 직접 연결된 작품 3~4개를 고르고 `safeAuto=true`와 `ownershipBasis=user-confirmed-2026-08-21`을 확인한다.
 - 작품 미리보기는 GPT Image 입력에만 사용한다. 최종 원고에는 `data-media-provider="gpt-image"`, 생성본 `data-local-image`, callilife 작품 상세 URL, `data-generation-owner-authorization="user-confirmed"`, `data-generation-content-preservation="medical-information-layout"`, 그리고 `data-generation-variation-mode="person-identity-subtle-variation"` 또는 `nonperson-style-subtle-variation`을 가진 이미지 3~4개만 넣는다.
 - 각 GPT Image `<figure>`에는 `data-image-zone="early-explanatory-body"`, `data-image-placement="after-related-paragraph"`, `data-image-anchor="핵심어1|핵심어2"`를 둔다. 직전의 `data-mobile-group="true"` 문단에는 anchor 가운데 하나가 실제로 있어야 한다. 3~4장 모두 원장 소개표 뒤 첫 두 개 설명 섹션 안에 두고 최소 1장은 첫 섹션에 둔다. 생성본은 이 figure로 최종 article에 들어가야 하며, 별도 파일 링크만 전달하면 실패다.
@@ -198,11 +212,11 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 - 식별 가능한 환자·가족 얼굴, 이름, 차트, 연락처가 보이는 공식 이미지는 자동 사용하지 않는다.
 - 선택한 위석 블로그 본문의 사진 URL은 복사하지 않는다. 필요한 시각 자료는 callilife 본인 작품 목록에서 별도로 찾고 GPT Image로 재생성한다.
 - `<article>` 안에는 제목 `h1`, 영문 브랜드 띠, 고정 원장 카드가 없어야 한다.
-- `<article>`에는 `data-goldhand-type="정보전달형"`, `data-editorial-mode="reference-reasoning-goldhand-adaptation"`, 선택한 한 편의 `data-editorial-master-id`, `data-content-reference-source`, `data-editorial-reference-source`, `data-editorial-source-role="editorial-reasoning-content-flow-and-expression-principles"`, `data-reference-writing-profile="선택 INFO ID"`, `data-reference-writing-intelligence="goldhand-reference-writing-intelligence-v1"`, `data-title-mechanism="선택 제목 장치"`, `data-closing-mechanism="선택 마무리 장치"`, `data-goldhand-voice-profile="goldhand-official-voice-v1"`, `data-writing-voice-review="writing-voice-final-rehear-v1"`, `data-writing-voice-status="pass"`를 둔다. 레퍼런스는 설득 기능과 흐름을 통제하고 금손 말투는 문장을 자연화하며 writing-voice는 완성 산문의 표현만 최종 재청취한다.
+- `<article>`에는 `data-goldhand-type="정보전달형"`, `data-editorial-mode="reference-reasoning-goldhand-adaptation"`, 선택한 한 편의 `data-editorial-master-id`, `data-content-reference-source`, `data-editorial-reference-source`, `data-editorial-source-role="editorial-reasoning-content-flow-and-expression-principles"`, `data-reference-writing-profile="선택 INFO ID"`, `data-reference-writing-intelligence="goldhand-reference-writing-intelligence-v1"`, `data-title-mechanism="선택 제목 장치"`, `data-closing-mechanism="선택 마무리 장치"`, `data-goldhand-voice-profile="goldhand-official-voice-v1"`를 둔다. 기본 writing-voice 원고에는 `data-writing-voice-review="writing-voice-final-rehear-v1"`, `data-writing-voice-status="pass"`를 둔다. humanize-korean 선택본에는 이 둘 대신 `data-final-prose-reviewer="humanize-korean"`, `data-final-prose-review="humanize-korean-final-pass-v1"`, `data-final-prose-status="pass"`를 둔다. 한 article에 두 윤문기 표식을 섞지 않는다.
 - `<article>`에 `data-goldhand-design-system="goldhand-naver-native-v4"`을 정확히 한 번 둔다. `data-decoration-master-reference-id`는 레퍼런스의 논리 배치 대조용일 뿐 꾸밈을 바꾸지 않는다.
 - 독자 고민 2~3개는 각각 `<blockquote data-reference-role="reader-question" data-question-source="representative-reader-concern" data-naver-native-component="quotation" style="text-align:center;">`로 만든다. blockquote에는 중앙 정렬 외의 배경·테두리·padding 스타일을 넣지 않는다.
 - 해결 방향 예고는 `data-reference-role="solution-preview" data-intro-persuasion-device="선택 도입 장치" data-reader-payoff="본문에 실제로 보이는 주제별 보상"`이 붙은 무배경 산문 블록을 정확히 한 번 둔다. 분 단위 장치를 고른 경우에만 내부에 `reading-time-hook`과 `data-reading-minutes="1~5"`를 둔다.
-- 선택 프로필의 마무리를 재구성한 `data-reference-role="neutral-close" data-closing-payoff="본문에 실제로 보이는 회수 문구"`를 정확히 한 번 둔다. 같은 중립 문장을 모든 글에 반복하지 않는다.
+- 선택 프로필의 마무리를 재구성한 `data-reference-role="neutral-close" data-closing-payoff="본문에 실제로 보이는 회수 문구"`를 정확히 한 번 둔다. 그 안에 제목·본문과 맞닿은 `data-reference-role="closing-heading" data-naver-native-component="subheading"` 소제목 한 개, 그 직후 순정 `divider` 한 개, 핵심 답을 회수하는 산문, `data-reference-role="closing-invitation"`인 부담 없는 진료 안내 한 개를 둔다. 같은 소제목·중립 문장·내원 문구를 모든 글에 반복하지 않는다.
 - 소제목은 `h2` 또는 `p`에 `data-reference-role="section-heading" data-naver-native-component="subheading"`을 두고, 앞뒤에 필요한 네이버 순정 `<hr data-naver-native-component="divider">`를 사용한다.
 - 표는 실제 행·열 관계가 있는 정보에만 쓰고, 모든 표에 `data-naver-native-component="table" data-native-table-preset="naver-table1-default"`를 둔다. 표 자체는 `width:100%;border-collapse:collapse;margin-left:auto;margin-right:auto`로 중앙 배치한다.
 - 모든 `td`·`th`에 `border:1px solid #D6D6D6;text-align:center;vertical-align:middle`을 빠짐없이 적용한다. 표 안의 라벨·설명·운영정보도 예외 없이 가로·세로 중앙 정렬한다.
@@ -234,6 +248,7 @@ python3 scripts/select_wipark_content_reference.py --keyword "정확 메인키�
 python3 scripts/validate_reference_learning.py
 python3 scripts/validate_title.py --title "확정 제목" --keyword "정확 메인키워드" --editorial-close --reference-master-id "선택 INFO ID" --title-mechanism-id "선택 제목 장치" --json
 python3 scripts/validate_final_voice_review.py --input speech-draft.json --json
+python3 scripts/validate_humanize_final_review.py --input speech-draft-humanize.json --json  # humanize-korean 경로만
 python3 scripts/validate_natural_speech_suite.py --input speech-draft.json --expected-count 1 --json
 python3 scripts/validate_article.py --input article.html --title "확정 제목" --keyword "정확 메인키워드" --editorial-close
 python3 scripts/validate_reference_reconstruction.py --input article.html --profile "선택한 INFO 마스터 ID" --editorial-close
@@ -264,6 +279,8 @@ python3 scripts/record_article_state.py --title "확정 제목" --keyword "정�
 - `natural-speech-rewrite-protocol-v1` 누락, SEO·HTML 없는 평문 초안과 별도 발화 편집 패스 미실행
 - `writing-voice-final-rehear-v1` 누락, 완성 산문·SEO 뒤 전체 재청취 미실행, `data-writing-voice-status=pass` 누락, 수정 전후 문단·표현의 일 기록 불일치
 - writing-voice 검수에서 문단·사실·의료 경계·확신 강도·레퍼런스 제목·도입·흐름·마무리 장치·키워드 약속·고정 HTML 구성을 바꾸거나, 고칠 곳이 없는데 억지로 문장을 수정함
+- humanize-korean 경로에서 `$writing-voice` 또는 A안 수정문을 사용함, `humanize-korean-final-pass-v1`·자체검증 6/6·잔존 S1 0건·A/B 등급·변경률 30% 이하 중 하나가 누락됨, quick-rules ID 없이 문장을 바꿈
+- 한 article에 writing-voice와 humanize-korean 검수 속성을 함께 넣거나, A/B 비교 두 안을 사용자의 선택 전에 각각 게시 이력으로 기록함
 - `제가·사실·그런데·~죠`를 검수 횟수에 맞춰 끼워 넣거나, 대칭형 안전 문장·치료명 나열·`확인합니다·봅니다·정합니다` 반복으로 전개함
 - 열 문단이 넘는 평문에서 같은 문장 수의 문단 비율이 88%를 넘거나 같은 문장 수가 7문단 이상 연속됨, `먼저` 6회 이상, `반대로` 3회 이상, 여러 원고에 같은 8어절 문장 틀이 남음
 - `ㅎㅎ`, `ㅠㅠ`, `^^`, 이모지 또는 등록된 AI 템플릿 문장 사용
@@ -281,13 +298,15 @@ python3 scripts/record_article_state.py --title "확정 제목" --keyword "정�
 - 선택한 `titleMechanism`과 제목 장치가 다르거나, 제목이 실제 답 개수를 약속했는데 숫자와 번호 소제목 개수가 다름
 - `solution-preview`의 선택 도입 장치·주제별 보상·도입 하이라이트 누락. 분 단위 장치를 선택했는데 1~5분 숫자·읽기 표현·주제별 보상 중 하나가 없거나, 분 단위 장치를 선택하지 않았는데 관성적으로 3분 문장을 삽입함
 - 선택한 `closingMechanism`과 마무리 감정·회수 내용이 다르거나 모든 글을 같은 중립 문장으로 끝냄
+- `neutral-close` 안에 글별 마무리 소제목·그 직후 순정 구분선·본문 핵심 회수·부담 없는 진료 안내 중 하나가 없거나, `25년 경험이 전하는 한 가지` 같은 레퍼런스 표면 문구를 공식처럼 반복함
 - callilife 주제 일치 작품 검색 누락, GPT Image 생성본 3~4개 누락, OGQ 미리보기·원본을 완성 글에 직접 사용, 생성본 절대 경로·작품 상세 URL·사용자 소유 확인·의학 정보 및 배치 보존·허용 변형 모드 누락, 인물 중심 그림의 그림체를 바꾸거나 비인물 중심 그림의 핵심 내용·배치를 바꿈
+- 시스템 `$imagegen` 대신 `scripts/image_gen.py`·CLI/API fallback을 사용하거나 `OPENAI_API_KEY`를 사용자에게 요구함
 - GPT Image 생성본을 최종 article·복사용 HTML에서 누락하거나, 복사용 HTML에 HTTPS 게시 URL 대신 로컬 경로·`data:image`를 남기거나, `data-image-placement`·`data-image-anchor` 없이 소제목 직후·관련 없는 문단 뒤·글 끝에 몰아서 배치함
 - 실제 진료 사진이 1~2장 범위를 벗어남, 1장인데 원장 소개표 위가 아니거나 2장인데 마무리 진료 구간이 아님, 설명 본문 중간에 분산함, 원장-환자 치료·진찰·상담·검사 장면이 아님, 진료 사진 ID·해시·시각 검수·`approvedAlt` 누락. `before-credential`에서만 `placementTerms`·anchor·바로 앞 문단 대응 누락도 실패
 - 마무리 신뢰 사진이 별도 1장이 아니거나 진료 사진 수량으로 대체됨, `closingTrustEligible`이 아닌 사진 사용, `closingTrustApprovedAlt`·원본 URL·ID·SHA256 누락, `data-image-placement="closing-credential-trust"` 누락, 사진 앞뒤에 `credential-trust-context`나 협약·수료·기부·봉사 설명 문장이 출력됨, 진료시간 안내 전 마지막 이미지가 아님, 또는 바로 직전 완료 글의 별도 신뢰 사진 ID·해시를 재사용함
 - 실제 사진이나 GPT 이미지 아래에 `<figcaption>` 또는 별도 설명·출처 문단을 표시함
 - 지역·업종 키워드를 글의 주제로 오인해 한의원 선택법·추천 이유·업체 비교를 설명하거나, 지역명·상호를 가렸을 때 실질적인 건강 정보가 남지 않음
-- 1,400~1,800자 또는 제목 1회·본문 2~3회 SEO 실패
+- 1,400~1,800자 또는 제목 1회·본문 1~2회 SEO 실패
 - 일반 본문이 2~3줄 묶음이 아니거나, 한 줄이 공백 제외 24자를 초과하거나, 묶음 뒤의 빈 줄이 누락됨
 - 인용구·인사·소제목·본문 중 하나라도 중앙 정렬이 아님
 - 노란 하이라이트 정확히 3개, 밑줄 2~3개, 빨간 글씨 1~2개, 합계 6~8개 계약 위반 또는 강조 효과 중첩
@@ -298,4 +317,4 @@ python3 scripts/record_article_state.py --title "확정 제목" --keyword "정�
 
 ## 완료 보고
 
-최종 응답에는 제목, `콘텐츠·편집 레퍼런스` 링크 한 편, 실제로 옮긴 제목·도입·흐름·마무리 장치, 금손 공식 말투·생활어 검수, `writing-voice` 최종 전체 재청취와 구조·사실 보존 통과, 최근 3개 주제 및 진행 중 예약 중복 검사, 선택한 진료 사진 배치 모드와 수량, `closing-trust`라면 주제 무관 배치와 직전 글 사진 재사용 수, 별도 마무리 신뢰 사진 1장과 장면 유형·직전 글 중복 0장, 진료 사진 자리에 로고·건물·약·장비·빈 공간 사용 0장, 설명 본문 GPT Image 3~4장, 공백 제외 글자 수, 제목·본문 키워드 횟수, 내용 순서·복사 거리, 전 문단 중앙 정렬, 노란 하이라이트·밑줄·주의용 빨간 글씨, 고정 가치입증 6행, 금손 색상의 3열 진료시간표와 1열 위치·전화 정보표, `clinic-info` 이후 추가 요소 0개, 모바일 2~3줄 문단·네이버 순정 컴포넌트, 의료·사실·HTML 검사 결과와 저장 경로를 간단히 적는다.
+최종 응답에는 제목, `콘텐츠·편집 레퍼런스` 링크 한 편, 실제로 옮긴 제목·도입·흐름·마무리 장치, 금손 공식 말투·생활어 검수, 선택된 최종 윤문기와 구조·사실 보존 통과, 최근 3개 주제 및 진행 중 예약 중복 검사, 선택한 진료 사진 배치 모드와 수량, `closing-trust`라면 주제 무관 배치와 직전 글 사진 재사용 수, 별도 마무리 신뢰 사진 1장과 장면 유형·직전 글 중복 0장, 진료 사진 자리에 로고·건물·약·장비·빈 공간 사용 0장, 설명 본문 GPT Image 3~4장, 공백 제외 글자 수, 제목·본문 키워드 횟수, 내용 순서·복사 거리, 전 문단 중앙 정렬, 노란 하이라이트·밑줄·주의용 빨간 글씨, 고정 가치입증 6행, 금손 색상의 3열 진료시간표와 1열 위치·전화 정보표, `clinic-info` 이후 추가 요소 0개, 모바일 2~3줄 문단·네이버 순정 컴포넌트, 의료·사실·HTML 검사 결과와 저장 경로를 간단히 적는다. A/B 비교 단계에서는 공통 초안과 두 윤문기 이름, 각 변경률·등급·검수 통과, 두 비교 파일 경로만 보고하고 아직 HTML·이미지·이력 기록을 하지 않았음을 분명히 적는다.

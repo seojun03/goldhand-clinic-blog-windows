@@ -452,6 +452,30 @@
       "data-writing-voice-status": "pass"
     }
   },
+  "finalProseReview": {
+    "requiredOnEveryArticle": true,
+    "defaultReviewer": "writing-voice",
+    "allowedReviewers": {
+      "writing-voice": {
+        "contractId": "writing-voice-final-rehear-v1",
+        "articleAttributes": {
+          "data-writing-voice-review": "writing-voice-final-rehear-v1",
+          "data-writing-voice-status": "pass"
+        }
+      },
+      "humanize-korean": {
+        "contractId": "humanize-korean-final-pass-v1",
+        "articleAttributes": {
+          "data-final-prose-reviewer": "humanize-korean",
+          "data-final-prose-review": "humanize-korean-final-pass-v1",
+          "data-final-prose-status": "pass"
+        }
+      }
+    },
+    "oneReviewerPerArticle": true,
+    "abTestUsesOneSharedPreFinalDraft": true,
+    "humanizeVariantMustExcludeWritingVoice": true
+  },
   "fixedClosingLinks": {
     "enabled": false,
     "requiredOnEveryArticle": false,
