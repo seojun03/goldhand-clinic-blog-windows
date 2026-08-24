@@ -2230,11 +2230,29 @@ class BuilderTests(unittest.TestCase):
         self.assertNotIn("run.style.textDecoration = 'none'", page)
         self.assertIn("굵게·밑줄·취소선", page)
         self.assertIn("window.location.protocol === 'file:'", page)
+        self.assertIn("copyRenderedSelection(nativeSelectionRoot(inputBuffer, nativeHtml))", page)
+        self.assertIn("inputBuffer.textContent = '\\u200B'", page)
         self.assertIn("복사 실패 · 클립보드가 바뀌지 않았습니다", page)
         self.assertLess(
             page.index("window.location.protocol === 'file:'"),
             page.index("navigator.clipboard?.write"),
         )
+
+    def test_copy_page_emits_naver_native_image_clipboard_contract(self) -> None:
+        page = PAGE_BUILDER.build_page(TITLE, valid_article())
+        self.assertIn("waitForCopyImages", page)
+        self.assertIn('data-linktype="img"', page)
+        self.assertIn("data-linkdata=", page)
+        self.assertIn("escapeAttribute", page)
+        self.assertIn("&quot;", page)
+        self.assertIn("se-module-image se-image-loaded", page)
+        self.assertIn("nativeSelectionRoot", page)
+        self.assertIn("imageDataLinks:", page)
+        self.assertIn("orphanImageCaptions:", page)
+        self.assertNotIn("사진 설명을 입력하세요.", page)
+        self.assertNotIn('<div class="se-caption', page)
+        result = HTML_VALIDATOR.validate_html(page)
+        self.assertEqual(result["status"], "pass", result)
 
     def test_build_page_publishes_local_image_as_https(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -32,7 +32,7 @@
 
 편집 원본은 이 플러그인의 `skills/goldhand-clinic-blog/` 하나뿐입니다. 사용자 스킬 폴더에 별도 복사본이나 심볼릭 링크를 만들지 않고, 개인 마켓플레이스에 설치된 플러그인 경로로만 노출합니다. 그래야 `$` 자동완성에 같은 금손 스킬이 두 번 나타나지 않습니다.
 
-플러그인 소스를 수정한 뒤 아래 명령을 실행하면 중복 직접 링크를 안전하게 정리하고, 버전 캐시버스터를 갱신한 뒤 개인 마켓플레이스에서 다시 설치합니다.
+플러그인 소유자 환경에서는 플러그인 소스를 수정한 뒤 아래 명령을 실행하면 중복 직접 링크를 안전하게 정리하고, 버전 캐시버스터를 갱신한 뒤 개인 마켓플레이스에서 다시 설치합니다. 소유자 전용 `~/.codex/state/goldhand-clinic-blog/publisher.json`에서 `autoPublish: true`가 설정되어 있으면 전체 콘텐츠 테스트와 Windows 배포 검증을 통과한 뒤 GitHub `main` 푸시, Windows CI 확인, 새 Release 생성, 공개 자산 재다운로드·SHA-256 검증, 공개 설치 경로 테스트까지 자동으로 이어집니다. 실패한 변경은 Release로 공개하지 않습니다. 이 설정과 GitHub 권한은 사용자 설치본에 포함하지 않습니다.
 
 ```bash
 python3 ~/plugins/goldhand-clinic-blog/scripts/refresh_plugin.py

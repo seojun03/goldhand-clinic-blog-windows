@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -18,6 +19,9 @@ CREATOR_SCRIPTS = (
 )
 DIRECT_SKILL_PATH = Path.home() / ".codex" / "skills" / PLUGIN_NAME
 SOURCE_SKILL_PATH = PLUGIN_ROOT / "skills" / PLUGIN_NAME
+PUBLISHER_CONFIG_PATH = (
+    Path.home() / ".codex" / "state" / PLUGIN_NAME / "publisher.json"
+)
 
 
 def fail(message: str) -> int:
@@ -78,6 +82,31 @@ def marketplace_name() -> str:
     raise ValueError("개인 마켓플레이스에 금손 플러그인 항목이 없습니다.")
 
 
+def publish_public_update_if_enabled() -> bool:
+    """Publish only on the owner's machine with an explicit local opt-in file."""
+    if os.environ.get("GOLDHAND_SKIP_AUTO_PUBLISH") == "1":
+        print("소유자 공개 자동 배포를 이번 실행에서만 건너뛰었습니다.")
+        return False
+    if not PUBLISHER_CONFIG_PATH.is_file():
+        return False
+    data = json.loads(PUBLISHER_CONFIG_PATH.read_text(encoding="utf-8"))
+    if data.get("autoPublish") is not True:
+        return False
+    distribution_root = Path(str(data.get("distributionRoot", ""))).expanduser().resolve()
+    publisher = distribution_root / "scripts" / "publish_update.py"
+    if not publisher.is_file():
+        raise ValueError(f"공개 자동 배포 스크립트를 찾을 수 없습니다: {publisher}")
+    run(
+        sys.executable,
+        str(publisher),
+        "--plugin-root",
+        str(PLUGIN_ROOT),
+        "--distribution-root",
+        str(distribution_root),
+    )
+    return True
+
+
 def main() -> int:
     cachebuster = CREATOR_SCRIPTS / "update_plugin_cachebuster.py"
     validator = CREATOR_SCRIPTS / "validate_plugin.py"
@@ -92,11 +121,14 @@ def main() -> int:
         run(sys.executable, str(validator), str(PLUGIN_ROOT))
         run(sys.executable, str(cachebuster), str(PLUGIN_ROOT))
         run("codex", "plugin", "add", f"{PLUGIN_NAME}@{name}")
+        published = publish_public_update_if_enabled()
     except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
         return fail(f"플러그인 새로고침 실패: {exc}")
     if removed_duplicate:
         print("중복 노출을 만들던 직접 사용자 스킬 링크를 제거했습니다.")
     print("금손한의원 플러그인을 하나의 개인 플러그인으로 새로고침했습니다. 새 Codex 작업에서 확인하세요.")
+    if published:
+        print("GitHub 공개 릴리스와 사용자 자동 업데이트 배포까지 완료했습니다.")
     return 0
 
 

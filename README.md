@@ -27,3 +27,7 @@ Direct selector: `goldhand-clinic-blog@goldhand-clinic-windows`
 ## Verification
 
 The GitHub Actions workflow runs plugin content tests and uses Windows PowerShell 5.1 to verify an actual Vercel CLI installation and version command, the first-time image-host automation contract, complete-archive installation, isolated-CMD recovery, invalid Codex candidate rejection, missing `CODEX_HOME` creation, nonfatal locked cleanup, transactional managed replacement, and enabled local plugin registration.
+
+## Owner publishing
+
+The canonical plugin's owner refresh command is connected to `scripts/publish_update.py` through the owner-only `publisher.json` state file. A source refresh validates and syncs the complete plugin, commits and pushes `main`, waits for the Windows PowerShell 5.1 workflow, creates a versioned GitHub Release only after CI succeeds, redownloads both public assets to verify SHA-256, and runs the public one-file installation workflow. Recipient machines do not receive GitHub credentials and do not run the owner publisher.

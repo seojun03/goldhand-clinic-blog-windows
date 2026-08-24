@@ -43,6 +43,13 @@ REQUIRED_SNIPPETS = {
     "closing-supplement-disabled": "requiresNativeFinisher:false",
     "native-input-buffer": "INPUT_BUFFER_DATA;",
     "native-copy-component-preservation": "element.matches('.se-component.se-oglink,.se-component.se-placesMap')",
+    "copy-image-readiness": "waitForCopyImages",
+    "native-image-link": 'data-linktype="img"',
+    "native-image-linkdata": "data-linkdata=",
+    "native-image-attribute-escape": "escapeAttribute",
+    "native-selection-copy": "nativeSelectionRoot",
+    "copy-image-preview": "imageDataLinks:",
+    "copy-caption-preview": "orphanImageCaptions:",
 }
 
 
@@ -669,7 +676,19 @@ def validate_html(raw: str, *, max_megabytes: float = 30.0) -> dict[str, object]
 
     if "data-local-image=" in raw:
         add(issues, "error", "local-image-not-published", "로컬 이미지가 네이버 복사용 HTTPS 주소로 게시되지 않았습니다.")
-    for src in re.findall(r"<img\b[^>]*\bsrc\s*=\s*['\"](.*?)['\"]", raw, flags=re.I | re.S):
+    if "사진 설명을 입력하세요." in raw or re.search(
+        r"<[^>]+\bclass\s*=\s*['\"][^'\"]*\bse-caption\b",
+        raw,
+        flags=re.I | re.S,
+    ):
+        add(
+            issues,
+            "error",
+            "orphan-image-caption",
+            "네이버 붙여넣기에서 사진 대신 남을 수 있는 빈 캡션 자리표시자가 있습니다.",
+        )
+    image_validation_html = article_match.group(0) if article_match else ""
+    for src in re.findall(r"<img\b[^>]*\bsrc\s*=\s*['\"](.*?)['\"]", image_validation_html, flags=re.I | re.S):
         if src.startswith(("/", "file:", "~/")):
             add(issues, "error", "local-path-leak", f"공유할 수 없는 로컬 이미지 경로: {src[:120]}")
         if src.startswith("data:image/"):
@@ -677,7 +696,7 @@ def validate_html(raw: str, *, max_megabytes: float = 30.0) -> dict[str, object]
         elif not src.startswith("https://"):
             add(issues, "error", "invalid-image-source", f"허용되지 않은 이미지 src: {src[:120]}")
 
-    for tag in re.findall(r"<img\b[^>]*\bdata-reference-source-url\s*=\s*['\"].*?['\"][^>]*>", raw, flags=re.I | re.S):
+    for tag in re.findall(r"<img\b[^>]*\bdata-reference-source-url\s*=\s*['\"].*?['\"][^>]*>", image_validation_html, flags=re.I | re.S):
         if not re.search(r"\breferrerpolicy\s*=\s*['\"]no-referrer['\"]", tag, flags=re.I):
             add(issues, "error", "referrer-policy-missing", "공식 이미지에 no-referrer가 없습니다.")
 

@@ -41,6 +41,7 @@ def main() -> int:
         ROOT / "requirements-windows.txt",
         ROOT / "scripts" / "apply-local-edits-windows.ps1",
         ROOT / "scripts" / "update-windows.ps1",
+        ROOT / "scripts" / "publish_update.py",
         ROOT / ".github" / "workflows" / "windows-install.yml",
     ]
     for path in required:
@@ -71,6 +72,7 @@ def main() -> int:
     image_setup_python = (PLUGIN_ROOT / "skills" / PLUGIN_NAME / "scripts" / "setup_image_host.py").read_text(encoding="utf-8")
     installer = (ROOT / "install-from-download-windows.ps1").read_text(encoding="ascii")
     updater = (ROOT / "scripts" / "update-windows.ps1").read_text(encoding="ascii")
+    publisher = (ROOT / "scripts" / "publish_update.py").read_text(encoding="utf-8")
     helper_bytes = (ROOT / "scripts" / "apply-local-edits-windows.ps1").read_bytes()
     require(helper_bytes.startswith(b"\xef\xbb\xbf"), "PowerShell 5.1 edit helper is missing UTF-8 BOM")
     require(f"{ENV_PREFIX}_BOOTSTRAP_ARCHIVE" in launcher, "isolated CMD archive override is missing")
@@ -106,6 +108,9 @@ def main() -> int:
     require('goldhand-clinic-blog-plugin.zip' in launcher, "isolated CMD must download the validated release ZIP")
     require("releases/latest" in updater and 'goldhand-clinic-blog-plugin.zip' in updater, "release-only updater is missing")
     require("archive/refs/heads/main.zip" not in launcher and "archive/refs/heads/main.zip" not in updater, "Windows install paths must not consume unvalidated main branch ZIPs")
+    require("update_existing_distribution.py" in publisher, "owner publisher must sync the complete canonical plugin")
+    require("def wait_for_run(" in publisher and '"watch"' in publisher and "def release_with_verified_assets(" in publisher and '"create"' in publisher, "owner publisher must wait for CI before releasing")
+    require("compare_asset_sets(" in publisher and '"download"' in publisher and "cleanup-tag" in publisher, "owner publisher must verify public assets and roll back failed releases")
     print(f"distribution validation passed: {PLUGIN_NAME} {manifest['version']}")
     return 0
 
