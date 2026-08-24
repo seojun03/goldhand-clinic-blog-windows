@@ -14,6 +14,7 @@ from unittest import mock
 
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
+PLUGIN_ROOT = SKILL_DIR.parents[1]
 SCRIPTS = SKILL_DIR / "scripts"
 GPT_IMAGE_FIXTURE = (SKILL_DIR / "assets" / "gpt-image-test-fixture.png").resolve()
 
@@ -3311,6 +3312,16 @@ class ReferenceCorpusTests(unittest.TestCase):
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_owner_refresh_is_wired_to_validated_public_release(self) -> None:
+        refresh = (PLUGIN_ROOT / "scripts" / "refresh_plugin.py").read_text(encoding="utf-8")
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("publisher.json", refresh)
+        self.assertIn('data.get("autoPublish") is not True', refresh)
+        self.assertIn("publish_update.py", refresh)
+        self.assertIn("publish_public_update_if_enabled()", refresh)
+        self.assertIn("GitHub 푸시", skill)
+        self.assertIn("공개 설치 테스트", skill)
+
     def test_required_contract_files_exist(self) -> None:
         for relative in (
             "SKILL.md",
