@@ -132,8 +132,10 @@ jobs:
           $env:GOLDHAND_FAKE_PY_VERSION_EXIT = "0"
           $env:GOLDHAND_FAKE_PY_SETUP_EXIT = "9"
           & cmd.exe /d /c (Join-Path $root "SETUP-IMAGES-WINDOWS.cmd")
-          if ($LASTEXITCODE -eq 0) { throw "Launcher hid a selected py.exe setup failure" }
+          $expectedFailureExit = $LASTEXITCODE
+          if ($expectedFailureExit -eq 0) { throw "Launcher hid a selected py.exe setup failure" }
           if (Test-Path -LiteralPath $marker) { throw "Launcher retried setup with python.exe after selected py.exe failed" }
+          $global:LASTEXITCODE = 0
 
       - name: Keep the primary error when cleanup is blocked
         shell: powershell
