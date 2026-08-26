@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -84,6 +85,11 @@ def main() -> int:
     require("Install-PythonRequirements" in installer and "requirements-windows.txt" in installer, "plugin Python dependency installation is missing")
     require("function Ensure-NodeAndNpm" in installer and "OpenJS.NodeJS.LTS" in installer, "Node.js LTS fallback installation is missing")
     require("function Ensure-VercelCli" in installer and "vercel.cmd" in installer, "Vercel CLI executable handling is missing")
+    require("$MinimumVercelCliVersion" in installer and "Get-VercelCliVersion" in installer, "minimum Vercel CLI device-login version guard is missing")
+    npm_command_body = installer[installer.index("function Get-NpmCommand") : installer.index("function Get-VercelCommand")]
+    vercel_command_body = installer[installer.index("function Get-VercelCommand") : installer.index("function Ensure-NodeAndNpm")]
+    require("Test-VersionCommand" in npm_command_body and "Get-VercelCliVersion" not in npm_command_body, "npm executable probe must not use the Vercel version gate")
+    require("Get-VercelCliVersion" in vercel_command_body and "$MinimumVercelCliVersion" in vercel_command_body, "Vercel executable probe must enforce the device-login minimum")
     require("install --global vercel --no-fund --no-audit" in installer, "Vercel CLI npm installation is missing")
     require("Test-VersionCommand" in installer and "Ensure-VercelCli" in installer, "Vercel CLI execution verification is missing")
     require(
@@ -114,7 +120,45 @@ def main() -> int:
     require("Write-ImageSetupDesktopLauncher" in installer and "Goldhand Image Setup.lnk" in installer, "one-click image setup retry shortcut is missing")
     require("setup_image_host.py" in image_setup_launcher, "standalone image setup launcher is missing the Python setup entrypoint")
     require((PLUGIN_ROOT / "skills" / PLUGIN_NAME / "scripts" / "setup_image_host.py").is_file(), "packaged image-host setup script is missing")
-    require('run_vercel(["login"]' in image_setup_python, "one-time browser Vercel login is missing")
+    require('run_prefilled_device_login(' in image_setup_python, "code-prefilled Vercel login flow is missing")
+    require('vercel_command(["login", "--no-color", "--non-interactive"])' in image_setup_python, "captured Vercel device login command is missing")
+    require('run_vercel(["login"]' not in image_setup_python, "raw inherited Vercel login must not be used")
+    image_setup_path = PLUGIN_ROOT / "skills" / PLUGIN_NAME / "scripts" / "setup_image_host.py"
+    image_setup_spec = importlib.util.spec_from_file_location("goldhand_distribution_image_setup", image_setup_path)
+    require(image_setup_spec is not None and image_setup_spec.loader is not None, "image-host setup module could not be loaded")
+    image_setup_module = importlib.util.module_from_spec(image_setup_spec)
+    previous_dont_write_bytecode = sys.dont_write_bytecode
+    try:
+        sys.dont_write_bytecode = True
+        image_setup_spec.loader.exec_module(image_setup_module)
+    finally:
+        sys.dont_write_bytecode = previous_dont_write_bytecode
+    require(image_setup_module.MINIMUM_VERCEL_CLI_VERSION == (50, 44, 0), "Vercel CLI minimum version must remain 50.44.0")
+    require(image_setup_module.LOGIN_ATTEMPTS == 2, "expired Vercel approval must have exactly one bounded fresh retry")
+    require(0 < image_setup_module.LOGIN_URL_WAIT_SECONDS <= 60, "Vercel approval URL wait must stay bounded")
+    require(0 < image_setup_module.LOGIN_ATTEMPT_TIMEOUT_SECONDS <= 630, "Vercel approval attempt timeout must stay bounded")
+    accepted_device_urls = (
+        "https://vercel.com/oauth/device?user_code=ABCD-EFGH",
+        "https://vercel.com/device?code=12345678-1234-1234-1234-1234567890ab",
+        "https://vercel.com/oauth/device/request-id?v=verification-id",
+    )
+    for approval_url in accepted_device_urls:
+        require(
+            image_setup_module.prefilled_vercel_device_url(f"Visit {approval_url}") == approval_url,
+            f"supported Vercel approval URL was rejected: {approval_url}",
+        )
+    rejected_device_urls = (
+        "https://vercel.com/oauth/device?user_code=ABCD-EFGH",
+        "Visit https://vercel.com/oauth/device",
+        "Visit https://vercel.com/device?next=/logout",
+        "Visit https://vercel.com/oauth/device/request-id?next=/logout",
+        "Visit https://vercel.com.evil.example/oauth/device?user_code=ABCD-EFGH",
+    )
+    for approval_url in rejected_device_urls:
+        require(
+            image_setup_module.prefilled_vercel_device_url(approval_url) is None,
+            f"unsafe or incomplete Vercel approval URL was accepted: {approval_url}",
+        )
     require('run_vercel(["project", "add"' in image_setup_python and 'run_vercel(["link"' in image_setup_python, "automatic Vercel project creation or linking is missing")
     require('"publicBaseUrl"' in image_setup_python and 'write_config(' in image_setup_python, "automatic image-host configuration persistence is missing")
     require("GOLDHANDBLOG_SKIP_IMAGE_HOST_SETUP" in updater, "background updates must skip interactive image-host setup")
@@ -122,6 +166,22 @@ def main() -> int:
     setup_lower = image_setup_python.lower()
     require("--token" not in installer_lower and "vercel_token=" not in installer_lower, "public installer must not bundle a Vercel credential")
     require("--token" not in setup_lower and "vercel_token=" not in setup_lower, "image setup must not bundle a Vercel credential")
+    require("exit /b 0" in image_setup_launcher and "exit /b 1" in image_setup_launcher, "standalone image setup must preserve success and failure exit codes")
+    require(
+        "py.exe -3 --version >nul 2>nul" in image_setup_launcher
+        and "python.exe --version >nul 2>nul" in image_setup_launcher,
+        "standalone image setup must probe each Python interpreter before choosing one",
+    )
+    require(
+        "if not errorlevel 1 goto :run_py" in image_setup_launcher
+        and "if not errorlevel 1 goto :run_python" in image_setup_launcher
+        and image_setup_launcher.count("if errorlevel 1 goto :failed") == 2,
+        "standalone image setup must execute only one selected interpreter and preserve setup failure",
+    )
+    require(
+        "$env:GOLDHAND_VERCEL_CLI = $script:VercelExecutable" in installer,
+        "installer must pass its supported Vercel CLI selection to image setup",
+    )
     require("plugin --help" in installer, "functional Codex CLI probe is missing")
     require("https://chatgpt.com/codex/install.ps1" in installer, "official Codex installer fallback is missing")
     require("Get-AppxPackage" not in installer and '-Filter "codex.exe"' not in installer, "protected Appx Codex discovery must not be used")

@@ -23,6 +23,7 @@ ARCHIVE_NAME = "goldhand-clinic-blog-plugin.zip"
 CMD_NAME = "INSTALL-WINDOWS.cmd"
 ALLOWED_BOOTSTRAP_PATHS = (
     ".github/workflows/windows-install.yml",
+    "SETUP-IMAGES-WINDOWS.cmd",
     "install-from-download-windows.ps1",
     "README.md",
     "plugins/goldhand-clinic-blog/",
@@ -437,7 +438,14 @@ def main() -> int:
             return 0
         if latest and tag <= latest:
             raise PublishError(f"새 버전이 기존 공개 버전보다 높지 않습니다: {tag} <= {latest}")
-        sync_canonical_plugin(plugin_root, distribution_root)
+        if (
+            plugin_version(distributed_plugin) == version
+            and tree_fingerprint(plugin_root) == tree_fingerprint(distributed_plugin)
+        ):
+            command([sys.executable, "scripts/validate_distribution.py"], cwd=distribution_root)
+            command(["git", "diff", "--check"], cwd=distribution_root)
+        else:
+            sync_canonical_plugin(plugin_root, distribution_root)
         distributed_version = plugin_version(distributed_plugin)
         if distributed_version != version:
             raise PublishError(

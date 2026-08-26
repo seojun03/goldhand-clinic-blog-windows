@@ -17,6 +17,7 @@ $LegacyTaskName = "GoldhandClinicPluginUpdate"
 $LegacyStartupFileName = "GoldhandClinicPluginUpdate.cmd"
 $LegacyRoot = $(if ($env:GOLDHANDBLOG_LEGACY_ROOT) { $env:GOLDHANDBLOG_LEGACY_ROOT } else { Join-Path $HOME "GoldhandClinicPlugin" })
 $SourceRoot = (Resolve-Path -LiteralPath $PSScriptRoot).Path
+$MinimumVercelCliVersion = [Version]"50.44.0"
 
 function Write-Step([string]$Message) {
     Write-Host "[Goldhand Clinic Blog installer] $Message" -ForegroundColor Cyan
@@ -259,6 +260,27 @@ function Test-VersionCommand([string]$Candidate) {
     }
 }
 
+function Get-VercelCliVersion([string]$Candidate) {
+    if ([string]::IsNullOrWhiteSpace($Candidate)) { return $null }
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        if (-not (Test-Path -LiteralPath $Candidate -PathType Leaf)) { return $null }
+        $resolved = (Resolve-Path -LiteralPath $Candidate).Path
+        $ErrorActionPreference = "Continue"
+        $global:LASTEXITCODE = $null
+        $output = @(& $resolved --version 2>&1)
+        if ($LASTEXITCODE -ne 0) { return $null }
+        $match = [regex]::Match(($output -join " "), '(\d+\.\d+\.\d+)')
+        if (-not $match.Success) { return $null }
+        return [Version]$match.Groups[1].Value
+    } catch {
+        return $null
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+        $global:LASTEXITCODE = 0
+    }
+}
+
 function Get-NpmCommand {
     $candidates = @()
     foreach ($name in @("npm.cmd", "npm.exe", "npm")) {
@@ -299,7 +321,8 @@ function Get-VercelCommand {
         $key = ([string]$candidate).ToLowerInvariant()
         if ($seen.ContainsKey($key)) { continue }
         $seen[$key] = $true
-        if (Test-VersionCommand -Candidate ([string]$candidate)) {
+        $version = Get-VercelCliVersion -Candidate ([string]$candidate)
+        if ($version -and $version -ge $MinimumVercelCliVersion) {
             return (Resolve-Path -LiteralPath ([string]$candidate)).Path
         }
     }
@@ -322,12 +345,13 @@ function Ensure-NodeAndNpm {
 function Ensure-VercelCli {
     $script:VercelExecutable = Get-VercelCommand
     if ($script:VercelExecutable) {
+        $env:GOLDHAND_VERCEL_CLI = $script:VercelExecutable
         Write-Step "Vercel CLI is available at $script:VercelExecutable"
         return
     }
 
     Ensure-NodeAndNpm
-    Write-Step "Installing the Vercel CLI."
+    Write-Step "Installing a supported Vercel CLI."
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = "Continue"
@@ -348,6 +372,7 @@ function Ensure-VercelCli {
     if (-not $script:VercelExecutable) {
         throw "The Vercel CLI was installed but could not be executed. Close this window, reopen PowerShell, and run INSTALL-WINDOWS.cmd again."
     }
+    $env:GOLDHAND_VERCEL_CLI = $script:VercelExecutable
     Write-Step "Vercel CLI is ready at $script:VercelExecutable"
 }
 
@@ -691,7 +716,7 @@ function Invoke-ImageHostSetupBestEffort {
         return
     }
     Write-Host ""
-    Write-Step "One-time image setup is starting. Approve the Vercel login in the browser if it opens."
+    Write-Step "One-time image setup is starting. In the browser, sign in and click Allow; do not find or type a code."
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = "Continue"
@@ -705,7 +730,7 @@ function Invoke-ImageHostSetupBestEffort {
         $global:LASTEXITCODE = 0
     }
     if ($null -eq $exitCode -or $exitCode -ne 0) {
-        Write-Warning "Automatic images are not connected yet. Double-click Goldhand Image Setup on the Desktop after signing in to Vercel."
+        Write-Warning "Automatic images are not connected yet. Close any blank code page, then double-click Goldhand Image Setup on the Desktop for a fresh approval request."
         return
     }
     Write-Step "Automatic GPT image hosting is connected."

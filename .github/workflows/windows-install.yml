@@ -85,6 +85,56 @@ jobs:
           }
           python scripts/validate_distribution.py
 
+      - name: Verify standalone image setup selects one working Python
+        shell: powershell
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP ("image-setup-launcher-" + [Guid]::NewGuid().ToString("N"))
+          $fakeBin = Join-Path $root "fake-bin"
+          $setupDir = Join-Path $root "plugins\goldhand-clinic-blog\skills\goldhand-clinic-blog\scripts"
+          New-Item -ItemType Directory -Path $fakeBin, $setupDir -Force | Out-Null
+          Copy-Item -LiteralPath "SETUP-IMAGES-WINDOWS.cmd" -Destination $root
+          $marker = Join-Path $root "setup-count.txt"
+          $setupScript = Join-Path $setupDir "setup_image_host.py"
+          $setupSource = @'
+          import os
+          from pathlib import Path
+          marker = Path(os.environ["GOLDHAND_SETUP_MARKER"])
+          count = int(marker.read_text(encoding="ascii")) if marker.exists() else 0
+          marker.write_text(str(count + 1), encoding="ascii")
+          '@
+          [IO.File]::WriteAllText($setupScript, $setupSource, (New-Object Text.UTF8Encoding($false)))
+          $fakePy = Join-Path $fakeBin "py.exe"
+          $fakePySource = @'
+          using System;
+          public static class FakePy {
+              public static int Main(string[] args) {
+                  bool version = Array.IndexOf(args, "--version") >= 0;
+                  string name = version ? "GOLDHAND_FAKE_PY_VERSION_EXIT" : "GOLDHAND_FAKE_PY_SETUP_EXIT";
+                  int value;
+                  return Int32.TryParse(Environment.GetEnvironmentVariable(name), out value) ? value : 0;
+              }
+          }
+          '@
+          Add-Type -TypeDefinition $fakePySource -OutputAssembly $fakePy -OutputType ConsoleApplication
+          $realPython = (Get-Command python.exe -ErrorAction Stop | Select-Object -First 1).Source
+          $pythonDir = Split-Path -Parent $realPython
+          $env:Path = "$fakeBin;$pythonDir;$env:SystemRoot\System32;$env:SystemRoot"
+          $env:GOLDHAND_SETUP_MARKER = $marker
+          $env:GOLDHANDBLOG_SKIP_PAUSE = "1"
+
+          $env:GOLDHAND_FAKE_PY_VERSION_EXIT = "9"
+          $env:GOLDHAND_FAKE_PY_SETUP_EXIT = "9"
+          & cmd.exe /d /c (Join-Path $root "SETUP-IMAGES-WINDOWS.cmd")
+          if ($LASTEXITCODE -ne 0) { throw "Launcher did not fall back from a broken py.exe to working python.exe" }
+          if ((Get-Content -LiteralPath $marker -Raw -Encoding ASCII).Trim() -ne "1") { throw "Launcher did not run setup exactly once" }
+
+          Remove-Item -LiteralPath $marker -Force
+          $env:GOLDHAND_FAKE_PY_VERSION_EXIT = "0"
+          $env:GOLDHAND_FAKE_PY_SETUP_EXIT = "9"
+          & cmd.exe /d /c (Join-Path $root "SETUP-IMAGES-WINDOWS.cmd")
+          if ($LASTEXITCODE -eq 0) { throw "Launcher hid a selected py.exe setup failure" }
+          if (Test-Path -LiteralPath $marker) { throw "Launcher retried setup with python.exe after selected py.exe failed" }
+
       - name: Keep the primary error when cleanup is blocked
         shell: powershell
         run: |

@@ -24,7 +24,7 @@
 
 - 공유용 Windows 설치본은 짧은 영문 폴더에 전체 플러그인을 설치하고 `requirements-windows.txt`의 고정된 Python 패키지와 Windows용 `Asia/Seoul` 시간대 데이터를 설치해야 합니다.
 - 결과 HTML은 Windows의 실제 바탕화면 위치를 사용하며 OneDrive 바탕화면도 인식합니다. 복사 안내는 `Ctrl+V`로 표시됩니다.
-- GPT Image는 시스템 `$imagegen`의 내장 `image_gen` 모드로만 생성하며 `scripts/image_gen.py`·CLI/API 대체 경로와 `OPENAI_API_KEY` 요청을 사용하지 않습니다. 공유용 Windows 설치기는 Node.js LTS가 없으면 함께 설치하고 Vercel CLI까지 자동 설치·실행 확인합니다. 처음 설치할 때 브라우저에서 사용자가 Vercel 로그인만 승인하면 `setup_image_host.py`가 사용자 계정 안에 전용 이미지 프로젝트를 생성·연결·배포하고 `image-host.json`까지 자동 저장합니다. 비밀번호와 토큰은 플러그인에 넣지 않습니다. 공개 HTTPS 게시 단계에서는 Windows npm shim인 `vercel.cmd`를 우선 인식합니다.
+- GPT Image는 시스템 `$imagegen`의 내장 `image_gen` 모드로만 생성하며 `scripts/image_gen.py`·CLI/API 대체 경로와 `OPENAI_API_KEY` 요청을 사용하지 않습니다. 공유용 Windows 설치기는 Node.js LTS가 없으면 함께 설치하고 Vercel CLI까지 자동 설치·실행 확인합니다. 처음 설치할 때 `setup_image_host.py`가 일회용 코드가 이미 적용된 Vercel 승인 주소만 기본 브라우저에 열므로 사용자는 코드를 찾거나 입력하지 않고 본인 로그인 후 Allow만 누릅니다. 요청이 만료되면 새 승인 요청을 한 번 자동으로 열고, 이후 사용자 계정 안에 전용 이미지 프로젝트를 생성·연결·배포해 `image-host.json`까지 저장합니다. 비밀번호·토큰·일회용 코드·승인 주소는 플러그인 설정에 넣지 않습니다. 공개 HTTPS 게시 단계에서는 Windows npm shim인 `vercel.cmd`를 우선 인식합니다.
 - 공유용 macOS 설치본은 Windows 배포와 별도 저장소·설치 폴더·마켓플레이스로 운영합니다. macOS 전용 관리 런타임과 Vercel 실행기는 `${CODEX_HOME:-$HOME/.codex}/state/goldhand-clinic-blog` 아래에 보존하므로 플러그인 업데이트 후에도 최초 연결을 다시 요구하지 않습니다.
 - 글쓰기·말투·표·이미지·HTML 규칙은 운영체제별로 나누지 않습니다. 같은 콘텐츠 계약 검사를 Windows 배포 CI에서도 실행해야 합니다.
 

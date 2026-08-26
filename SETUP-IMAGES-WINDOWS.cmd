@@ -10,31 +10,36 @@ if not exist "%GOLDHAND_SETUP_SCRIPT%" (
   goto :failed
 )
 
-where py.exe >nul 2>nul
-if not errorlevel 1 (
-  py.exe -3 -X utf8 "%GOLDHAND_SETUP_SCRIPT%"
-  if not errorlevel 1 goto :complete
-)
+py.exe -3 --version >nul 2>nul
+if not errorlevel 1 goto :run_py
 
-where python.exe >nul 2>nul
-if not errorlevel 1 (
-  python.exe -X utf8 "%GOLDHAND_SETUP_SCRIPT%"
-  if not errorlevel 1 goto :complete
-)
+python.exe --version >nul 2>nul
+if not errorlevel 1 goto :run_python
 
 echo Automatic image setup did not finish.
 echo Run INSTALL-WINDOWS.cmd again, then retry this file.
 goto :failed
 
+:run_py
+py.exe -3 -X utf8 "%GOLDHAND_SETUP_SCRIPT%"
+if errorlevel 1 goto :failed
+goto :complete
+
+:run_python
+python.exe -X utf8 "%GOLDHAND_SETUP_SCRIPT%"
+if errorlevel 1 goto :failed
+goto :complete
+
 :complete
 echo.
 echo AUTOMATIC IMAGE SETUP COMPLETE
-goto :finish
+if not "%GOLDHANDBLOG_SKIP_PAUSE%"=="1" pause
+endlocal
+exit /b 0
 
 :failed
 echo.
 echo AUTOMATIC IMAGE SETUP FAILED
-
-:finish
 if not "%GOLDHANDBLOG_SKIP_PAUSE%"=="1" pause
 endlocal
+exit /b 1

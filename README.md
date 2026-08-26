@@ -9,12 +9,12 @@ Windows recipients can install this plugin from one file. They do not need Git, 
 1. Download the file from the link above.
 2. Close ChatGPT completely.
 3. Double-click `INSTALL-WINDOWS.cmd`.
-4. If a browser opens, sign in to the recipient's own Vercel account and approve the connection once.
+4. If a browser opens, sign in to the recipient's own Vercel account and click Allow. The one-time code is prefilled; do not look for or type a code.
 5. Wait for `INSTALLATION COMPLETE`, close the window, and reopen ChatGPT.
 
 The installer does not install, update, remove, or modify the ChatGPT app. It verifies Python, installs Node.js LTS only when a working npm is missing, installs and executes the Vercel CLI, verifies a Codex CLI that supports plugins, downloads the latest validated release to a short path, transactionally replaces `%USERPROFILE%\GoldhandBlog`, and connects it as a local marketplace plugin. After the browser login approval, it creates and links the recipient's own `goldhand-blog-images` project, performs the first production deployment, selects a stable public HTTPS alias, and saves the plugin's `image-host.json` automatically.
 
-No Vercel password or token is bundled in this public package. The recipient only approves their own Vercel login in the browser; project names, folders, URLs, and JSON settings are not entered manually. If login is closed before approval, `Goldhand Image Setup` remains on the Desktop as a one-click retry shortcut.
+No Vercel password, token, one-time code, or approval URL is bundled or persisted in this public package. The setup opens only Vercel's code-prefilled approval URL, retries once with a fresh request if the first request expires, and verifies the finished login before continuing. The recipient only signs in and clicks Allow; project names, folders, URLs, and JSON settings are not entered manually. If login is closed before approval, `Goldhand Image Setup` remains on the Desktop as a one-click retry shortcut.
 
 The managed copy checks for a newer validated GitHub Release at Windows sign-in and every six hours. It never installs directly from the unvalidated `main` branch. The previous complete folder is retained until the new plugin is enabled, and a failed update restores the previous folder and connection. Recipient-side edits inside the managed folder are replaced by the next official update.
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import importlib.util
 import json
 import os
@@ -2489,6 +2490,159 @@ class BuilderTests(unittest.TestCase):
 
 
 class ImageHostSetupTests(unittest.TestCase):
+    def test_device_login_accepts_only_a_code_prefilled_vercel_url(self) -> None:
+        complete = "https://vercel.com/oauth/device?user_code=ABCD-EFGH"
+        upstream_complete = "https://vercel.com/device?code=12345678-1234-1234-1234-1234567890ab"
+        path_complete = "https://vercel.com/oauth/device/request-id?v=verification-id"
+        osc8 = f"Visit \x1b]8;;{complete}\x1b\\vercel.com/device\x1b]8;;\x1b\\"
+        for candidate in (complete, upstream_complete, path_complete):
+            with self.subTest(candidate=candidate):
+                self.assertEqual(IMAGE_HOST_SETUP.prefilled_vercel_device_url(f"Visit {candidate}"), candidate)
+        self.assertEqual(IMAGE_HOST_SETUP.prefilled_vercel_device_url(osc8), complete)
+        for unsafe in (
+            "https://vercel.com/oauth/device",
+            "https://vercel.com/device",
+            "Visit https://vercel.com/device?next=/logout",
+            "Visit https://vercel.com/device/extra?code=12345678-1234-1234-1234-1234567890ab",
+            "Visit https://vercel.com/oauth/device/request-id?next=/logout",
+            "Visit https://vercel.com/oauth/device/request-id?v=",
+            "Visit https://vercel.com/oauth/device/request-id/extra?v=verification-id",
+            "Visit https://vercel.com/oauth/device?user_code=ABCD-EFGH&next=/logout",
+            "http://vercel.com/oauth/device?user_code=ABCD-EFGH",
+            "https://vercel.com.evil.example/oauth/device?user_code=ABCD-EFGH",
+            "https://user:password@vercel.com/oauth/device?user_code=ABCD-EFGH",
+            "https://vercel.com:444/oauth/device?user_code=ABCD-EFGH",
+            "Visit https://example.com/oauth/device?user_code=ABCD-EFGH",
+            complete,
+        ):
+            with self.subTest(unsafe=unsafe):
+                self.assertIsNone(IMAGE_HOST_SETUP.prefilled_vercel_device_url(unsafe))
+
+    def test_vercel_cli_minimum_version_is_enforced(self) -> None:
+        self.assertEqual(IMAGE_HOST_SETUP.parse_vercel_cli_version("Vercel CLI 59.5.0"), (59, 5, 0))
+        self.assertIsNone(IMAGE_HOST_SETUP.parse_vercel_cli_version("unknown"))
+        old = "/fake/old-vercel"
+        supported = "/fake/supported-vercel"
+        with mock.patch.object(IMAGE_HOST_SETUP, "_VERCEL_CLI_OVERRIDE", None), mock.patch.object(
+            IMAGE_HOST_SETUP,
+            "vercel_cli_candidates",
+            return_value=[old],
+        ), mock.patch.object(
+            IMAGE_HOST_SETUP.subprocess,
+            "run",
+            return_value=subprocess.CompletedProcess([], 0, "Vercel CLI 50.43.0", ""),
+        ):
+            with self.assertRaises(IMAGE_HOST_SETUP.SetupError):
+                IMAGE_HOST_SETUP.ensure_supported_vercel_cli(Path.cwd())
+
+        def fake_version(command, **kwargs):
+            output = "Vercel CLI 50.43.0" if command[0] == old else "Vercel CLI 50.44.0"
+            return subprocess.CompletedProcess(command, 0, output, "")
+
+        with mock.patch.object(IMAGE_HOST_SETUP, "_VERCEL_CLI_OVERRIDE", None), mock.patch.object(
+            IMAGE_HOST_SETUP,
+            "vercel_cli_candidates",
+            return_value=[old, supported],
+        ), mock.patch.object(IMAGE_HOST_SETUP.subprocess, "run", side_effect=fake_version) as run:
+            IMAGE_HOST_SETUP.ensure_supported_vercel_cli(Path.cwd())
+            self.assertEqual(IMAGE_HOST_SETUP.resolve_vercel_cli(), supported)
+            self.assertEqual(run.call_count, 2)
+
+    def test_device_login_opens_the_exact_prefilled_url_with_captured_output(self) -> None:
+        complete = "https://vercel.com/oauth/device?user_code=ABCD-EFGH"
+
+        class FakeLoginProcess:
+            def __init__(self) -> None:
+                self.stdout = io.StringIO(f"Visit {complete}\nWaiting for authentication...\n")
+                self.pid = 4321
+                self.returncode = None
+
+            def poll(self):
+                return self.returncode
+
+            def wait(self, timeout=None):
+                self.returncode = 0
+                return 0
+
+            def kill(self):
+                self.returncode = -9
+
+        process = FakeLoginProcess()
+        opener = mock.Mock(return_value=True)
+        with mock.patch.object(IMAGE_HOST_SETUP, "vercel_command", return_value=["vercel", "login"]), mock.patch.object(
+            IMAGE_HOST_SETUP.subprocess,
+            "Popen",
+            return_value=process,
+        ) as popen:
+            actual = IMAGE_HOST_SETUP.run_prefilled_device_login(Path.cwd(), browser_opener=opener)
+
+        self.assertEqual(actual, IMAGE_HOST_SETUP.LOGIN_SUCCESS)
+        opener.assert_called_once_with(complete, new=1, autoraise=True)
+        command = popen.call_args.args[0]
+        kwargs = popen.call_args.kwargs
+        self.assertEqual(command, ["vercel", "login"])
+        self.assertEqual(kwargs["stdout"], subprocess.PIPE)
+        self.assertEqual(kwargs["stderr"], subprocess.STDOUT)
+        self.assertEqual(kwargs["stdin"], subprocess.DEVNULL)
+        self.assertEqual(kwargs["env"]["CI"], "1")
+        self.assertNotIn(complete, command)
+
+    def test_browser_open_failure_reaps_login_without_retrying_inside_attempt(self) -> None:
+        complete = "https://vercel.com/oauth/device?user_code=ABCD-EFGH"
+
+        class FakeLoginProcess:
+            def __init__(self) -> None:
+                self.stdout = io.StringIO(f"Visit {complete}\n")
+                self.pid = 4321
+
+            def poll(self):
+                return None
+
+        process = FakeLoginProcess()
+        with mock.patch.object(IMAGE_HOST_SETUP, "vercel_command", return_value=["vercel", "login"]), mock.patch.object(
+            IMAGE_HOST_SETUP.subprocess,
+            "Popen",
+            return_value=process,
+        ), mock.patch.object(IMAGE_HOST_SETUP, "stop_login_process") as stop:
+            actual = IMAGE_HOST_SETUP.run_prefilled_device_login(
+                Path.cwd(),
+                browser_opener=mock.Mock(return_value=False),
+            )
+
+        self.assertEqual(actual, IMAGE_HOST_SETUP.LOGIN_FAILED)
+        stop.assert_called_once_with(process)
+        self.assertTrue(process.stdout.closed)
+
+    def test_expired_device_login_is_replaced_once_without_manual_code_entry(self) -> None:
+        statuses = [
+            subprocess.CompletedProcess([], 1, "", "not logged in"),
+            subprocess.CompletedProcess([], 1, "", "still pending"),
+            subprocess.CompletedProcess([], 0, "{}", ""),
+        ]
+        with mock.patch.object(IMAGE_HOST_SETUP, "run_vercel", side_effect=statuses) as run_vercel, mock.patch.object(
+            IMAGE_HOST_SETUP,
+            "run_prefilled_device_login",
+            side_effect=[IMAGE_HOST_SETUP.LOGIN_RETRYABLE, IMAGE_HOST_SETUP.LOGIN_SUCCESS],
+        ) as login:
+            IMAGE_HOST_SETUP.ensure_authenticated(Path.cwd())
+
+        self.assertEqual(login.call_count, 2)
+        self.assertEqual(run_vercel.call_count, 3)
+
+    def test_denied_device_login_does_not_open_a_second_request(self) -> None:
+        statuses = [
+            subprocess.CompletedProcess([], 1, "", "not logged in"),
+            subprocess.CompletedProcess([], 1, "", "still not logged in"),
+        ]
+        with mock.patch.object(IMAGE_HOST_SETUP, "run_vercel", side_effect=statuses), mock.patch.object(
+            IMAGE_HOST_SETUP,
+            "run_prefilled_device_login",
+            return_value=IMAGE_HOST_SETUP.LOGIN_FAILED,
+        ) as login:
+            with self.assertRaises(IMAGE_HOST_SETUP.SetupError):
+                IMAGE_HOST_SETUP.ensure_authenticated(Path.cwd())
+        login.assert_called_once()
+
     def test_macos_setup_uses_the_managed_vercel_wrapper(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -2541,9 +2695,6 @@ class ImageHostSetupTests(unittest.TestCase):
                 if arguments[:1] == ["whoami"]:
                     whoami_count += 1
                     return subprocess.CompletedProcess(arguments, 1 if whoami_count == 1 else 0, "{}", "")
-                if arguments == ["login"]:
-                    self.assertTrue(kwargs.get("interactive"))
-                    return subprocess.CompletedProcess(arguments, 0, "", "")
                 if arguments[:2] == ["project", "inspect"]:
                     return subprocess.CompletedProcess(arguments, 1, "", "missing")
                 if arguments[:2] == ["project", "add"]:
@@ -2585,7 +2736,15 @@ class ImageHostSetupTests(unittest.TestCase):
                     )
                 raise AssertionError(f"unexpected Vercel command: {arguments}")
 
-            with mock.patch.object(IMAGE_HOST_SETUP, "run_vercel", side_effect=fake_run), mock.patch.object(
+            with mock.patch.object(IMAGE_HOST_SETUP, "ensure_supported_vercel_cli"), mock.patch.object(
+                IMAGE_HOST_SETUP,
+                "run_vercel",
+                side_effect=fake_run,
+            ), mock.patch.object(
+                IMAGE_HOST_SETUP,
+                "run_prefilled_device_login",
+                return_value=IMAGE_HOST_SETUP.LOGIN_SUCCESS,
+            ) as login, mock.patch.object(
                 IMAGE_HOST_SETUP,
                 "verify_public_base_url",
             ) as verify:
@@ -2597,13 +2756,43 @@ class ImageHostSetupTests(unittest.TestCase):
 
             self.assertEqual(payload["publicBaseUrl"], "https://goldhand-blog-images.vercel.app")
             self.assertEqual(json.loads(config_path.read_text(encoding="utf-8")), payload)
+            self.assertEqual(set(payload), {"projectDir", "publicBaseUrl", "projectName"})
             self.assertTrue((project_dir / "vercel.json").is_file())
             self.assertTrue((project_dir / ".vercel" / "project.json").is_file())
-            self.assertIn(("login",), calls)
+            login.assert_called_once_with(project_dir.resolve())
             self.assertIn(("project", "add", "goldhand-blog-images"), calls)
             self.assertIn(("link", "--yes", "--project", "goldhand-blog-images"), calls)
             self.assertIn(("deploy", "--prod", "--yes", "--format", "json"), calls)
             verify.assert_called_once_with("https://goldhand-blog-images.vercel.app")
+
+    def test_first_setup_creates_project_directory_before_vercel_version_probe(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            project_dir = root / "new-image-host-project"
+            config_path = root / "state" / "image-host.json"
+
+            def require_existing_project(candidate: Path) -> None:
+                self.assertEqual(candidate, project_dir.resolve())
+                self.assertTrue(candidate.is_dir())
+                self.assertTrue((candidate / "vercel.json").is_file())
+
+            with mock.patch.object(
+                IMAGE_HOST_SETUP,
+                "ensure_supported_vercel_cli",
+                side_effect=require_existing_project,
+            ) as version_probe, mock.patch.object(
+                IMAGE_HOST_SETUP,
+                "ensure_authenticated",
+                side_effect=IMAGE_HOST_SETUP.SetupError("stop after ordering check"),
+            ):
+                with self.assertRaisesRegex(IMAGE_HOST_SETUP.SetupError, "ordering check"):
+                    IMAGE_HOST_SETUP.setup_image_host(
+                        config_path,
+                        project_dir,
+                        "goldhand-blog-images",
+                    )
+
+            version_probe.assert_called_once_with(project_dir.resolve())
 
     def test_existing_valid_setup_is_reused_without_redeploy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2623,7 +2812,7 @@ class ImageHostSetupTests(unittest.TestCase):
                 "projectName": "goldhand-blog-images",
             }
             config_path.write_text(json.dumps(expected), encoding="utf-8")
-            with mock.patch.object(
+            with mock.patch.object(IMAGE_HOST_SETUP, "ensure_supported_vercel_cli"), mock.patch.object(
                 IMAGE_HOST_SETUP,
                 "run_vercel",
                 return_value=subprocess.CompletedProcess([], 0, "{}", ""),
