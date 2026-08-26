@@ -51,6 +51,14 @@ MASTER_CONFIG: dict[str, dict[str, Any]] = {
     "INFO04": {
         "logNo": "224291545650",
         "type": "정보전달형",
+        "autoEligible": False,
+        "sensitiveTopicPolicy": {
+            "category": "mental-health-sensitive",
+            "automaticSelectionBlocked": True,
+            "explicitRequestRequired": True,
+            "explicitRequestRule": "panic-terms-or-insomnia-with-mental-context-excluding-menopause",
+            "manualOverrideAllowed": True,
+        },
         "selectionTags": ["효과 보는 사람", "못 보는 사람", "비교", "공통점", "자가 점검"],
         "bestFor": "같은 관리에도 반응이 다른 조건을 비교하고 자신에게 맞는지 구분하게 할 때",
         "hook": "치료 가능성과 중단 후 재발 걱정을 연속 질문으로 제시",
@@ -114,6 +122,14 @@ MASTER_CONFIG: dict[str, dict[str, Any]] = {
     "INFO11": {
         "logNo": "224221217878",
         "type": "정보전달형",
+        "autoEligible": False,
+        "sensitiveTopicPolicy": {
+            "category": "mental-health-sensitive",
+            "automaticSelectionBlocked": True,
+            "explicitRequestRequired": True,
+            "explicitRequestRule": "trauma-terms",
+            "manualOverrideAllowed": True,
+        },
         "selectionTags": ["극복 방법 2가지", "오래된 불편", "몸과 마음", "치료 가능성", "두 질문"],
         "bestFor": "오래된 불편을 한 면으로만 보지 않고 두 갈래의 회복 기준을 설명할 때",
         "hook": "오래 안고 가야 하는지와 기존 관리로도 달라지지 않는다는 질문 두 개를 인용",
@@ -417,6 +433,9 @@ def make_profile(
         "referenceControlsDecoration": False,
         "nativeDesignSystemId": "goldhand-naver-native-v4",
     }
+    sensitive_topic_policy = config.get("sensitiveTopicPolicy")
+    if isinstance(sensitive_topic_policy, dict):
+        profile["sensitiveTopicPolicy"] = sensitive_topic_policy
     return profile
 
 
@@ -433,13 +452,17 @@ def library_markdown(profiles: dict[str, dict[str, Any]]) -> str:
     ]
     lines.extend(["## 허용 레퍼런스 11편", ""])
     for profile_id, profile in profiles.items():
+        if profile.get("autoEligible") is True:
+            status = "자동·정밀작성 모두 선택 가능"
+        else:
+            status = "자동 후보 제외; 일치하는 민감 주제 명시 요청 또는 해당 ID 수동 지정에서만 선택 가능"
         lines.extend(
             [
                 f"### `{profile_id}` — {profile['sourceTitle']}",
                 "",
                 f"- 원문: <{profile['sourceUrl']}>",
                 f"- 발행일: {profile['publishedAt']}",
-                "- 상태: 자동·정밀작성 모두 선택 가능",
+                f"- 상태: {status}",
                 f"- 질문 위치: {profile['familyContract']['questionPlacement']}",
                 f"- 적합한 글: {profile['bestFor']}",
                 f"- 도입: {profile['writingContract']['hook']}",
@@ -495,6 +518,14 @@ def main() -> int:
             "cutoffInclusive": corpus["cutoffInclusive"],
             "referenceFamilyId": family["familyId"],
             "allowedMasterIds": family["allowedMasterIds"],
+            "automaticMasterIds": [
+                master_id for master_id, profile in profiles.items() if profile.get("autoEligible") is True
+            ],
+            "sensitiveTopicMasterIds": [
+                master_id
+                for master_id, profile in profiles.items()
+                if isinstance(profile.get("sensitiveTopicPolicy"), dict)
+            ],
             "sourceFactsBlocked": True,
             "referenceExpressionLearningEnabled": True,
             "sourceSentenceImitationBlocked": True,

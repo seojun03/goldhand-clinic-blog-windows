@@ -2,11 +2,11 @@
 
 ## 자동모드 상태 흐름
 
-`모드 확인 → 메인키워드 → 최근 3개 주제·직전 1개 글의 진료 사진·마무리 신뢰 사진 이력 읽기 → 검토 완료 위석 정보글 11편 중 겹치지 않는 한 편 선택 → 문장형 원문을 숨기고 orderedContentAtoms 고정 → 금손 사실 대응 → natural-speech-rewrite-protocol 읽기 → SEO·HTML 없는 생활어 초안 → 별도 진료실 발화 편집 → 내용 원자 전수 대응 → 내용 순서·말투·문장 중복 독립 검수 → 부분 수정 → SEO 1~2회 → 글별 마무리 소제목·핵심 회수·부담 없는 진료 안내 완성 → writing-voice 최종 전체 재청취 → 수정 전후·표현의 일·구조와 사실 보존 검증 → 모바일 시각 분할 → 진료 사진 before-credential 1장 또는 closing-trust 2장 배치 → credential 고정 → GPT Image 3~4장 생성·설명 본문 배치 → 마무리 신뢰 사진 1장을 진료시간 전 마지막 이미지로 별도 배치 → 네이버 순정 구분선·필요한 표·운영정보에서 종료 → HTML → 한 번 복붙 → 실검증 → 발행 게이트 → 두 사진 풀의 ID·해시를 따로 이력 기록`
+`모드 확인 → 메인키워드 → 민감 주제 명시 여부 판정 → 최근 3개 주제·직전 1개 글의 진료 사진·마무리 신뢰 사진 이력 읽기 → 검토 완료 위석 정보글 중 자동 허용 후보 또는 명시 요청과 일치한 민감 후보 한 편 선택 → 문장형 원문을 숨기고 orderedContentAtoms 고정 → 금손 사실 대응 → natural-speech-rewrite-protocol 읽기 → SEO·HTML 없는 생활어 초안 → 별도 진료실 발화 편집 → 내용 원자 전수 대응 → 내용 순서·말투·문장 중복 독립 검수 → 부분 수정 → SEO 1~2회 → 글별 마무리 소제목·핵심 회수·부담 없는 진료 안내 완성 → writing-voice 최종 전체 재청취 → 수정 전후·표현의 일·구조와 사실 보존 검증 → 모바일 시각 분할 → 진료 사진 before-credential 1장 또는 closing-trust 2장 배치 → credential 고정 → GPT Image 3~4장 생성·설명 본문 배치 → 마무리 신뢰 사진 1장을 진료시간 전 마지막 이미지로 별도 배치 → 네이버 순정 구분선·필요한 표·운영정보에서 종료 → HTML → 한 번 복붙 → 실검증 → 발행 게이트 → 두 사진 풀의 ID·해시를 따로 이력 기록`
 
 메인키워드 하나 외에는 사전 질문하지 않는다. 확인된 사실이 없어 제목의 답을 만들 수 없을 때만 누락값 하나를 묻는다.
 
-`scripts/select_wipark_content_reference.py`는 본문 검토가 끝난 `wipark-content-briefs.json`의 11편만 사용한다. 최근 3개와 같은 레퍼런스·핵심 주제, 다른 진행 중 작업이 예약한 레퍼런스를 제외하고, 선택한 한 편만 **주제·독자 고민·핵심 일반 정보·제목 심리·도입 설득·정보 공개 순서·전환·미세 표현 기능·마무리 감정**을 통제한다. 선택기는 사실 골격인 `orderedContentAtoms`와 편집 판단인 `referenceWritingIntelligence`를 함께 내보내고 원문 완성 문장은 숨긴다. `sourceProseWithheld=true`, `contentAtomCoverageRequired=true`, `sourceSentenceImitationBlocked=true`, `referenceEditorialReasoningEnabled=true`, `goldhandFactReplacementRequired=true`, `voiceProtocolId=natural-speech-rewrite-protocol-v1`, `voiceProfileId=goldhand-official-voice-v1`, `finalVoiceReviewRequired=true`, `finalVoiceReviewerSkill=writing-voice`, `finalVoiceReviewContractId=writing-voice-final-rehear-v1`이 아니면 쓰지 않는다. 금손 말투는 레퍼런스 기능을 지우지 않고 문장을 생활어로 자연화하고, writing-voice는 완성 산문의 표현만 다시 듣는다. 꾸밈은 `goldhand-naver-native-v4`이다.
+`scripts/select_wipark_content_reference.py`는 본문 검토가 끝난 `wipark-content-briefs.json`의 11편만 사용하되, 자동 선택은 `autoEligible=true`인 9편으로 제한한다. `INFO11`은 트라우마·외상 후 스트레스·PTSD 명시 요청, `INFO04`는 공황 명시 요청 또는 갱년기 맥락이 아닌 불면과 정신건강 맥락의 결합 요청에서만 해제한다. `불면` 단독, 갱년기·폐경·완경·안면홍조와 결합한 불면, 일반적인 정신건강·상담 표현, 포괄 키워드, fallback, 우선 ID만으로는 해제하지 않는다. 수동 예외는 특정 민감 ID와 `--allow-sensitive-manual`을 함께 지정해야 한다. 최근 3개와 같은 레퍼런스·핵심 주제, 다른 진행 중 작업이 예약한 레퍼런스를 제외하고, 선택한 한 편만 **주제·독자 고민·핵심 일반 정보·제목 심리·도입 설득·정보 공개 순서·전환·미세 표현 기능·마무리 감정**을 통제한다. 선택기는 사실 골격인 `orderedContentAtoms`와 편집 판단인 `referenceWritingIntelligence`를 함께 내보내고 원문 완성 문장은 숨긴다. `sourceProseWithheld=true`, `contentAtomCoverageRequired=true`, `sourceSentenceImitationBlocked=true`, `referenceEditorialReasoningEnabled=true`, `goldhandFactReplacementRequired=true`, `voiceProtocolId=natural-speech-rewrite-protocol-v1`, `voiceProfileId=goldhand-official-voice-v1`, `finalVoiceReviewRequired=true`, `finalVoiceReviewerSkill=writing-voice`, `finalVoiceReviewContractId=writing-voice-final-rehear-v1`이 아니면 쓰지 않는다. 금손 말투는 레퍼런스 기능을 지우지 않고 문장을 생활어로 자연화하고, writing-voice는 완성 산문의 표현만 다시 듣는다. 꾸밈은 `goldhand-naver-native-v4`이다.
 
 메인키워드가 포괄적인 지역·업종 표현이면 키워드 자체를 글감으로 확장하지 않는다. 선택한 주제의 `topicIdea`·`coverageQuestions`와 금손 `진료·콘텐츠 지도`를 연결해 하나의 구체적인 건강 문제 또는 치료 질문을 정한다. 추나요법·침·약침·골타·한약처럼 금손이 실제 사용하는 치료는 치료 목적·적용 기준·변화가 더딜 수 있는 조건·한계·다른 검사 우선 경계에 답한다. 위고비·마운자로처럼 일반 의료 정보로 다루는 주제는 금손의 제공 서비스로 오인시키지 않고, 필요한 권위 자료로 현재 정보와 안전 경계를 별도 확인한다. 한의원 선택 기준이나 업체 추천 이유를 답으로 만들지 않는다.
 
@@ -36,7 +36,7 @@ A안은 `validate_final_voice_review.py`, B안은 `validate_humanize_final_revie
 한 응답에서 질문 하나만 한다.
 
 1. `메인키워드를 입력해 주세요.`
-2. `select_wipark_content_reference.py --count 3`으로 최근 3개와도, 후보끼리도 의미가 겹치지 않는 주제 세 개를 고른다. 각 후보는 주제·독자 고민·핵심 내용·정보 순서를 가져올 `콘텐츠 레퍼런스` 한 편과 금손 말투로 만든 후보 제목을 함께 보여 준다.
+2. `select_wipark_content_reference.py --count 3`으로 최근 3개와도, 후보끼리도 의미가 겹치지 않는 자동 허용 주제 세 개를 고른다. 민감 주제는 사용자가 일치하는 주제를 명시한 경우만 후보에 포함한다. 각 후보는 주제·독자 고민·핵심 내용·정보 순서를 가져올 `콘텐츠 레퍼런스` 한 편과 금손 말투로 만든 후보 제목을 함께 보여 준다.
 3. 선택한 위석 원문 한 편을 콘텐츠 레퍼런스로 고정한다. 말투는 `goldhand-official-voice-v1`, 꾸밈은 `goldhand-naver-native-v4`로 고정한다.
 4. `추가할 사실·원장 판단·실제 장면이 있나요? 없으면 없음이라고 적어 주세요.`
 5. 플러그인 `assets/official-media`에 내장된 공식 블로그 사진 가운데 시각 검수 승인 사진을 자동 사용한다. 별도 이미지 방식이나 사용자 로컬 사진 폴더는 묻지 않는다.

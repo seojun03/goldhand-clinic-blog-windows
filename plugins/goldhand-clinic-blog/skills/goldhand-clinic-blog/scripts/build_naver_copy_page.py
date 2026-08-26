@@ -359,6 +359,57 @@ def media_by_id(library: dict[str, object]) -> dict[str, dict[str, object]]:
     return result
 
 
+def visible_prose_tokens(article: str) -> list[str]:
+    """Return visible prose tokens without tag attributes or image metadata."""
+
+    value = re.sub(r"<script\b[^>]*>.*?</script>", " ", article, flags=re.I | re.S)
+    value = re.sub(r"<style\b[^>]*>.*?</style>", " ", value, flags=re.I | re.S)
+    value = re.sub(r"<figure\b[^>]*>.*?</figure>", " ", value, flags=re.I | re.S)
+    value = re.sub(r"<[^>]+>", " ", value)
+    return re.findall(r"[0-9A-Za-z가-힣]{2,}", html.unescape(value).lower())
+
+
+def selected_media_context_leaks(
+    article: str,
+    indexed: dict[str, dict[str, object]],
+    *,
+    minimum_run: int = 7,
+) -> list[str]:
+    """Find selected-photo source prose copied into the visible article body."""
+
+    visible = visible_prose_tokens(article)
+    if len(visible) < minimum_run:
+        return []
+    visible_runs = {
+        tuple(visible[index : index + minimum_run])
+        for index in range(len(visible) - minimum_run + 1)
+    }
+    selected_ids = {
+        attribute_value(tag, "data-goldhand-media")
+        for tag in re.findall(r"<img\b[^>]*>", article, flags=re.I | re.S)
+        if attribute_value(tag, "data-goldhand-media")
+    }
+    leaks: list[str] = []
+    for asset_id in sorted(selected_ids):
+        asset = indexed.get(asset_id)
+        if asset is None:
+            continue
+        for field in ("context", "closingTrustContextText"):
+            source_tokens = re.findall(
+                r"[0-9A-Za-z가-힣]{2,}",
+                html.unescape(str(asset.get(field, ""))).lower(),
+            )
+            if len(source_tokens) < minimum_run:
+                continue
+            if any(
+                tuple(source_tokens[index : index + minimum_run]) in visible_runs
+                for index in range(len(source_tokens) - minimum_run + 1)
+            ):
+                leaks.append(asset_id)
+                break
+    return leaks
+
+
 def is_approved_director_patient_photo(asset: dict[str, object]) -> bool:
     descriptor = " ".join(
         str(asset.get(field, ""))
@@ -444,6 +495,11 @@ def validate_person_media_policy(
             failures.append(f"{asset_id}의 파일 해시가 내장 라이브러리와 다릅니다.")
         if attribute_value(tag, "data-reference-source-url") != str(asset.get("url", "")):
             failures.append(f"{asset_id}의 공식 원본 URL이 내장 라이브러리와 다릅니다.")
+    leaks = selected_media_context_leaks(article, indexed)
+    if leaks:
+        failures.append(
+            "선택 사진의 내부 context 문장이 본문에 노출됐습니다: " + ", ".join(leaks)
+        )
     if failures:
         raise ValueError("실제 사진 정책 위반: " + " ".join(failures))
 
@@ -533,6 +589,7 @@ def build_page(
       const root = document.getElementById('naver-copy-root');
       const status = document.getElementById('copy-status');
       const expectedImageCount = root.querySelectorAll('img').length;
+      let copyImagesState = expectedImageCount > 0 ? 'pending' : 'ready';
       function setState(state, message) {{
         button.dataset.state = state; button.textContent = message; status.textContent = message;
         window.setTimeout(() => {{ button.dataset.state = ''; button.textContent = '네이버용 HTML 복사'; }}, 2600);
@@ -557,9 +614,11 @@ def build_page(
       }}
       const copyImagesReady = waitForCopyImages();
       copyImagesReady.then(() => {{
+        copyImagesState = 'ready';
         button.disabled = false; button.textContent = '네이버용 HTML 복사';
         status.textContent = `사진 ${{expectedImageCount}}장 준비 완료`;
       }}).catch(() => {{
+        copyImagesState = 'failed';
         button.disabled = true; button.dataset.state = 'error';
         button.textContent = '사진 불러오기 실패'; status.textContent = '사진 주소를 확인한 뒤 HTML을 다시 열어 주세요.';
       }});
@@ -727,20 +786,34 @@ def build_page(
         return [...element.childNodes].map(nativeComponentsFromNode).join('');
       }}
       function prepareNativeNaverHtml(copyRoot) {{ return [...copyRoot.childNodes].map(nativeComponentsFromNode).join(''); }}
-      function nativeSelectionRoot(inputBuffer, nativeHtml) {{
-        const selectionRoot=document.createElement('div');
-        selectionRoot.appendChild(inputBuffer.cloneNode(true));
-        selectionRoot.insertAdjacentHTML('beforeend', nativeHtml);
-        return selectionRoot;
+      function copyWithDataTransfer(htmlValue, plainValue) {{
+        let payloadConfirmed=false;
+        const onCopy=(event) => {{
+          if (!event.clipboardData) return;
+          event.preventDefault();
+          event.clipboardData.clearData();
+          event.clipboardData.setData('text/html',htmlValue);
+          event.clipboardData.setData('text/plain',plainValue);
+          payloadConfirmed=(
+            event.clipboardData.getData('text/html')===htmlValue &&
+            event.clipboardData.getData('text/plain')===plainValue
+          );
+        }};
+        document.addEventListener('copy',onCopy,true);
+        let copied=false;
+        try {{ copied=document.execCommand('copy'); }}
+        catch {{ copied=false; }}
+        finally {{ document.removeEventListener('copy',onCopy,true); }}
+        return copied && payloadConfirmed;
       }}
-      function copyRenderedSelection(copyRoot) {{
-        copyRoot.style.position='fixed'; copyRoot.style.left='-100000px'; copyRoot.style.top='0'; copyRoot.style.width='580px';
-        document.body.appendChild(copyRoot); const selection=window.getSelection(); const range=document.createRange();
-        range.selectNodeContents(copyRoot); selection.removeAllRanges(); selection.addRange(range);
-        const copied=document.execCommand('copy'); selection.removeAllRanges(); copyRoot.remove(); return copied;
+      function copySuccessMessage(plainValue) {{
+        return `복사 완료 · 본문 ${{plainValue.length.toLocaleString()}}자 · 사진 ${{expectedImageCount}}장 · {escaped_shortcut}`;
       }}
-      button.addEventListener('click', async () => {{
-        try {{ await copyImagesReady; }} catch {{ setState('error','복사 실패 · 사진을 불러오지 못했습니다'); return; }}
+      button.addEventListener('click', () => {{
+        if (copyImagesState !== 'ready') {{
+          setState('error',copyImagesState === 'failed' ? '복사 실패 · 사진을 불러오지 못했습니다' : '복사 대기 · 사진을 준비하고 있습니다');
+          return;
+        }}
         const prepared = prepareNaverCopyRoot();
         const nativeHtml = prepareNativeNaverHtml(prepared);
         const inputBuffer = document.createElement('span');
@@ -750,19 +823,21 @@ def build_page(
         const htmlValue = `<meta charset="utf-8">${{inputBuffer.outerHTML}}${{nativeHtml}}`;
         const plainValue = prepared.innerText.replaceAll('\\u00a0','').replaceAll('\\u2060','').replace(/\\n{{3,}}/g,'\\n\\n').trim();
         if (window.location.protocol === 'file:') {{
-          if (copyRenderedSelection(nativeSelectionRoot(inputBuffer, nativeHtml))) setState('done',`복사 완료 · 사진 ${{expectedImageCount}}장 포함 · 굵게·밑줄 확인 후 {escaped_shortcut}`);
+          if (copyWithDataTransfer(htmlValue,plainValue)) setState('done',copySuccessMessage(plainValue));
           else setState('error','복사 실패 · 클립보드가 바뀌지 않았습니다');
           return;
         }}
-        try {{
-          if (navigator.clipboard?.write && window.ClipboardItem) {{
-            await navigator.clipboard.write([new ClipboardItem({{'text/html':new Blob([htmlValue],{{type:'text/html'}}),'text/plain':new Blob([plainValue],{{type:'text/plain'}})}})]);
-          }} else if (!copyRenderedSelection(nativeSelectionRoot(inputBuffer, nativeHtml))) throw new Error('rich-copy-unavailable');
-          setState('done',`복사 완료 · 사진 ${{expectedImageCount}}장 포함 · 굵게·밑줄 확인 후 {escaped_shortcut}`);
-        }} catch (error) {{
-          try {{ if (!copyRenderedSelection(nativeSelectionRoot(inputBuffer, nativeHtml))) throw error; setState('done',`복사 완료 · 사진 ${{expectedImageCount}}장 포함 · 굵게·밑줄 확인 후 {escaped_shortcut}`); }}
-          catch {{ setState('error','복사 차단됨 · 브라우저 권한 확인'); }}
+        if (navigator.clipboard?.write && window.ClipboardItem) {{
+          navigator.clipboard.write([new ClipboardItem({{'text/html':new Blob([htmlValue],{{type:'text/html'}}),'text/plain':new Blob([plainValue],{{type:'text/plain'}})}})])
+            .then(() => setState('done',copySuccessMessage(plainValue)))
+            .catch(() => {{
+              if (copyWithDataTransfer(htmlValue,plainValue)) setState('done',copySuccessMessage(plainValue));
+              else setState('error','복사 차단됨 · 클립보드가 바뀌지 않았습니다');
+            }});
+          return;
         }}
+        if (copyWithDataTransfer(htmlValue,plainValue)) setState('done',copySuccessMessage(plainValue));
+        else setState('error','복사 차단됨 · 클립보드가 바뀌지 않았습니다');
       }});
       window.__goldhandCopyPreview = () => {{
         const prepared=prepareNaverCopyRoot();

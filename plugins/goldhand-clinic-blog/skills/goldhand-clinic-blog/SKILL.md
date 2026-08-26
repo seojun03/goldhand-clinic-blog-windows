@@ -1,6 +1,6 @@
 ---
 name: goldhand-clinic-blog
-description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직접 본문까지 검토한 위석부부한의원 정보글 11편 중 한 편을 고르고, 그 글의 제목 장치·독자 심리·도입 설득·정보 흐름·전환·디테일한 표현 기능·마무리 감정을 먼저 해석한 뒤 확인된 금손한의원 사실과 박준희 원장의 실제 생활어로 자연스럽게 재구성한다. 원문 완성 문장·업체 사실·경력·환자 수·사례·성과·프로그램·사진은 복사하지 않는다. 구체적인 읽기 시간 숫자는 모든 글의 공식이 아니라 부담을 낮추고 주제별 보상을 약속할 때만 1~5분에서 판단한다. 기본 완성 산문은 writing-voice로 최종 검수한다. 사용자가 같은 원고의 A/B 윤문 비교를 명시하면 동일한 검수 직전 원고에서 writing-voice판과 humanize-korean판을 따로 만들어 마지막 윤문기 차이만 비교한다. 동시 작업은 레퍼런스를 선점해 같은 글이 나오지 않게 한다. 글마다 제목과 본문에 맞는 마무리 소제목·핵심 회수·부담 없는 진료 안내를 새로 쓴다. 꾸밈과 고정 자격·운영정보는 goldhand-naver-native-v4 계약을 유지하며, 글은 clinic-info 운영정보 표에서 끝낸다.
+description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직접 본문까지 검토한 위석부부한의원 정보글 11편 중 자동 허용 9편과, 사용자가 관련 민감 주제를 명시했을 때만 허용하는 2편 가운데 한 편을 고른다. 그 글의 제목 장치·독자 심리·도입 설득·정보 흐름·전환·디테일한 표현 기능·마무리 감정을 먼저 해석한 뒤 확인된 금손한의원 사실과 박준희 원장의 실제 생활어로 자연스럽게 재구성한다. 원문 완성 문장·업체 사실·경력·환자 수·사례·성과·프로그램·사진은 복사하지 않는다. 구체적인 읽기 시간 숫자는 모든 글의 공식이 아니라 부담을 낮추고 주제별 보상을 약속할 때만 1~5분에서 판단한다. 기본 완성 산문은 writing-voice로 최종 검수한다. 사용자가 같은 원고의 A/B 윤문 비교를 명시하면 동일한 검수 직전 원고에서 writing-voice판과 humanize-korean판을 따로 만들어 마지막 윤문기 차이만 비교한다. 동시 작업은 레퍼런스를 선점해 같은 글이 나오지 않게 한다. 글마다 제목과 본문에 맞는 마무리 소제목·핵심 회수·부담 없는 진료 안내를 새로 쓴다. 꾸밈과 고정 자격·운영정보는 goldhand-naver-native-v4 계약을 유지하며, 글은 clinic-info 운영정보 표에서 끝낸다.
 ---
 
 # 금손한의원 블로그 자동화
@@ -21,7 +21,7 @@ description: 금손한의원 정보형 네이버 블로그 글을 만든다. 직
 2. 도입의 대표 독자 고민은 선택한 위석 정보글 한 편의 실제 고민을 금손 내용으로 바꿔 2~3개 둔다. 이 질문 2~3개를 글의 첫 보이는 문장으로 연속 배치한 뒤에만 고정 인사를 쓴다. 같은 뜻을 늘려 개수를 맞추지 않는다.
 3. 마지막 고민 뒤, 첫 정보 소제목 전에 독자가 헷갈리는 이유와 이번 글에서 풀 범위·금손의 설명 기준·읽고 얻게 될 판단을 예고한다. 이 부분은 배경·테두리가 없는 일반 산문 문단으로 쓴다.
 4. 업체소개형·사례공유형·스토리텔링형·일상글·공지·이벤트는 자동 선택, 최근 이력 회전, 무작위 선택, 기본값, 자료 부족 fallback 어디에도 넣지 않는다.
-5. 자동 주제는 `assets/wipark-content-briefs.json`의 본문 검토 완료 11편에서만 고른다. 최근 3개와 같은 레퍼런스·핵심 대상·검색 의도는 후보에서 제외한다.
+5. 자동 주제는 `assets/wipark-content-briefs.json`의 본문 검토 완료 11편 가운데 `autoEligible=true`인 9편에서만 고른다. `INFO04`와 `INFO11`은 넓은 키워드·fallback·우선 ID만으로 열지 않으며, 아래 민감 주제 정책에 맞는 명시 요청 또는 의도적인 수동 예외에서만 쓴다. 최근 3개와 같은 레퍼런스·핵심 대상·검색 의도는 후보에서 제외한다.
 6. 한 글에서는 주제를 가져온 위석 원문 한 편을 `content and editorial reference`로 고정한다. `orderedContentAtoms`로 사실 골격을 지키고, 같은 ID의 `referenceWritingIntelligence`로 제목 심리·도입 설득·정보 공개 순서·전환·미세 표현 기능·마무리 감정을 함께 재구성한다. 여러 글을 섞거나 평균 내지 않는다.
 7. 위석 원문의 완성 문장, 7어절 이상 연속 표현, 업체명·지역·원장·경력·환자 수·성과·프로그램·장비·사진·연락처는 가져오지 않는다. 다만 종결어미 하나를 흉내 내는 수준이 아니라 질문의 기능, 구체성, 리듬 변화, 반론 인정, 대비, 호기심 공백, 보상 약속이 왜 효과적인지는 분석해 금손 내용으로 바꾼다.
 8. `assets/goldhand-official-voice-profile.json`, `references/goldhand-official-voice.md`, `references/natural-speech-rewrite-protocol.md`는 레퍼런스의 설득 구조를 지우는 대체 템플릿이 아니다. 해석한 기능을 유지한 채 모든 완성 문장을 박준희 원장이 실제 진료실에서 말할 생활어로 자연화한다. 의료 답은 검토된 일반 정보, 금손 최신 사실, 필요한 권위 자료가 결정한다.
@@ -94,6 +94,14 @@ B안은 `$humanize-korean`의 `SKILL.md`와 `references/quick-rules.md`를 읽�
 - 모드·검수·저장: [references/workflow-and-output.md](references/workflow-and-output.md)
 - 금손 공식 글 조사 범위·이미지: [references/official-blog-inventory.md](references/official-blog-inventory.md)
 
+## 민감 주제 선택 정책
+
+- `INFO11`은 키워드 또는 희망 주제에 `트라우마`, `외상 후 스트레스`, `PTSD`가 명시된 경우만 연다.
+- `INFO04`는 `공황`을 명시했거나, `불면`과 함께 `불안·우울·정신건강·정신과·심리·항우울·항불안` 맥락을 명시한 경우만 연다.
+- `불면`만 입력했거나 `갱년기·폐경·완경·안면홍조` 맥락의 불면이면 `INFO04`를 열지 않는다. 정신건강·상담만 있고 공황 또는 정신건강 맥락의 불면이 없는 요청도 열지 않는다.
+- 포괄 키워드, 해시 동률, 후보 부족 fallback, `--preferred-master-id`만으로는 두 ID를 열 수 없다. 명시 규칙에 맞지 않으면 후보 수가 부족해도 민감 주제를 반환하지 않는다.
+- 사용자가 해당 민감 레퍼런스를 의도적으로 직접 지정한 경우에만 `--preferred-master-id INFO04|INFO11 --allow-sensitive-manual` 조합으로 수동 예외를 쓴다. 수동 플래그 단독 사용은 실패다.
+
 ## 실행 모드
 
 사용자가 모드를 말하지 않았다면 다른 질문을 섞지 말고 다음 한 문장만 묻는다.
@@ -109,7 +117,7 @@ B안은 `$humanize-korean`의 `SKILL.md`와 `references/quick-rules.md`를 읽�
 메인키워드를 받으면 추가 확인 없이 끝까지 진행한다.
 
 1. 입력한 메인키워드의 띄어쓰기와 표기를 정확히 고정한다.
-2. `scripts/select_wipark_content_reference.py --reserve`로 본문 검토 완료 위석 정보글 11편 중 한 편을 원자적으로 선점한다. 최근 3개와 같은 레퍼런스·핵심 대상·검색 의도뿐 아니라 다른 진행 중 작업이 예약한 레퍼런스도 제외한다. 새 후보가 없으면 중복으로 되돌아가지 않는다.
+2. `scripts/select_wipark_content_reference.py --reserve`로 본문 검토 완료 위석 정보글 가운데 자동 허용 후보 한 편을 원자적으로 선점한다. `INFO04`·`INFO11`은 민감 주제 정책과 일치하는 명시 요청에서만 후보가 된다. 최근 3개와 같은 레퍼런스·핵심 대상·검색 의도뿐 아니라 다른 진행 중 작업이 예약한 레퍼런스도 제외한다. 새 후보가 없으면 중복 또는 민감 주제로 되돌아가지 않는다.
 3. `광주 한의원`, `광주 한의원 추천`처럼 포괄적인 지역·업종 키워드는 SEO 앵커일 뿐 글의 주제가 아니다. 선택된 위석 글의 실제 건강 문제를 주제로 쓴다.
 4. 선택 결과의 `topic`, `readerConcerns`, `orderedContentAtoms`, `referenceWritingIntelligence`, `approvedWritingLessons`, `blockedFromSource`를 한 묶음으로 고정한다. 제목 장치만 빌리고 다른 흐름을 쓰거나 여러 글을 섞지 않는다.
 5. `sourceProseWithheld=true`, `contentAtomCoverageRequired=true`, `sourceSentenceImitationBlocked=true`, `referenceEditorialReasoningEnabled=true`, `goldhandFactReplacementRequired=true`, `voiceProtocolId=natural-speech-rewrite-protocol-v1`, `voiceProfileId=goldhand-official-voice-v1`, `finalVoiceReviewRequired=true`를 확인한 뒤에만 초안을 쓴다. 기본 원고는 `finalVoiceReviewerSkill=writing-voice`, `finalVoiceReviewContractId=writing-voice-final-rehear-v1`이다. 명시적 A/B 비교의 B안은 같은 선택 결과를 공유하되 `humanize-korean`, `humanize-korean-final-pass-v1`으로만 분기한다.
@@ -132,7 +140,7 @@ B안은 `$humanize-korean`의 `SKILL.md`와 `references/quick-rules.md`를 읽�
 한 번에 하나만 질문하며 이미 답한 값은 다시 묻지 않는다.
 
 1. 메인키워드
-2. `select_wipark_content_reference.py --count 3 --no-reserve`로 최근 3개와 겹치지 않는 주제 후보 3개를 고른다. 각 후보에는 주제·핵심 내용뿐 아니라 제목 심리·도입 설득·흐름·마무리를 가져올 `콘텐츠·편집 레퍼런스` 링크 한 편을 표시한다. 최종 후보를 고르면 `--preferred-master-id 선택ID --reserve`로 같은 ID를 예약한 뒤 진행한다.
+2. `select_wipark_content_reference.py --count 3 --no-reserve`로 최근 3개와 겹치지 않는 자동 허용 주제 후보 3개를 고른다. 각 후보에는 주제·핵심 내용뿐 아니라 제목 심리·도입 설득·흐름·마무리를 가져올 `콘텐츠·편집 레퍼런스` 링크 한 편을 표시한다. 최종 후보를 고르면 `--preferred-master-id 선택ID --reserve`로 같은 ID를 예약한 뒤 진행한다. `INFO04`·`INFO11`은 우선 ID만으로 차단을 우회하지 않는다.
 3. 후보 중 최종 제목
 4. 글에 추가할 사실·원장 판단·실제 장면. 없으면 내장 사실만 사용
 5. 플러그인 `assets/official-media`의 공식 블로그 내장 사진 가운데 시각 검수 승인 사진을 자동 사용한다. 이미지 방식이나 사용자 로컬 폴더는 묻지 않는다.
@@ -248,6 +256,8 @@ B안은 `$humanize-korean`의 `SKILL.md`와 `references/quick-rules.md`를 읽�
 
 ```bash
 python3 scripts/select_wipark_content_reference.py --keyword "정확 메인키워드" --topic "희망 주제"
+# 민감 주제 직접 지정이 실제 사용자 의도일 때만:
+python3 scripts/select_wipark_content_reference.py --keyword "정확 메인키워드" --topic "직접 지정한 민감 주제" --preferred-master-id "INFO04 또는 INFO11" --allow-sensitive-manual
 python3 scripts/validate_reference_learning.py
 python3 scripts/validate_title.py --title "확정 제목" --keyword "정확 메인키워드" --editorial-close --reference-master-id "선택 INFO ID" --title-mechanism-id "선택 제목 장치" --json
 python3 scripts/validate_final_voice_review.py --input speech-draft.json --json

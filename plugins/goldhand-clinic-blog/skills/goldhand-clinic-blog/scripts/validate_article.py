@@ -779,6 +779,59 @@ def load_media_library(path: Path) -> dict[str, dict[str, object]]:
     }
 
 
+def media_context_tokens(value: str) -> list[str]:
+    """Tokenize prose for copied source-context detection."""
+
+    return re.findall(
+        r"[0-9A-Za-z가-힣]{2,}",
+        normalize(html.unescape(value)).lower(),
+    )
+
+
+def selected_media_context_leaks(
+    article: str,
+    media_library: dict[str, dict[str, object]],
+    *,
+    minimum_run: int = 7,
+) -> list[dict[str, str]]:
+    """Return visible prose copied from a selected photo's internal context."""
+
+    if minimum_run < 1:
+        raise ValueError("minimum_run은 1 이상이어야 합니다.")
+    visible_tokens = media_context_tokens(visible_text(article))
+    if len(visible_tokens) < minimum_run:
+        return []
+    visible_runs = {
+        tuple(visible_tokens[index : index + minimum_run])
+        for index in range(len(visible_tokens) - minimum_run + 1)
+    }
+    selected_ids = {
+        asset_id
+        for tag in re.findall(r"<img\b[^>]*>", article, flags=re.I | re.S)
+        for asset_id in attr_values(tag, "data-goldhand-media")
+        if asset_id
+    }
+    leaks: list[dict[str, str]] = []
+    for asset_id in sorted(selected_ids):
+        asset = media_library.get(asset_id)
+        if not isinstance(asset, dict):
+            continue
+        for field in ("context", "closingTrustContextText"):
+            source_tokens = media_context_tokens(str(asset.get(field, "")))
+            for index in range(len(source_tokens) - minimum_run + 1):
+                run = tuple(source_tokens[index : index + minimum_run])
+                if run in visible_runs:
+                    leaks.append(
+                        {
+                            "assetId": asset_id,
+                            "field": field,
+                            "excerpt": " ".join(run),
+                        }
+                    )
+                    break
+    return leaks
+
+
 def previous_completed_entry(
     state: dict[str, object], *, current_title: str = ""
 ) -> dict[str, object] | None:
@@ -2102,6 +2155,16 @@ def validate_article(
 
     try:
         official_assets = load_media_library(DEFAULT_LIBRARY) if media_library is None else media_library
+        for leak in selected_media_context_leaks(article, official_assets):
+            add(
+                issues,
+                "error",
+                "visible-media-context-leak",
+                (
+                    f"선택 사진 {leak['assetId']}의 내부 {leak['field']} 문장이 "
+                    f"본문에 노출됐습니다: {leak['excerpt']}"
+                ),
+            )
         image_metrics = image_checks(
             article,
             issues,

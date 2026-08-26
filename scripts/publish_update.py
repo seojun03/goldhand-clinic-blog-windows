@@ -23,6 +23,7 @@ ARCHIVE_NAME = "goldhand-clinic-blog-plugin.zip"
 CMD_NAME = "INSTALL-WINDOWS.cmd"
 ALLOWED_BOOTSTRAP_PATHS = (
     ".github/workflows/windows-install.yml",
+    "install-from-download-windows.ps1",
     "README.md",
     "plugins/goldhand-clinic-blog/",
     "scripts/publish_update.py",

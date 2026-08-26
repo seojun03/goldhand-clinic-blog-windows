@@ -64,6 +64,7 @@ def guide_markdown(library: dict[str, object]) -> str:
             "",
             "- 자동모드는 `scripts/select_topic_idea.py`가 최근 3개의 의미 주제와 겹치는 후보를 먼저 제외하고, 남은 주제에 맞는 위석부부한의원 글쓰기 마스터를 별도로 고른다.",
             "- 정밀작성모드는 같은 선택기로 서로 의미가 다른 최대 3개 주제와 각 글쓰기 마스터를 제시한다.",
+            "- `INFO04`와 `INFO11`은 자동 후보가 아니다. 활성 콘텐츠 선택기에서 각각 공황 또는 정신건강 맥락의 불면, 트라우마를 명시한 요청에만 열며, 갱년기 불면은 `INFO04`를 열지 않는다.",
             "- 모든 결과는 `정보전달형`이며 업체소개형·사례공유형·스토리텔링형·일상글로 전환하지 않는다.",
             "- 범어 설명한의원 글은 주제 아이디어와 설명할 질문만 제공한다. 제목 문구·제목 패턴·본문 순서·말투·꾸밈·의학 답·사례·이미지는 제공하지 않는다.",
             "- 선택된 위석부부한의원 한 편을 제목 장치와 글쓰기 흐름 마스터로 사용하고, 꾸밈은 네이버 순정 인용구·구분선·표1을 적용한다.",
@@ -100,6 +101,7 @@ def main() -> int:
                 "type": profile["type"],
                 "sourceUrl": profile["sourceUrl"],
                 "autoEligible": profile["autoEligible"],
+                "sensitiveTopicPolicy": profile.get("sensitiveTopicPolicy"),
                 "bestFor": profile["bestFor"],
                 "selectionTags": profile.get("selectionTags", []),
             }
@@ -115,8 +117,10 @@ def main() -> int:
             if source_id not in family_articles:
                 continue
             family_article = family_articles[source_id]
+            master_id = str(family_article["masterId"])
+            profile = profiles[master_id]
             content_type = "정보전달형"
-            compatible = [str(family_article["masterId"])]
+            compatible = [master_id]
             articles.append(
                 {
                     "id": source["id"],
@@ -144,6 +148,8 @@ def main() -> int:
                     "sourceFactsBlocked": True,
                     "sourceSentencesBlocked": True,
                     "sourceMediaBlocked": True,
+                    "autoEligible": profile["autoEligible"],
+                    "sensitiveTopicPolicy": profile.get("sensitiveTopicPolicy"),
                 }
             )
         library = {
@@ -154,6 +160,14 @@ def main() -> int:
             "referenceFamilyId": family["familyId"],
             "allowedReferenceIds": family["allowedReferenceIds"],
             "allowedMasterIds": family["allowedMasterIds"],
+            "automaticMasterIds": [
+                master_id for master_id, profile in profiles.items() if profile.get("autoEligible") is True
+            ],
+            "sensitiveTopicMasterIds": [
+                master_id
+                for master_id, profile in profiles.items()
+                if isinstance(profile.get("sensitiveTopicPolicy"), dict)
+            ],
             "sourceArticleCount": corpus["includedCount"],
             "articleCount": len(articles),
             "excludedCount": corpus["includedCount"] - len(articles),

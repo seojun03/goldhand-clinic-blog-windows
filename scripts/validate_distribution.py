@@ -86,7 +86,31 @@ def main() -> int:
     require("function Ensure-VercelCli" in installer and "vercel.cmd" in installer, "Vercel CLI executable handling is missing")
     require("install --global vercel --no-fund --no-audit" in installer, "Vercel CLI npm installation is missing")
     require("Test-VersionCommand" in installer and "Ensure-VercelCli" in installer, "Vercel CLI execution verification is missing")
+    require(
+        "Start-Process -FilePath $winget.Source" in installer
+        and "-RedirectStandardOutput $stdoutPath" in installer
+        and "-RedirectStandardError $stderrPath" in installer,
+        "winget must run as a monitored child process",
+    )
+    require(
+        "GOLDHANDBLOG_WINGET_TIMEOUT_SECONDS" in installer
+        and "GOLDHANDBLOG_WINGET_STALL_SECONDS" in installer
+        and "Stop-ProcessTreeBestEffort" in installer,
+        "bounded winget timeout and stall handling is missing",
+    )
+    require(
+        "installation is still running" in installer
+        and "--disable-interactivity" in installer
+        and "--silent" in installer,
+        "winget progress or noninteractive installation flags are missing",
+    )
+    require("& $winget.Source install" not in installer, "winget must not use an unbounded synchronous install call")
     require("Invoke-ImageHostSetupBestEffort" in installer, "automatic first-time image-host setup is missing")
+    require("Initialize-OptionalImageToolsBestEffort" in installer, "nonfatal optional image-tool setup is missing")
+    require(
+        "The core plugin is installed, but optional Node.js or Vercel setup did not finish" in installer,
+        "optional Node.js or Vercel failure must preserve the core installation",
+    )
     require("Write-ImageSetupDesktopLauncher" in installer and "Goldhand Image Setup.lnk" in installer, "one-click image setup retry shortcut is missing")
     require("setup_image_host.py" in image_setup_launcher, "standalone image setup launcher is missing the Python setup entrypoint")
     require((PLUGIN_ROOT / "skills" / PLUGIN_NAME / "scripts" / "setup_image_host.py").is_file(), "packaged image-host setup script is missing")
@@ -105,10 +129,44 @@ def main() -> int:
     require("sourceType" in installer and "local" in installer, "local marketplace verification is missing")
     require("Copy-ManagedTree" in installer and "Restore-ManagedTree" in installer, "transactional managed replacement is missing")
     require("Register-AutoUpdate" in installer and "New-ScheduledTaskTrigger" in installer, "automatic update registration is missing")
+    install_body = installer[installer.index("function Install-DownloadedPlugin") :]
+    replace_index = install_body.index("$treeResult = Copy-ManagedTree")
+    registration_index = install_body.index('Invoke-Codex -Arguments @("plugin", "add", $PluginSelector')
+    retirement_index = install_body.index("Retire-LegacyInstallationBestEffort")
+    optional_tools_index = install_body.index("$imageToolsReady = Initialize-OptionalImageToolsBestEffort")
+    require(
+        replace_index < registration_index < retirement_index < optional_tools_index,
+        "core replacement and registration must finish before legacy retirement and optional Node/Vercel setup",
+    )
+    require(
+        '$LegacyMarketplaceName = "goldhand-clinic"' in installer
+        and '$LegacyPluginSelector = "$PluginName@$LegacyMarketplaceName"' in installer
+        and 'Invoke-Codex -Arguments @("plugin", "remove", $LegacyPluginSelector' in installer
+        and 'Invoke-Codex -Arguments @("plugin", "marketplace", "remove", $LegacyMarketplaceName' in installer,
+        "legacy marketplace and plugin retirement is missing",
+    )
+    require(
+        '$LegacyTaskName = "GoldhandClinicPluginUpdate"' in installer
+        and '$LegacyStartupFileName = "GoldhandClinicPluginUpdate.cmd"' in installer
+        and "Unregister-ScheduledTask -TaskName $LegacyTaskName" in installer,
+        "legacy scheduled and Startup-folder updater retirement is missing",
+    )
+    require(
+        ".legacy-backup." in installer
+        and 'Join-Path $LegacyRoot ".agents\\plugins\\marketplace.json"' in installer
+        and "$legacyManifest.name -ne $LegacyMarketplaceName" in installer
+        and "Move-Item -LiteralPath $LegacyRoot -Destination $backup" in installer
+        and "Remove-Item -LiteralPath $LegacyRoot" not in installer,
+        "legacy plugin folder must be identity-checked and moved to a backup instead of deleted",
+    )
     require('goldhand-clinic-blog-plugin.zip' in launcher, "isolated CMD must download the validated release ZIP")
     require("releases/latest" in updater and 'goldhand-clinic-blog-plugin.zip' in updater, "release-only updater is missing")
     require("archive/refs/heads/main.zip" not in launcher and "archive/refs/heads/main.zip" not in updater, "Windows install paths must not consume unvalidated main branch ZIPs")
     require("update_existing_distribution.py" in publisher, "owner publisher must sync the complete canonical plugin")
+    require(
+        '"install-from-download-windows.ps1",' in publisher,
+        "owner publisher must allow an explicitly reviewed primary-installer change",
+    )
     require("def wait_for_run(" in publisher and '"watch"' in publisher and "def release_with_verified_assets(" in publisher and '"create"' in publisher, "owner publisher must wait for CI before releasing")
     require("compare_asset_sets(" in publisher and '"download"' in publisher and "cleanup-tag" in publisher, "owner publisher must verify public assets and roll back failed releases")
     print(f"distribution validation passed: {PLUGIN_NAME} {manifest['version']}")

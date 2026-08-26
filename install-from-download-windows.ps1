@@ -11,6 +11,11 @@ $MarketplaceName = "goldhand-clinic-windows"
 $PluginName = "goldhand-clinic-blog"
 $PluginSelector = "$PluginName@$MarketplaceName"
 $TaskName = $(if ($env:GOLDHANDBLOG_AUTO_UPDATE_TASK_NAME) { $env:GOLDHANDBLOG_AUTO_UPDATE_TASK_NAME } else { "GoldhandBlogUpdate" })
+$LegacyMarketplaceName = "goldhand-clinic"
+$LegacyPluginSelector = "$PluginName@$LegacyMarketplaceName"
+$LegacyTaskName = "GoldhandClinicPluginUpdate"
+$LegacyStartupFileName = "GoldhandClinicPluginUpdate.cmd"
+$LegacyRoot = $(if ($env:GOLDHANDBLOG_LEGACY_ROOT) { $env:GOLDHANDBLOG_LEGACY_ROOT } else { Join-Path $HOME "GoldhandClinicPlugin" })
 $SourceRoot = (Resolve-Path -LiteralPath $PSScriptRoot).Path
 
 function Write-Step([string]$Message) {
@@ -75,24 +80,133 @@ function Test-PythonAvailable {
     return -not [string]::IsNullOrWhiteSpace((Get-PythonCommand))
 }
 
+function Get-BoundedPositiveInteger {
+    param(
+        [string]$Value,
+        [int]$Default,
+        [int]$Minimum,
+        [int]$Maximum
+    )
+    $parsed = 0
+    if (-not [string]::IsNullOrWhiteSpace($Value) -and [int]::TryParse($Value, [ref]$parsed)) {
+        if ($parsed -ge $Minimum -and $parsed -le $Maximum) { return $parsed }
+    }
+    return $Default
+}
+
+function Get-InstallerLogTail([string[]]$Paths) {
+    $lines = @()
+    foreach ($path in $Paths) {
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { continue }
+        try {
+            $content = @(Get-Content -LiteralPath $path -Tail 20 -ErrorAction Stop)
+            if ($content) { $lines += $content }
+        } catch {
+        }
+    }
+    if (-not $lines) { return "" }
+    return "`nLast installer output:`n" + (($lines | Select-Object -Last 30) -join [Environment]::NewLine)
+}
+
+function Stop-ProcessTreeBestEffort([System.Diagnostics.Process]$Process) {
+    if (-not $Process) { return }
+    try {
+        $Process.Refresh()
+        if ($Process.HasExited) { return }
+    } catch {
+        return
+    }
+    try {
+        $taskkill = Get-Command "taskkill.exe" -ErrorAction SilentlyContinue
+        if ($taskkill -and $taskkill.Source) {
+            & $taskkill.Source /PID $Process.Id /T /F *> $null
+            $global:LASTEXITCODE = 0
+        }
+    } catch {
+    }
+    try {
+        $Process.Refresh()
+        if (-not $Process.HasExited) { $Process.Kill() }
+        [void]$Process.WaitForExit(5000)
+    } catch {
+    }
+}
+
 function Install-WingetPackage([string]$Id) {
-    if (-not (Get-Command winget.exe -ErrorAction SilentlyContinue)) {
+    $winget = Get-Command winget.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $winget -or -not $winget.Source) {
         throw "Required package $Id is missing and winget is unavailable. Install App Installer from the Microsoft Store, then run this installer again."
     }
-    Write-Step "Installing required package $Id."
-    $previousErrorActionPreference = $ErrorActionPreference
+    $timeoutSeconds = Get-BoundedPositiveInteger -Value $env:GOLDHANDBLOG_WINGET_TIMEOUT_SECONDS -Default 900 -Minimum 60 -Maximum 3600
+    $stallDefaultSeconds = [Math]::Min(240, $timeoutSeconds)
+    $stallSeconds = Get-BoundedPositiveInteger -Value $env:GOLDHANDBLOG_WINGET_STALL_SECONDS -Default $stallDefaultSeconds -Minimum 30 -Maximum $timeoutSeconds
+    $pollMilliseconds = 2000
+    $progressSeconds = 15
+    $stdoutPath = Join-Path ([IO.Path]::GetTempPath()) ("goldhand-winget-out-" + [Guid]::NewGuid().ToString("N") + ".log")
+    $stderrPath = Join-Path ([IO.Path]::GetTempPath()) ("goldhand-winget-err-" + [Guid]::NewGuid().ToString("N") + ".log")
+    $process = $null
+    $exitCode = $null
+    $details = ""
+    Write-Step "Installing required package $Id. This step is limited to $timeoutSeconds seconds."
     try {
-        $ErrorActionPreference = "Continue"
-        $global:LASTEXITCODE = $null
-        & winget.exe install --id $Id --exact --source winget --accept-package-agreements --accept-source-agreements --silent
-        $exitCode = $LASTEXITCODE
+        $arguments = @(
+            "install", "--id", $Id, "--exact", "--source", "winget",
+            "--accept-package-agreements", "--accept-source-agreements",
+            "--disable-interactivity", "--silent"
+        )
+        $process = Start-Process -FilePath $winget.Source -ArgumentList $arguments -NoNewWindow -PassThru -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+        $startedUtc = [DateTime]::UtcNow
+        $lastActivityUtc = $startedUtc
+        $lastProgressUtc = $startedUtc
+        $lastLogSize = [int64]0
+        $failure = ""
+        while (-not $process.HasExited) {
+            Start-Sleep -Milliseconds $pollMilliseconds
+            $nowUtc = [DateTime]::UtcNow
+            $logSize = [int64]0
+            foreach ($logPath in @($stdoutPath, $stderrPath)) {
+                if (Test-Path -LiteralPath $logPath -PathType Leaf) {
+                    try { $logSize += (Get-Item -LiteralPath $logPath -ErrorAction Stop).Length } catch {
+                    }
+                }
+            }
+            if ($logSize -ne $lastLogSize) {
+                $lastLogSize = $logSize
+                $lastActivityUtc = $nowUtc
+            }
+            $elapsedSeconds = [int][Math]::Floor(($nowUtc - $startedUtc).TotalSeconds)
+            $idleSeconds = [int][Math]::Floor(($nowUtc - $lastActivityUtc).TotalSeconds)
+            if ($elapsedSeconds -ge $timeoutSeconds) {
+                $failure = "$Id installation timed out after $timeoutSeconds seconds."
+                break
+            }
+            if ($idleSeconds -ge $stallSeconds) {
+                $failure = "$Id installation produced no progress for $stallSeconds seconds and was stopped. Check for a hidden administrator approval or Windows Installer window, then rerun INSTALL-WINDOWS.cmd."
+                break
+            }
+            if (($nowUtc - $lastProgressUtc).TotalSeconds -ge $progressSeconds) {
+                Write-Step "$Id installation is still running ($elapsedSeconds seconds elapsed; $idleSeconds seconds since installer output)."
+                $lastProgressUtc = $nowUtc
+            }
+        }
+        if ($failure) {
+            Stop-ProcessTreeBestEffort -Process $process
+            $details = Get-InstallerLogTail -Paths @($stdoutPath, $stderrPath)
+            throw "$failure$details"
+        }
+        $process.WaitForExit()
+        $exitCode = $process.ExitCode
+        $details = Get-InstallerLogTail -Paths @($stdoutPath, $stderrPath)
     } finally {
-        $ErrorActionPreference = $previousErrorActionPreference
+        if ($process) { try { $process.Dispose() } catch {
+        } }
+        Remove-Item -LiteralPath $stdoutPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
         $global:LASTEXITCODE = 0
     }
     $alreadyCurrentExitCodes = @(-1978335189, -1978335153, -1978335135)
     if ($null -eq $exitCode -or ($exitCode -ne 0 -and $alreadyCurrentExitCodes -notcontains $exitCode)) {
-        throw "$Id installation failed with winget exit code $exitCode."
+        throw "$Id installation failed with winget exit code $exitCode.$details"
     }
     Refresh-ProcessPath
 }
@@ -441,6 +555,105 @@ function Remove-LegacyDesktopShortcut {
     if (Test-Path -LiteralPath $shortcut -PathType Leaf) { Remove-Item -LiteralPath $shortcut -Force -ErrorAction SilentlyContinue }
 }
 
+function Remove-LegacyAutoUpdateBestEffort {
+    try {
+        if (Get-Command "Get-ScheduledTask" -ErrorAction SilentlyContinue) {
+            $legacyTask = Get-ScheduledTask -TaskName $LegacyTaskName -ErrorAction SilentlyContinue
+            if ($legacyTask) {
+                Unregister-ScheduledTask -TaskName $LegacyTaskName -Confirm:$false -ErrorAction Stop
+                Write-Step "Removed the legacy scheduled updater $LegacyTaskName."
+            }
+        }
+    } catch {
+        Write-Warning "The legacy scheduled updater could not be removed: $($_.Exception.Message)"
+    }
+
+    try {
+        $startup = [Environment]::GetFolderPath("Startup")
+        if (-not [string]::IsNullOrWhiteSpace($startup)) {
+            $legacyStartup = Join-Path $startup $LegacyStartupFileName
+            if (Test-Path -LiteralPath $legacyStartup -PathType Leaf) {
+                Remove-Item -LiteralPath $legacyStartup -Force -ErrorAction Stop
+                Write-Step "Removed the legacy Startup-folder updater $LegacyStartupFileName."
+            }
+        }
+    } catch {
+        Write-Warning "The legacy Startup-folder updater could not be removed: $($_.Exception.Message)"
+    }
+}
+
+function Backup-LegacyRootBestEffort {
+    if ([string]::IsNullOrWhiteSpace($LegacyRoot) -or -not (Test-Path -LiteralPath $LegacyRoot -PathType Container)) { return $null }
+    try {
+        $legacyFull = [IO.Path]::GetFullPath($LegacyRoot).TrimEnd('\')
+        $currentFull = [IO.Path]::GetFullPath($EditableRoot).TrimEnd('\')
+        if ($legacyFull.Equals($currentFull, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Warning "The legacy folder matches the current managed folder and was not moved."
+            return $null
+        }
+        $legacyManifestPath = Join-Path $LegacyRoot ".agents\plugins\marketplace.json"
+        if (-not (Test-Path -LiteralPath $legacyManifestPath -PathType Leaf)) {
+            Write-Warning "The legacy folder has no Goldhand marketplace marker and was left in place: $LegacyRoot"
+            return $null
+        }
+        $legacyManifest = Get-Content -LiteralPath $legacyManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $legacyPlugin = $legacyManifest.plugins | Where-Object { $_.name -eq $PluginName } | Select-Object -First 1
+        if ($legacyManifest.name -ne $LegacyMarketplaceName -or -not $legacyPlugin) {
+            Write-Warning "The legacy folder marker does not identify $LegacyPluginSelector and was left in place: $LegacyRoot"
+            return $null
+        }
+        $parent = Split-Path -Parent $LegacyRoot
+        $leaf = Split-Path -Leaf $LegacyRoot
+        $backup = Join-Path $parent ($leaf + ".legacy-backup." + [DateTime]::UtcNow.ToString("yyyyMMddHHmmss") + "." + [Guid]::NewGuid().ToString("N").Substring(0, 8))
+        Move-Item -LiteralPath $LegacyRoot -Destination $backup -ErrorAction Stop
+        Write-Step "Preserved the legacy plugin folder as a backup at $backup"
+        return $backup
+    } catch {
+        Write-Warning "The legacy plugin folder was left in place because it could not be backed up: $($_.Exception.Message)"
+        return $null
+    }
+}
+
+function Retire-LegacyInstallationBestEffort {
+    if ($env:GOLDHANDBLOG_SKIP_LEGACY_RETIREMENT -eq "1") {
+        Write-Step "Legacy plugin retirement was skipped for this test run."
+        return
+    }
+    Write-Step "Checking for the legacy Goldhand Clinic Blog installation."
+    $legacyConnectionRetired = $false
+    try {
+        $beforePlugins = (Invoke-Codex -Arguments @("plugin", "list", "--json") -Capture) | ConvertFrom-Json
+        $legacyInstalled = $beforePlugins.installed | Where-Object { $_.pluginId -eq $LegacyPluginSelector } | Select-Object -First 1
+        if ($legacyInstalled) {
+            Invoke-Codex -Arguments @("plugin", "remove", $LegacyPluginSelector, "--json") -Capture | Out-Null
+        }
+
+        $beforeMarketplaces = (Invoke-Codex -Arguments @("plugin", "marketplace", "list", "--json") -Capture) | ConvertFrom-Json
+        $legacyMarketplace = $beforeMarketplaces.marketplaces | Where-Object { $_.name -eq $LegacyMarketplaceName } | Select-Object -First 1
+        if ($legacyMarketplace) {
+            Invoke-Codex -Arguments @("plugin", "marketplace", "remove", $LegacyMarketplaceName, "--json") -Capture | Out-Null
+        }
+
+        $afterPlugins = (Invoke-Codex -Arguments @("plugin", "list", "--json") -Capture) | ConvertFrom-Json
+        $afterMarketplaces = (Invoke-Codex -Arguments @("plugin", "marketplace", "list", "--json") -Capture) | ConvertFrom-Json
+        $legacyStillInstalled = $afterPlugins.installed | Where-Object { $_.pluginId -eq $LegacyPluginSelector } | Select-Object -First 1
+        $legacyMarketplaceStillConfigured = $afterMarketplaces.marketplaces | Where-Object { $_.name -eq $LegacyMarketplaceName } | Select-Object -First 1
+        $legacyConnectionRetired = (-not $legacyStillInstalled) -and (-not $legacyMarketplaceStillConfigured)
+        if ($legacyConnectionRetired -and ($legacyInstalled -or $legacyMarketplace)) {
+            Write-Step "Unregistered the legacy $LegacyPluginSelector connection."
+        }
+    } catch {
+        Write-Warning "The legacy plugin connection could not be completely retired: $($_.Exception.Message)"
+    }
+
+    Remove-LegacyAutoUpdateBestEffort
+    if ($legacyConnectionRetired) {
+        [void](Backup-LegacyRootBestEffort)
+    } elseif (Test-Path -LiteralPath $LegacyRoot -PathType Container) {
+        Write-Warning "The legacy plugin folder remains unchanged because its Codex connection is still present."
+    }
+}
+
 function Write-ImageSetupDesktopLauncher {
     if ($env:GOLDHANDBLOG_SKIP_DESKTOP_SHORTCUT -eq "1") { return }
     $desktop = [Environment]::GetFolderPath("Desktop")
@@ -498,6 +711,19 @@ function Invoke-ImageHostSetupBestEffort {
     Write-Step "Automatic GPT image hosting is connected."
 }
 
+function Initialize-OptionalImageToolsBestEffort {
+    Write-ImageSetupDesktopLauncher
+    try {
+        Ensure-VercelCli
+    } catch {
+        Write-Warning "The core plugin is installed, but optional Node.js or Vercel setup did not finish: $($_.Exception.Message)"
+        Write-Warning "You can use the plugin now. Rerun INSTALL-WINDOWS.cmd later, or use Goldhand Image Setup on the Desktop after Node.js is available."
+        return $false
+    }
+    Invoke-ImageHostSetupBestEffort
+    return $true
+}
+
 function Register-AutoUpdate {
     if ($env:GOLDHANDBLOG_SKIP_AUTO_UPDATE_REGISTRATION -eq "1") { Write-Step "Automatic update registration was skipped for this test run."; return }
     $updateScript = Join-Path $EditableRoot "scripts\update-windows.ps1"
@@ -526,7 +752,6 @@ function Install-DownloadedPlugin {
     Write-Step "Installing the managed plugin without changing the ChatGPT app or Git."
     Ensure-Python
     Install-PythonRequirements
-    Ensure-VercelCli
 
     if ($env:CODEX_HOME -and -not (Test-Path -LiteralPath $env:CODEX_HOME)) {
         New-Item -ItemType Directory -Path $env:CODEX_HOME -Force | Out-Null
@@ -590,13 +815,17 @@ function Install-DownloadedPlugin {
 
     if ($treeResult -and $treeResult.BackupRoot) { try { [void](Remove-TempDirectoryBestEffort -LiteralPath ([string]$treeResult.BackupRoot)) } catch {
     } }
+    Retire-LegacyInstallationBestEffort
     Remove-LegacyDesktopShortcut
-    Write-ImageSetupDesktopLauncher
-    Invoke-ImageHostSetupBestEffort
+    $imageToolsReady = Initialize-OptionalImageToolsBestEffort
     Write-Host ""
     Write-Step "INSTALLATION COMPLETE"
     Write-Step "Open ChatGPT, start a new task, and select the Goldhand Clinic Blog plugin."
-    Write-Step "Vercel CLI is installed. After one browser approval, the image project and plugin settings are configured automatically."
+    if ($imageToolsReady) {
+        Write-Step "Vercel CLI is installed. After one browser approval, the image project and plugin settings are configured automatically."
+    } else {
+        Write-Step "The core blog plugin is ready. Optional automatic image hosting can be completed later from Goldhand Image Setup."
+    }
     Write-Step "Future validated releases will update automatically on Windows."
 }
 

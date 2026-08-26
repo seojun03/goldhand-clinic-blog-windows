@@ -47,7 +47,10 @@ REQUIRED_SNIPPETS = {
     "native-image-link": 'data-linktype="img"',
     "native-image-linkdata": "data-linkdata=",
     "native-image-attribute-escape": "escapeAttribute",
-    "native-selection-copy": "nativeSelectionRoot",
+    "clipboard-data-transfer-copy": "copyWithDataTransfer",
+    "clipboard-html-payload": "setData('text/html',htmlValue)",
+    "clipboard-plain-payload": "setData('text/plain',plainValue)",
+    "clipboard-payload-confirmation": "getData('text/html')===htmlValue",
     "copy-image-preview": "imageDataLinks:",
     "copy-caption-preview": "orphanImageCaptions:",
 }

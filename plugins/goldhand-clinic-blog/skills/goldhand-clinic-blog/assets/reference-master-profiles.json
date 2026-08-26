@@ -16,6 +16,21 @@
     "INFO11",
     "INFO12"
   ],
+  "automaticMasterIds": [
+    "INFO03",
+    "INFO01",
+    "INFO09",
+    "INFO08",
+    "INFO10",
+    "INFO05",
+    "INFO12",
+    "INFO06",
+    "INFO07"
+  ],
+  "sensitiveTopicMasterIds": [
+    "INFO04",
+    "INFO11"
+  ],
   "sourceFactsBlocked": true,
   "referenceExpressionLearningEnabled": true,
   "sourceSentenceImitationBlocked": true,
@@ -2573,7 +2588,7 @@
       "sourceUrl": "https://blog.naver.com/wi-parkclinic/224291545650",
       "sourceTitle": "공황장애·불면증 한방 치료, 효과 보는 사람 vs 못 보는 사람",
       "publishedAt": "2026-05-20",
-      "autoEligible": true,
+      "autoEligible": false,
       "selectionTags": [
         "효과 보는 사람",
         "못 보는 사람",
@@ -3201,6 +3216,13 @@
         "sameReferenceForIdeaAndContentFlow": true,
         "referenceControlsDecoration": false,
         "nativeDesignSystemId": "goldhand-naver-native-v4"
+      },
+      "sensitiveTopicPolicy": {
+        "category": "mental-health-sensitive",
+        "automaticSelectionBlocked": true,
+        "explicitRequestRequired": true,
+        "explicitRequestRule": "panic-terms-or-insomnia-with-mental-context-excluding-menopause",
+        "manualOverrideAllowed": true
       }
     },
     "INFO10": {
@@ -4683,7 +4705,7 @@
       "sourceUrl": "https://blog.naver.com/wi-parkclinic/224221217878",
       "sourceTitle": "광주 트라우마치료, 25년 부부한의사가 알려주는 극복방법 2가지",
       "publishedAt": "2026-03-18",
-      "autoEligible": true,
+      "autoEligible": false,
       "selectionTags": [
         "극복 방법 2가지",
         "오래된 불편",
@@ -5287,6 +5309,13 @@
         "sameReferenceForIdeaAndContentFlow": true,
         "referenceControlsDecoration": false,
         "nativeDesignSystemId": "goldhand-naver-native-v4"
+      },
+      "sensitiveTopicPolicy": {
+        "category": "mental-health-sensitive",
+        "automaticSelectionBlocked": true,
+        "explicitRequestRequired": true,
+        "explicitRequestRule": "trauma-terms",
+        "manualOverrideAllowed": true
       }
     },
     "INFO12": {
