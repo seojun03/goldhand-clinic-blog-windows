@@ -117,10 +117,12 @@ class SensitiveTopicGateTests(unittest.TestCase):
                 self.assertEqual(selected["sensitiveSelectionMode"], "explicit-request")
                 self.assertIs(selected["automaticSelectionEligible"], False)
 
-    def test_explicit_panic_or_mental_health_insomnia_selects_info04(self) -> None:
+    def test_explicit_panic_or_insomnia_selects_info04(self) -> None:
         for keyword, topic in (
             ("광주 공황장애 한의원", ""),
             ("광주 한의원", "공황 발작 관리"),
+            ("광주 한의원", "불면"),
+            ("광주 한의원", "불면증"),
             ("광주 한의원", "불면과 불안이 함께 있는 경우"),
             ("광주 한의원", "정신건강 상담이 필요한 불면증"),
             ("광주 한의원", "우울감과 불면"),
@@ -131,10 +133,22 @@ class SensitiveTopicGateTests(unittest.TestCase):
                 self.assertEqual(selected["sensitiveSelectionMode"], "explicit-request")
                 self.assertIs(selected["automaticSelectionEligible"], False)
 
-    def test_insomnia_alone_and_menopausal_insomnia_do_not_unlock_info04(self) -> None:
-        for topic in (
-            "불면",
+    def test_explicit_insomnia_is_not_displaced_by_recent_master_rotation(self) -> None:
+        selected = SELECTOR.select(
+            "동천동 한의원",
             "불면증",
+            self.briefs,
+            self.profiles,
+            {"entries": [{"editorialMasterId": "INFO04"}]},
+            count=1,
+            seed="recent-sensitive-master-test",
+            intelligence=self.intelligence,
+        )[0]
+        self.assertEqual(selected["masterId"], "INFO04")
+        self.assertEqual(selected["sensitiveSelectionMode"], "explicit-request")
+
+    def test_menopausal_insomnia_does_not_unlock_info04(self) -> None:
+        for topic in (
             "갱년기 불면",
             "폐경 후 불면과 우울감",
             "완경 이후 불면과 불안",

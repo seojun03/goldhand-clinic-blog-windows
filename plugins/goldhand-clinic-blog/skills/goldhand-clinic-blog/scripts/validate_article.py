@@ -2023,10 +2023,20 @@ def validate_article(
         add(issues, "error", "article-too-long", f"제목+실제 본문 공백 제외 {combined_chars}자; 최대 {max_chars}자입니다.")
 
     title_keyword_count = title.count(keyword) if keyword else 0
+    title_non_whitespace_chars = len(compact(title))
     keyword_paragraphs = [index for index, paragraph in enumerate(prose_paragraphs, start=1) if keyword and keyword in paragraph]
     body_keyword_count = sum(paragraph.count(keyword) for paragraph in prose_paragraphs) if keyword else 0
     if title_keyword_count != 1:
         add(issues, "error", "title-keyword-count", f"제목의 정확 메인키워드가 {title_keyword_count}회입니다.")
+    elif not title.startswith(keyword):
+        add(issues, "error", "title-keyword-prefix", "메인키워드는 제목의 첫 글자부터 시작해야 합니다.")
+    if title_non_whitespace_chars > 30:
+        add(
+            issues,
+            "error",
+            "title-too-long",
+            f"제목이 공백 제외 {title_non_whitespace_chars}자입니다. 30자 이내여야 합니다.",
+        )
     if editorial_close:
         if body_keyword_count not in {1, 2}:
             add(

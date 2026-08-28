@@ -121,7 +121,7 @@
         "category": "mental-health-sensitive",
         "automaticSelectionBlocked": true,
         "explicitRequestRequired": true,
-        "explicitRequestRule": "panic-terms-or-insomnia-with-mental-context-excluding-menopause",
+        "explicitRequestRule": "panic-or-insomnia-terms-excluding-menopause",
         "manualOverrideAllowed": true
       },
       "bestFor": "같은 관리에도 반응이 다른 조건을 비교하고 자신에게 맞는지 구분하게 할 때",
@@ -451,7 +451,7 @@
         "category": "mental-health-sensitive",
         "automaticSelectionBlocked": true,
         "explicitRequestRequired": true,
-        "explicitRequestRule": "panic-terms-or-insomnia-with-mental-context-excluding-menopause",
+        "explicitRequestRule": "panic-or-insomnia-terms-excluding-menopause",
         "manualOverrideAllowed": true
       }
     },

@@ -2,9 +2,9 @@
 
 ## 역할
 
-이 11편은 주제·독자 고민·핵심 일반 정보뿐 아니라 제목 장치의 심리, 도입 설득, 정보 공개 순서, 전환 방식, 미세 표현 기능, 마무리 감정을 통제한다. 한 글에서는 한 편을 콘텐츠·편집 레퍼런스로 고정한다. 원문 완성 문장과 업체의 경력·수치·치료 주장·사례·사진은 옮기지 않고, 각 기능을 확인된 금손 사실과 박준희 원장의 생활어로 재구성한다. 꾸밈은 `goldhand-naver-native-v4`로 고정한다.
+이 11편은 제목 확정 뒤 사용하는 기존 글 구조용 편집 마스터다. 한 글에서는 한 편만 골라 확정 제목 장치의 심리, 도입 설득, 정보 공개 흐름, 전환 방식, 미세 표현 기능, 마무리 감정을 통제한다. 일반 정보는 별도의 다중 출처 수집 결과가 담당하며 콘텐츠 출처가 늘어나도 기존 금손 구조는 바꾸지 않는다. 원문 완성 문장과 업체 사실은 옮기지 않고 박준희 원장의 생활어로 새로 쓴다. 꾸밈은 `goldhand-naver-native-v4`로 고정한다.
 
-주제와 일반 정보 출처는 `wipark-content-briefs.json`, 편집 판단 출처는 `reference-writing-intelligence.json`, 최종 생활어 출처는 `goldhand-official-voice-profile.json`, 금손 사실 출처는 `clinic-facts.md`, 꾸밈 출처는 `goldhand-naver-native-design-system.json`이다. 역할을 서로 바꾸지 않는다.
+일반 정보 출처는 `wipark-content-briefs.json`, `user-general-information-references.json`, 필요한 한국어 네이버 보충 자료다. 편집 판단 출처는 `reference-writing-intelligence.json`, 최종 생활어 출처는 `goldhand-official-voice-profile.json`, 금손 사실 출처는 `clinic-facts.md`, 꾸밈 출처는 `goldhand-naver-native-design-system.json`이다. 역할을 서로 바꾸지 않는다.
 
 ## 허용 레퍼런스 11편
 
@@ -68,7 +68,7 @@
 
 - 원문: <https://blog.naver.com/wi-parkclinic/224291545650>
 - 발행일: 2026-05-20
-- 상태: 자동 후보 제외; 일치하는 민감 주제 명시 요청 또는 해당 ID 수동 지정에서만 선택 가능
+- 상태: 자동 후보 제외; 사용자가 공황 또는 불면증을 명시한 경우나 해당 ID를 수동 지정한 경우만 선택 가능. 갱년기·폐경·완경 맥락의 불면은 제외
 - 질문 위치: before-greeting
 - 적합한 글: 같은 관리에도 반응이 다른 조건을 비교하고 자신에게 맞는지 구분하게 할 때
 - 도입: 치료 가능성과 중단 후 재발 걱정을 연속 질문으로 제시

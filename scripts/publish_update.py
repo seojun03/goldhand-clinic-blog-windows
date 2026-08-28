@@ -21,6 +21,18 @@ WORKFLOW = "windows-install.yml"
 PLUGIN_NAME = "goldhand-clinic-blog"
 ARCHIVE_NAME = "goldhand-clinic-blog-plugin.zip"
 CMD_NAME = "INSTALL-WINDOWS.cmd"
+PUBLIC_VERSION_RE = re.compile(
+    r"^(?P<major>0|[1-9]\d*)\."
+    r"(?P<minor>0|[1-9]\d*)\."
+    r"(?P<patch>0|[1-9]\d*)\+codex\."
+    r"(?P<cachebuster>\d{14})$"
+)
+RELEASE_TAG_RE = re.compile(
+    r"^v(?P<major>0|[1-9]\d*)\."
+    r"(?P<minor>0|[1-9]\d*)\."
+    r"(?P<patch>0|[1-9]\d*)-codex\."
+    r"(?P<cachebuster>\d{14})$"
+)
 ALLOWED_BOOTSTRAP_PATHS = (
     ".github/workflows/windows-install.yml",
     "SETUP-IMAGES-WINDOWS.cmd",
@@ -98,13 +110,25 @@ def plugin_version(plugin_root: Path) -> str:
     except (OSError, json.JSONDecodeError) as exc:
         raise PublishError(f"플러그인 manifest를 읽을 수 없습니다: {manifest}") from exc
     version = str(data.get("version", "")).strip()
-    if not re.fullmatch(r"0\.1\.0\+codex\.\d{14}", version):
+    if PUBLIC_VERSION_RE.fullmatch(version) is None:
         raise PublishError(f"공개 배포용 버전 형식이 아닙니다: {version}")
     return version
 
 
 def release_tag(version: str) -> str:
     return "v" + version.replace("+", "-", 1)
+
+
+def release_tag_sort_key(tag: str) -> tuple[int, int, int, int]:
+    match = RELEASE_TAG_RE.fullmatch(tag.strip())
+    if match is None:
+        raise PublishError(f"비교할 수 없는 공개 릴리스 태그입니다: {tag}")
+    return (
+        int(match.group("major")),
+        int(match.group("minor")),
+        int(match.group("patch")),
+        int(match.group("cachebuster")),
+    )
 
 
 def git_status(distribution_root: Path) -> list[str]:
@@ -436,7 +460,7 @@ def main() -> int:
                 raise PublishError("원본이 공개본과 다르지만 manifest 버전이 기존 공개 버전과 같습니다.")
             print(f"already published: {tag}")
             return 0
-        if latest and tag <= latest:
+        if latest and release_tag_sort_key(tag) <= release_tag_sort_key(latest):
             raise PublishError(f"새 버전이 기존 공개 버전보다 높지 않습니다: {tag} <= {latest}")
         if (
             plugin_version(distributed_plugin) == version

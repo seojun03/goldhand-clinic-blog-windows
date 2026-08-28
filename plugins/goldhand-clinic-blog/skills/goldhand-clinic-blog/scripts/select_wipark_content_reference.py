@@ -37,16 +37,6 @@ SENSITIVE_MASTER_IDS = frozenset({"INFO04", "INFO11"})
 TRAUMA_REQUEST_TERMS = ("트라우마", "외상후스트레스", "ptsd")
 PANIC_REQUEST_TERMS = ("공황", "panic")
 INSOMNIA_REQUEST_TERMS = ("불면", "insomnia")
-MENTAL_CONTEXT_TERMS = (
-    "불안",
-    "우울",
-    "정신건강",
-    "정신과",
-    "정신건강의학과",
-    "심리",
-    "항우울",
-    "항불안",
-)
 MENOPAUSE_CONTEXT_TERMS = ("갱년기", "폐경", "완경", "안면홍조", "menopause")
 
 
@@ -133,9 +123,8 @@ def explicit_sensitive_master_ids(keyword: str, topic: str) -> set[str]:
         matched.add("INFO11")
     panic_requested = has_any_term(query, PANIC_REQUEST_TERMS)
     insomnia_requested = has_any_term(query, INSOMNIA_REQUEST_TERMS)
-    mental_context = has_any_term(query, MENTAL_CONTEXT_TERMS)
     menopause_context = has_any_term(query, MENOPAUSE_CONTEXT_TERMS)
-    if panic_requested or (insomnia_requested and mental_context and not menopause_context):
+    if panic_requested or (insomnia_requested and not menopause_context):
         matched.add("INFO04")
     return matched
 
@@ -212,7 +201,7 @@ def select(
         if preferred_master_id and master_id != preferred_master_id:
             continue
         if (
-            master_id in recent
+            (master_id in recent and master_id not in explicit_sensitive_ids)
             or master_id in excluded
             or master_id not in profiles.get("profiles", {})
             or master_id not in learning_profiles
