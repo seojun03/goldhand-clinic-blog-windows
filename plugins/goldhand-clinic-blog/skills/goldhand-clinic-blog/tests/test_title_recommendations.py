@@ -97,6 +97,14 @@ class TitleRecommendationTests(unittest.TestCase):
     def fast_payload(self) -> dict[str, object]:
         payload = self.valid_payload()
         payload["workflowStage"] = "title-first"
+        payload["informationDoctor"] = {
+            "queried": True,
+            "stage": "title",
+            "status": "stored-match",
+            "sourceProseLoaded": False,
+            "editorialMasterLoaded": False,
+            "matchedSourceIds": ["WIP-223606765259"],
+        }
         payload.pop("referenceMasterId")
         for candidate in payload["candidates"]:
             candidate.pop("titleMechanismId")
@@ -133,6 +141,23 @@ class TitleRecommendationTests(unittest.TestCase):
         self.assertEqual(result["status"], "fail")
         self.assertIn("title-first-reference-master-preselected", issue_codes)
         self.assertIn("title-first-mechanism-preselected", issue_codes)
+
+    def test_title_first_requires_compact_information_doctor_query(self) -> None:
+        payload = self.fast_payload()
+        payload.pop("informationDoctor")
+        result = self.validate(payload)
+        self.assertIn(
+            "title-first-information-doctor-missing",
+            {item["code"] for item in result["issues"]},
+        )
+
+        payload = self.fast_payload()
+        payload["informationDoctor"]["sourceProseLoaded"] = True
+        payload["informationDoctor"]["generalInformationAtoms"] = [{"id": "A1"}]
+        result = self.validate(payload)
+        codes = {item["code"] for item in result["issues"]}
+        self.assertIn("title-first-source-prose-loaded", codes)
+        self.assertIn("title-first-information-doctor-payload-too-large", codes)
 
     def test_title_first_cli_does_not_load_writing_intelligence(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

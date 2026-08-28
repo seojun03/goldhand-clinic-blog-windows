@@ -11,8 +11,8 @@
 
 ## 정보 수집 순서
 
-1. 주제·메인키워드가 모여도 제목 확정 전에는 정보 수집을 시작하지 않는다. 먼저 `title-recommendation-contract.json`만으로 제목 5개를 제시하고 사용자의 선택을 기다린다.
-2. 제목이 확정되면 그때 처음 `select_general_information.py`를 실행한다. 주제와 확정 제목의 실제 질문, 숫자 답 개수를 함께 전달한다.
+1. 주제·메인키워드가 모이면 상세 정보 수집이나 원문 재열람 대신 `query_information_doctor.py --stage title`을 실행한다. 이 조회는 주제와 직접 맞는 저장 출처 ID·독자 질문·일반화한 제목 각도·지원 가능한 답 수만 반환하며, 출처 제목·본문·상세 정보 원자·편집 마스터는 읽거나 반환하지 않는다. 일치 정보가 없으면 `title-recommendation-contract.json`만 사용한다.
+2. 제목이 확정되면 `query_information_doctor.py --stage article` 또는 `select_general_information.py`를 실행한다. 주제와 확정 제목의 실제 질문, 숫자 답 개수를 함께 전달한다.
 3. `assets/wipark-content-briefs.json`과 `assets/user-general-information-references.json`에서 질환·증상 주제어가 실제로 맞는 글을 모두 찾는다. `원인`, `치료`, `2가지` 같은 공통 제목 표현만 맞는 글은 제외한다.
 4. 관련 글 여러 편의 `generalInformationAtoms`를 합치고 의미가 같은 정보는 하나로 묶는다. 출처가 여러 개인 원자는 `sourceIds`를 모두 보존한다.
 5. 제목이 요구한 답을 저장 원자만으로 직접 채울 수 있는지 검토한다. 단순 원자 수가 많아도 제목 질문과 관계없는 정보라면 부족한 것으로 본다.
@@ -20,6 +20,16 @@
 7. 네이버 결과의 후보 글은 `fetch_naver_post_text.py`로 임시 읽기만 한다. 서로 다른 발행자 2곳 이상의 정보를 비교하고, 치료·검사·중단·주의·응급 경계가 들어가면 한국 공식 의료기관 자료를 하나 이상 포함한다.
 8. 읽은 문장에서 `증상·원인·생활관리·검사·치료의 일반 원리`만 짧은 정보 원자로 다시 적는다. 원문 문장을 초안에 전달하거나 어미만 바꿔 쓰지 않는다.
 9. 검색 결과가 없거나 HTTP 방식이 막히면 현재 작업에서 사용할 수 있는 시스템 웹 검색으로 같은 한국어 검색어를 실행할 수 있다. 이 경로도 브라우저 GUI·로그인을 요구하지 않는다. 두 경로 모두 실패하면 사실을 만들지 말고 정보 수집 실패를 정확히 알린다.
+
+## 사용자가 새 레퍼런스 블로그를 줄 때
+
+1. `collect_information_reference_blog.py --blog "블로그 주소" --output intake.json`으로 공개 글 목록과 모바일 공개 본문을 최초 한 번만 천천히 읽는다.
+2. 공지·사례·성과·업체 선택·자체 상품·프로그램·장비 중심 글을 제외하고, 실제 본문에 재사용 가능한 일반 건강 정보가 있는 글만 사람이 최종 검토한다.
+3. 원문 본문과 문장은 영구 저장하지 않는다. 일반 정보 원자, 독자 질문, 일반화한 제목 각도, URL, 본문 해시, 출처 차단 엔터티만 별도 검토 JSON으로 만든다.
+4. `store_information_doctor_sources.py`로 저장한다. 같은 URL과 같은 해시는 다시 학습하지 않고, 같은 URL의 해시가 달라졌다면 사용자가 갱신을 원할 때만 `--refresh`를 쓴다.
+5. `validate_general_information_library.py`를 통과시킨다. 구조 마스터 11편과 `reference-master-profiles.json`은 이 과정에서 절대 바꾸지 않는다.
+
+네이버가 429를 반환하면 병렬 요청을 멈추고 느린 순차 요청·지수 백오프·이어받기를 사용한다. 끝까지 읽지 못한 글은 제목만 보고 학습하지 않는다.
 
 ## 다른 한의원 정보 완전 차단
 
@@ -44,4 +54,4 @@
 - 제목의 숫자 약속과 실제 번호 답 개수
 - 글에 삽입한 금손 사실과 `source=references/clinic-facts.md`
 
-웹에서 이번 글을 위해 찾은 자료는 임시 작업 자료이며 자동으로 영구 라이브러리에 넣지 않는다. 사용자가 새 레퍼런스 글을 제공하면 출처 업체 정보를 분리·검토한 뒤 `user-general-information-references.json`에 일반 정보 원자만 추가하고 `validate_general_information_library.py`를 통과시킨다.
+웹에서 이번 글을 위해 찾은 자료는 임시 작업 자료이며 자동으로 영구 라이브러리에 넣지 않는다. 사용자가 새 레퍼런스 글이나 블로그를 제공한 경우에만 위 최초 1회 학습 절차를 거쳐 `user-general-information-references.json`에 원문 없는 일반 정보 지식만 추가한다.

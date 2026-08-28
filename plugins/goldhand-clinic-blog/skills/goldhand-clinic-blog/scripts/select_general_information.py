@@ -53,6 +53,18 @@ STOP_TERMS = {
     "원칙",
 }
 
+GENERIC_SUBJECT_ANCHORS = {
+    "후유증",
+    "통증",
+    "증상",
+    "질환",
+    "질병",
+    "관리",
+    "치료",
+    "회복",
+    "재활",
+}
+
 TOPIC_ALIASES: dict[str, tuple[str, ...]] = {
     "불면": ("불면증", "수면장애", "잠들기 어려움", "자주 깨는", "중도각성", "새벽각성", "수면"),
     "안면마비": ("얼굴마비", "구안와사", "벨마비"),
@@ -126,6 +138,17 @@ def topical_terms(topic: str) -> set[str]:
         if any(compact(term) and compact(term) in topic_compact for term in family):
             result.update(normalize(term) for term in family)
     return result
+
+
+def subject_anchor_terms(topic: str) -> set[str]:
+    """Prefer the named condition/body subject over generic symptom suffixes."""
+    anchors = topical_terms(topic)
+    specific = {
+        term
+        for term in anchors
+        if compact(term) not in {compact(value) for value in GENERIC_SUBJECT_ANCHORS}
+    }
+    return specific or anchors
 
 
 def has_context(raw_query: str, required: tuple[str, ...] | list[str]) -> bool:
@@ -330,7 +353,7 @@ def select_information(
     keyword = normalize(keyword)
     raw_query = f"{topic} {title.replace(keyword, ' ') if keyword else title}".strip()
     terms = query_terms(topic, title, keyword)
-    anchors = topical_terms(topic)
+    anchors = subject_anchor_terms(topic)
     sources = built_in_sources(briefs, profiles) + user_sources(user_library)
     matched_sources: list[dict[str, Any]] = []
     atom_candidates: list[dict[str, Any]] = []
@@ -342,12 +365,13 @@ def select_information(
             [
                 str(source.get("sourceTitle", "")),
                 str(source.get("topic", "")),
-                *[str(value) for value in source.get("topicTags", []) if isinstance(value, str)],
+                *[str(value) for value in source.get("primaryTopicTags", []) if isinstance(value, str)],
             ]
         )
         source_haystack = " ".join(
             [
                 anchor_haystack,
+                *[str(value) for value in source.get("topicTags", []) if isinstance(value, str)],
                 *[str(value) for value in source.get("readerConcerns", []) if isinstance(value, str)],
             ]
         )

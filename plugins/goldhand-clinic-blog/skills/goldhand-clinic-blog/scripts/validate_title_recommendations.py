@@ -110,6 +110,45 @@ def validate_recommendations(
     if not isinstance(candidates, list):
         add(issues, "error", "candidates-not-list", "candidates는 제목 후보 목록이어야 합니다.")
         candidates = []
+
+    if title_first and contract.get("storedInformationDoctorQueryRequiredBeforeRecommendations") is True:
+        doctor = payload.get("informationDoctor")
+        if not isinstance(doctor, dict):
+            add(
+                issues,
+                "error",
+                "title-first-information-doctor-missing",
+                "빠른 제목 단계 전에 저장 정보 박사의 title 조회가 필요합니다.",
+            )
+        else:
+            if doctor.get("queried") is not True or TITLE_VALIDATOR.normalize(str(doctor.get("stage", ""))) != "title":
+                add(
+                    issues,
+                    "error",
+                    "title-first-information-doctor-query-invalid",
+                    "informationDoctor는 queried=true, stage=title이어야 합니다.",
+                )
+            if doctor.get("sourceProseLoaded") is not False:
+                add(
+                    issues,
+                    "error",
+                    "title-first-source-prose-loaded",
+                    "제목 단계에서는 출처 원문을 다시 읽지 않습니다.",
+                )
+            if doctor.get("editorialMasterLoaded") is not False:
+                add(
+                    issues,
+                    "error",
+                    "title-first-editorial-master-loaded",
+                    "제목 단계에서는 구조 마스터를 읽지 않습니다.",
+                )
+            if any(key in doctor for key in ("sourceTitles", "generalInformationAtoms", "sourceProse")):
+                add(
+                    issues,
+                    "error",
+                    "title-first-information-doctor-payload-too-large",
+                    "제목 단계에는 출처 제목·원문·상세 정보 원자를 전달하지 않습니다.",
+                )
     if len(candidates) != expected_count:
         add(
             issues,

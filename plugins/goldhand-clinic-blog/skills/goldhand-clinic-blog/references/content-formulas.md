@@ -5,7 +5,9 @@
 ## 레퍼런스와 금손 내용의 경계
 
 - `wipark-content-briefs.json`: 직접 본문까지 검토한 위석 정보글 11편에서 분리한 일반 정보 원자
-- `user-general-information-references.json`: 사용자가 추가한 레퍼런스에서 출처 업체 정보를 제거하고 검토한 일반 정보 원자
+- `user-general-information-references.json`: 사용자가 추가한 레퍼런스를 최초 한 번만 읽고 출처 업체 정보와 원문을 제거해 저장한 일반 정보 원자·독자 질문·제목 각도
+- `query_information_doctor.py`: 제목 전에는 압축 제목 각도만, 제목 확정 뒤에는 상세 일반 정보 원자만 주제별 조회하는 단일 창구
+- `information-doctor-library.md`: 현재 63편 정보 레퍼런스 목록과 네이버 제한 대응·영구 저장 경계
 - `general-information-retrieval.md`: 저장 자료가 부족할 때의 한국어 네이버 백그라운드 보충 절차
 - `reference-master-profiles.json`: 같은 위석 원문의 기능적 내용 역할과 한 편 전체의 읽기 순서
 - `reference-writing-intelligence.json`: 제목 장치의 독자 심리, 도입 설득, 전환, 디테일한 표현 기능, 신뢰 슬롯, 마무리 감정

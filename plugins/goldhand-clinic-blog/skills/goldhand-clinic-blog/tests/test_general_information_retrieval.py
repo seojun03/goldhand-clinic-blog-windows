@@ -66,19 +66,23 @@ class GeneralInformationSelectionTests(unittest.TestCase):
             self.empty_library,
         )
 
-    def test_insomnia_uses_only_sleep_atoms_from_info04(self) -> None:
+    def test_insomnia_keeps_info04_sensitive_atoms_closed_with_expanded_library(self) -> None:
         result = self.select("불면증", "동천동 한의원 불면증 원인 2가지")
         self.assertEqual(result["status"], "stored-sufficient")
-        self.assertEqual([source["id"] for source in result["storedSources"]], ["INFO04"])
-        atom_ids = {
+        source_ids = {source["id"] for source in result["storedSources"]}
+        self.assertIn("INFO04", source_ids)
+        self.assertIn("WIP-223606765259", source_ids)
+        self.assertNotIn("BEO-224123381569", source_ids)
+        info04_atom_ids = {
             atom_id
             for atom in result["mergedInformationAtoms"]
             for atom_id in atom["sourceAtomIds"]
+            if atom_id.startswith("INFO04-")
         }
-        self.assertEqual(atom_ids, {"INFO04-A1", "INFO04-A3"})
+        self.assertEqual(info04_atom_ids, {"INFO04-A1", "INFO04-A3"})
 
     def test_unknown_topic_never_forces_unrelated_reference(self) -> None:
-        result = self.select("이명", "동천동 한의원 이명 원인 3가지")
+        result = self.select("손톱 갈라짐", "동천동 한의원 손톱 갈라짐 원인 3가지")
         self.assertEqual(result["status"], "web-required")
         self.assertEqual(result["storedSources"], [])
         self.assertTrue(result["webSearch"]["required"])
@@ -87,7 +91,7 @@ class GeneralInformationSelectionTests(unittest.TestCase):
 
     def test_numbered_title_requires_enough_distinct_atoms(self) -> None:
         result = self.select("불면증", "동천동 한의원 불면증 원인 3가지")
-        self.assertEqual(result["status"], "stored-plus-web-required")
+        self.assertEqual(result["status"], "stored-sufficient")
         self.assertEqual(result["titleContract"]["promisedAnswerCount"], 3)
         self.assertEqual(result["coverage"]["minimumAtomCount"], 3)
 
@@ -260,16 +264,31 @@ class SourceBoundaryValidationTests(unittest.TestCase):
         library["sources"] = [
             {
                 "id": "USER01",
+                "sourceBlogId": "sleep-example",
                 "sourceTitle": "불면증 정보",
                 "sourceUrl": "https://example.com/post",
                 "sourceType": "clinic-blog",
                 "sourceClinicName": "서울잠한의원",
+                "contentHash": "a" * 64,
+                "learnedAt": "2026-08-29T00:00:00+00:00",
+                "topic": "불면증",
                 "topicTags": ["불면증"],
+                "readerQuestions": ["잠들기 어려운 이유를 무엇부터 나눠 봐야 하는가?"],
+                "titleAngles": [
+                    {
+                        "angleId": "USER01-T1",
+                        "angle": "잠들기 어려워지는 생활 조건 두 가지",
+                        "mechanism": "everyday-cause-count",
+                        "supportedAnswerCount": 2,
+                    }
+                ],
                 "reviewStatus": "general-information-only-reviewed",
                 "generalInformationOnly": True,
                 "sourceClinicFactsBlocked": True,
                 "sourceSentencesBlocked": True,
                 "sourceCasesAndResultsBlocked": True,
+                "sourceProgramsProductsEquipmentBlocked": True,
+                "officialKoreanMedicalSupportRequiredAtDraftTime": True,
                 "blockedEntities": ["서울잠한의원"],
                 "generalInformationAtoms": [
                     {
@@ -282,6 +301,7 @@ class SourceBoundaryValidationTests(unittest.TestCase):
                 ],
             }
         ]
+        library["knowledgeDoctor"]["storedSourceCount"] = 1
         result = VALIDATE_LIBRARY.validate_library(library)
         self.assertEqual(result["status"], "fail")
         self.assertIn("source-entity-in-atom", {issue["code"] for issue in result["issues"]})
