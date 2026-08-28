@@ -116,6 +116,9 @@ def normalized_fingerprint_bytes(relative: Path, path: Path) -> bytes:
     payload = path.read_bytes()
     if relative == SKILL_RELATIVE_PATH:
         text = payload.decode("utf-8")
+        # Keep the managed source fingerprint identical across Git checkouts.
+        # Windows tests create CRLF files, while the canonical macOS source uses LF.
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
         matches = list(SKILL_VERSION_LINE_RE.finditer(text))
         if len(matches) != 1:
             raise ValueError("SKILL.md의 관리 대상 자동화 버전 줄은 정확히 하나여야 합니다.")

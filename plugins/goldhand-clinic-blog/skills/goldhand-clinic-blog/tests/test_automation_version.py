@@ -100,6 +100,26 @@ class AutomationVersionTests(unittest.TestCase):
                 json.loads(state.read_text(encoding="utf-8"))["sourceFingerprint"]
             )
 
+    def test_crlf_skill_initializes_with_the_same_managed_version(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_name:
+            root = Path(temp_name) / "plugin"
+            manifest, skill, state = self.make_plugin(root)
+            skill.write_bytes(
+                skill.read_text(encoding="utf-8").replace("\n", "\r\n").encode("utf-8")
+            )
+
+            result = REFRESH.sync_automation_version(
+                root,
+                now="2026-08-27T00:00:00+00:00",
+            )
+
+            self.assertTrue(result["initialized"])
+            self.assertFalse(result["contentChanged"])
+            self.assertEqual(result["currentVersion"], "1.0")
+            self.assertTrue(
+                json.loads(state.read_text(encoding="utf-8"))["sourceFingerprint"]
+            )
+
     def test_one_source_update_bumps_once_and_retry_keeps_version(self) -> None:
         with tempfile.TemporaryDirectory() as temp_name:
             root = Path(temp_name) / "plugin"
