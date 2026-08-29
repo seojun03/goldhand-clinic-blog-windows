@@ -30,7 +30,6 @@ REQUIRED_CLUSTERS = {
     "weight-management",
 }
 REQUIRED_DENIED_USES = {
-    "titlePattern",
     "articleStructure",
     "prose",
     "formatting",
@@ -41,22 +40,6 @@ REQUIRED_DENIED_USES = {
     "media",
 }
 ALLOWED_PAYLOAD_KEYS = {"sourceTitle", "topicIdea", "coverageQuestions"}
-FORBIDDEN_EXACT_KEYS = {
-    "writingMasterId",
-    "compatibleWritingMasterIds",
-    "titlePatternId",
-    "titlePatternDescription",
-    "questionPlacement",
-    "openingMode",
-    "solutionPreviewMode",
-    "answerAgenda",
-    "renderContract",
-    "bodyText",
-    "sourceHtml",
-    "claims",
-    "cases",
-    "media",
-}
 FORBIDDEN_KEY_WORDS = {
     "title",
     "pattern",
@@ -153,8 +136,8 @@ def find_forbidden_payload_keys(value: Any, path: str = "$") -> list[str]:
             child_path = f"{path}.{key}"
             if key not in ALLOWED_PAYLOAD_KEYS:
                 blocked = split_key_words(key) & FORBIDDEN_KEY_WORDS
-                if key in FORBIDDEN_EXACT_KEYS or blocked:
-                    reason = ", ".join(sorted(blocked)) if blocked else "explicitly forbidden"
+                if blocked:
+                    reason = ", ".join(sorted(blocked))
                     errors.append(
                         f"작성·구조·사실·내용 payload 키를 둘 수 없습니다: {child_path} "
                         f"({reason})"

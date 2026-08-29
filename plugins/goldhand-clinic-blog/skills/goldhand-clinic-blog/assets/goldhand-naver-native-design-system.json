@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 13,
-  "id": "goldhand-naver-native-v4",
-  "name": "금손한의원 네이버 스마트에디터 중앙 정렬·노란 강조·순정 표 시스템",
+  "schemaVersion": 14,
+  "id": "goldhand-naver-native-v5",
+  "name": "금손한의원 승인 평문 보존·단일 정보전달 구조 네이버 디자인 시스템",
   "editorEvidence": {
     "auditedOn": "2026-08-20",
     "editor": "NAVER SmartEditor ONE",
@@ -30,19 +30,19 @@
     "importantPhrasesUseYellowHighlightUnderlineOrRedText": true,
     "valueProofUsesOneColumnMultiRowTable": true,
     "valueProofRowsAreFixed": true,
-    "credentialFollowsCompleteIntroduction": true,
-    "credentialPrecedesFirstInformationBody": true,
-    "clinicHoursUsesThreeCenteredColumns": true,
-    "clinicHoursOmitsHolidayRows": true,
-    "clinicInfoUsesStackedCenteredRows": true,
-    "clinicInfoOmitsKakaoAndNaverReservationRows": true,
-    "titleMechanismFollowsSelectedReferencePsychology": true,
-    "numberedAnswerPromiseMatchesActualCountWhenUsed": true,
-    "solutionPreviewUsesASelectedPersuasionDevice": true,
-    "specificReadingTimeIsOptionalAndAdaptive": true,
+    "plainTextApprovalRequiredBeforeDesign": true,
+    "approvedSentencesAndOrderAreFrozen": true,
+    "credentialFollowsReaderQuestions": true,
+    "credentialPrecedesThreeMinutePayoff": true,
+    "numberedAnswerPromiseMatchesActualCount": true,
+    "numberedAnswerCountAllowed": [2, 3],
+    "specificReadingTimeIsAlwaysThreeMinutes": true,
     "solutionPreviewContainsFirstHighlight": true,
+    "closingSummaryFollowsNumberedAnswers": true,
+    "ctaIsFinalVisibleBlock": true,
+    "contentAfterCtaAllowed": false,
     "finalWritingVoiceRehearIsRequired": true,
-    "finalWritingVoiceDoesNotChangeContentOrStructure": true,
+    "finalWritingVoiceDoesNotChangeApprovedContentOrOrder": true,
     "userOwnedCallilifeReferenceGeneratesGptImage": true
   },
   "readabilityEvidence": {
@@ -95,28 +95,24 @@
     },
     "requiredGapAfterMobileGroup": true
   },
-  "editorialCloseOverrides": {
-    "draftCompleteNaturalProseBeforeVisualLineBreaks": true,
-    "exactBodyKeywordMinimumCount": 2,
-    "exactBodyKeywordMaximumCount": 3,
-    "quotationMinimumCount": 1,
-    "quotationMaximumCount": 3,
-    "tableMinimumCount": 3,
-    "tableMaximumCount": 4,
-    "articleSummaryMinimumCount": 0,
-    "articleSummaryMaximumCount": 1,
-    "editorialMasterCount": 1,
-    "sourceRole": "editorial-reasoning-content-flow-and-expression-principles",
-    "credentialPlacement": {
-      "appliesToEveryArticle": true,
-      "questionAndGreetingOrderControlledByEditorialMaster": true,
-      "requiredAfterAllIntroRoles": ["reader-question", "greeting-authority", "solution-preview"],
-      "requiredAfterCompletedRole": "solution-preview",
-      "requiredImmediatelyBeforeFirstInformationBodyRole": ["divider", "section-heading"],
-      "allowedInterveningContentRoles": ["evidence-media:before-credential"],
-      "maximumBeforeCredentialRealPhotos": 1,
-      "allowedInterveningNonContentMarker": "data-preview-gap=true"
-    }
+  "approvedSingleStructure": {
+    "productionBeginsAfterPlainTextApproval": true,
+    "approvedSentenceTextFrozen": true,
+    "approvedBlockOrderFrozen": true,
+    "requiredBlockOrder": [
+      "reader-question",
+      "credential",
+      "solution-preview",
+      "numbered-answer",
+      "closing-summary",
+      "cta"
+    ],
+    "readerQuestionCount": [2, 3],
+    "numberedAnswerCount": [2, 3],
+    "solutionPreviewMinutes": 3,
+    "ctaMustBeFinalVisibleBlock": true,
+    "contentAfterCtaAllowed": false,
+    "automaticClinicHoursOrContactBlocksAllowed": false
   },
   "nativeComponents": {
     "quotation": {
@@ -138,16 +134,16 @@
       "allowedTags": ["h2", "p"],
       "marker": "data-naver-native-component=subheading",
       "minimumCount": 2,
-      "maximumCount": 4,
+      "maximumCount": 3,
       "customBoxStyleAllowed": false
     },
     "table": {
       "tag": "table",
       "marker": "data-naver-native-component=table",
-      "minimumCount": 3,
-      "maximumCount": 4,
+      "minimumCount": 1,
+      "maximumCount": 1,
       "preset": "naver-table1-default",
-      "allowedPurposes": ["credential", "article-summary", "clinic-hours", "clinic-info"]
+      "allowedPurposes": ["credential"]
     }
   },
   "tablePurposes": {
@@ -164,48 +160,10 @@
       "maximumItemRows": 6,
       "fixedRowsRequired": true,
       "placement": {
-        "requiredAfterCompleteIntroduction": true,
-        "requiredDirectlyAfterRole": "solution-preview",
-        "requiredImmediatelyBeforeFirstInformationBodyRole": ["divider", "section-heading"],
+        "requiredDirectlyAfterRole": "reader-question",
+        "requiredImmediatelyBeforeRole": "solution-preview",
         "appliesToEveryArticle": true
       }
-    },
-    "article-summary": {
-      "minimumCount": 1,
-      "maximumCount": 1,
-      "minimumRows": 3,
-      "minimumColumns": 2,
-      "requiresGoldHeader": true
-    },
-    "clinic-hours": {
-      "minimumCount": 1,
-      "maximumCount": 1,
-      "minimumRows": 4,
-      "maximumRows": 4,
-      "minimumColumns": 3,
-      "maximumColumns": 3,
-      "requiresGoldHeader": true,
-      "columnWidths": ["24%", "38%", "38%"],
-      "headerTexts": ["요일", "진료시간", "비고"],
-      "forbiddenVisibleTexts": ["공휴일", "설·추석"],
-      "minimumCellHeight": "64px",
-      "requiredLineHeight": "1.8",
-      "requiredWordBreak": "keep-all"
-    },
-    "clinic-info": {
-      "minimumCount": 1,
-      "maximumCount": 1,
-      "minimumRows": 4,
-      "maximumRows": 4,
-      "minimumColumns": 1,
-      "maximumColumns": 1,
-      "requiresGoldHeader": true,
-      "headerText": "금손한의원",
-      "columnWidth": "100%",
-      "forbiddenVisibleTexts": ["카카오톡", "@금손한의원", "네이버 예약"],
-      "minimumCellHeight": "64px",
-      "requiredLineHeight": "1.8",
-      "requiredWordBreak": "keep-all"
     }
   },
   "tableDesign": {
@@ -270,46 +228,43 @@
     "nestedEmphasisAllowed": false
   },
   "retentionHooks": {
-    "titleRequiresNumericAnswerPromise": false,
-    "titleMechanismSource": "selected-reference-writing-intelligence",
-    "numberedAnswerPromiseRule": "숫자 답을 약속한 제목에서만 실제 번호 답 개수와 일치",
+    "titleRequiresNumericAnswerPromise": true,
+    "titleMechanismSource": "user-confirmed-natural-korean-title",
+    "numberedAnswerPromiseRule": "확정 제목의 n은 실제 번호 답 n개와 정확히 일치",
     "titleRecommendations": {
-      "contractId": "goldhand-title-recommendations-v1",
+      "contractId": "goldhand-title-recommendations-v2",
       "candidateCount": 5,
-      "keywordMustStartTitle": true,
-      "maximumNonWhitespaceCharacters": 30,
+      "keywordMustStartTitle": false,
+      "maximumNonWhitespaceCharacters": null,
       "customTitleAllowed": true,
-      "minimumCareerCandidateCount": 1,
-      "minimumNumberedCandidateCount": 3,
-      "numberedAnswerCounts": [
-        1,
-        2,
-        3
-      ],
-      "strongWordingRequired": true,
-      "readerBenefitOrLossRequired": true
+      "minimumCareerCandidateCount": 0,
+      "minimumNumberedCandidateCount": 0,
+      "numberedAnswerCountRule": "positive-integer-equal-to-distinct-supported-answers",
+      "strongWordingRequired": false,
+      "readerBenefitOrLossRequired": false,
+      "naturalKoreanTitleRequired": true,
+      "confirmedUserTitleFrozen": true
     },
     "readingTime": {
-      "requiredForEveryArticle": false,
-      "requiredWhenDevice": "specific-number-low-friction-topic-payoff",
-      "minimumMinutes": 1,
-      "maximumMinutes": 5,
-      "requiredRoleWhenUsed": "reading-time-hook",
-      "requiredNumericAttributeWhenUsed": "data-reading-minutes",
+      "requiredForEveryArticle": true,
+      "exactMinutes": 3,
+      "requiredRole": "solution-preview",
+      "requiredNumericAttribute": "data-reading-minutes=3",
       "requiredInsideRole": "solution-preview",
       "topicSpecificPayoffRequired": true
     },
     "introductionPersuasion": {
-      "requiredAttribute": "data-intro-persuasion-device",
-      "deviceSource": "selected-reference-writing-intelligence.openingMechanism.allowedDeviceIds",
+      "requiredRole": "solution-preview",
+      "fixedPromise": "3분 안에 제목의 답을 알 수 있는 구체적 이득",
       "requiredPayoffAttribute": "data-reader-payoff",
       "payoffMustAppearInVisibleIntroduction": true
     },
     "closing": {
-      "requiredMechanismAttribute": "data-closing-mechanism",
-      "mechanismSource": "selected-reference-writing-intelligence.closingMechanism.allowedIds",
-      "requiredPayoffAttribute": "data-closing-payoff",
-      "payoffMustAppearInVisibleClose": true
+      "requiredSummaryRole": "closing-summary",
+      "requiredCtaRole": "cta",
+      "ctaMustFollowSummary": true,
+      "ctaMustBeFinalVisibleBlock": true,
+      "contentAfterCtaAllowed": false
     },
     "introductionHighlight": {
       "minimumCount": 1,
@@ -323,8 +278,8 @@
     "minimumCount": 3,
     "maximumCount": 4,
     "requiredImageZone": "early-explanatory-body",
-    "placementStart": "after-credential-table",
-    "placementEnd": "before-third-body-section-heading-or-neutral-close-if-fewer-sections",
+    "placementStart": "inside-first-numbered-answer-after-related-approved-paragraph",
+    "placementEnd": "before-closing-summary",
     "maximumBodySectionsFromStart": 2,
     "minimumCountInFirstSection": 1,
     "ownerAuthorization": "user-confirmed",
@@ -385,9 +340,8 @@
     "userDesktopDependencyAllowed": false,
     "recentArticleWindow": 1,
     "selectionOrder": [
-      "before-credential-context-match-not-used-by-immediately-previous-article",
-      "closing-trust-approved-clinical-scene-not-used-by-immediately-previous-article",
-      "closing-trust-approved-clinical-scene-reused-only-when-fresh-below-target"
+      "numbered-answer-context-match-not-used-by-immediately-previous-article",
+      "numbered-answer-context-match-from-older-approved-article"
     ],
     "personInteractionRequired": true,
     "directorVisibleRequired": true,
@@ -401,62 +355,23 @@
     ],
     "visibleCaptionAllowed": false,
     "allowedLayouts": {
-      "before-credential": 1,
-      "closing-trust": 2
+      "numbered-answer": [1, 2]
     },
-    "explanatoryBodyPlacementAllowed": false,
+    "explanatoryBodyPlacementAllowed": true,
     "olderArticleReuseAllowed": true,
     "immediatelyPreviousArticleReuseAllowed": false,
     "recentReuseAllowedWhenFreshBelowTarget": false,
     "recentReuseMaximumPerArticle": 0,
     "placementTermsRequired": true,
     "contextMatchRequiredByLayout": {
-      "before-credential": true,
-      "closing-trust": false
+      "numbered-answer": true
     },
-    "closingTrustRecentReuseAllowedWhenFreshBelowTarget": true,
-    "closingTrustRecentReuseMaximumPerArticle": 2,
     "approvedAltRequired": true,
     "requiredFigurePlacementByLayout": {
-      "before-credential": "after-related-paragraph",
-      "closing-trust": "closing-clinical-gallery"
+      "numbered-answer": "inside-approved-numbered-answer-after-related-paragraph"
     },
     "requiredAlignment": "center",
     "requiresVisualPrivacyReview": true
-  },
-  "closingCredentialTrustMedia": {
-    "exactCount": 1,
-    "separateFromClinicalMedia": true,
-    "countsTowardRealGoldhandMedia": false,
-    "sources": [
-      "goldhand-bundled-official-library"
-    ],
-    "bundledDirectory": "assets/official-media",
-    "registry": "assets/media-library.json",
-    "requiresBundledFileHashMatch": true,
-    "eligibleField": "closingTrustEligible",
-    "reviewedField": "closingTrustReviewed",
-    "allowedSceneTypes": [
-      "director-agreement-pose",
-      "director-community-pose",
-      "credential-detail"
-    ],
-    "directorOrDocumentVisibleRequired": true,
-    "requiredMarker": "data-trust-photo=true",
-    "requiredSlot": "closing-credential-trust",
-    "requiredContextRole": null,
-    "contextTextRequired": false,
-    "visibleContextAllowed": false,
-    "requiredFigurePlacement": "closing-credential-trust",
-    "approvedAltRequired": true,
-    "visibleCaptionAllowed": false,
-    "placementStart": "after-neutral-close",
-    "placementEnd": "before-clinic-hours-heading",
-    "mustBeLastImageBeforeClinicHours": true,
-    "recentArticleWindow": 1,
-    "olderArticleReuseAllowed": true,
-    "immediatelyPreviousArticleReuseAllowed": false,
-    "recentReuseMaximumPerArticle": 0
   },
   "copyPolicy": {
     "stripArticleWrapper": true,
@@ -482,58 +397,16 @@
       "script"
     ]
   },
-  "finalWritingVoiceReview": {
-    "requiredOnEveryArticle": true,
-    "contractId": "writing-voice-final-rehear-v1",
-    "sourceSkill": "writing-voice",
-    "stage": "after-complete-visible-prose-and-seo-before-production-assembly",
-    "allowForcedEdit": false,
-    "preserve": [
-      "content-and-order",
-      "facts-and-medical-boundaries",
-      "claim-strength",
-      "reference-mechanisms",
-      "keyword-and-title-promise",
-      "html-components-and-output-boundary"
-    ],
-    "articleAttributes": {
-      "data-writing-voice-review": "writing-voice-final-rehear-v1",
-      "data-writing-voice-status": "pass"
-    }
-  },
-  "finalProseReview": {
-    "requiredOnEveryArticle": true,
-    "defaultReviewer": "writing-voice",
-    "allowedReviewers": {
-      "writing-voice": {
-        "contractId": "writing-voice-final-rehear-v1",
-        "articleAttributes": {
-          "data-writing-voice-review": "writing-voice-final-rehear-v1",
-          "data-writing-voice-status": "pass"
-        }
-      },
-      "humanize-korean": {
-        "contractId": "humanize-korean-final-pass-v1",
-        "articleAttributes": {
-          "data-final-prose-reviewer": "humanize-korean",
-          "data-final-prose-review": "humanize-korean-final-pass-v1",
-          "data-final-prose-status": "pass"
-        }
-      }
-    },
-    "oneReviewerPerArticle": true,
-    "abTestUsesOneSharedPreFinalDraft": true,
-    "humanizeVariantMustExcludeWritingVoice": true
-  },
   "fixedClosingLinks": {
     "enabled": false,
     "requiredOnEveryArticle": false,
-    "articleEndsWith": "clinic-info",
-    "config": "assets/goldhand-closing-links.json",
+    "articleEndsWith": "cta",
     "forbiddenClosingElements": [
       "related-post-label",
       "latest-blog-post-link",
-      "naver-place-map"
+      "naver-place-map",
+      "clinic-hours",
+      "clinic-info"
     ],
     "preserveAllOtherArticleOutput": true
   },
@@ -554,5 +427,5 @@
   "forbiddenMarkupAttributes": [
     "data-goldhand-box"
   ],
-  "policy": "선택한 한 레퍼런스의 제목 심리·도입 설득·정보 순서·마무리 감정만 배우고 완성 문장과 업체 사실은 금손 내용으로 새로 쓴다. 첫 보이는 문장은 서로 다른 생활 장면을 묻는 질문 2~3개이며 그 뒤에만 고정 인사를 쓴다. 질문 묶음은 writing-voice 최종 재청취에서 함께 듣고 증상명 때문에 ...나요 틀의 반복, 쉼표로 증상을 쌓은 요약 질문, 같은 리듬을 차단한다. solution-preview에는 선택된 도입 장치와 보이는 주제별 보상을 둔다. 모든 글은 중앙 정렬하고 하이라이트 3개, 밑줄 2~3개, 안전 경계 빨간 글씨 1~2개를 사용한다. 사용자 소유 callilife 작품을 레퍼런스로 만든 GPT Image 3~4장은 원장 소개표 뒤 첫 두 개 설명 섹션 안에 배치하고, 최소 1장은 첫 설명 섹션에 두며, data-image-zone=early-explanatory-body로 표시한다. 실제 진료 사진은 해결 방향 예고 뒤 원장 소개표 바로 위 before-credential 1장 또는 neutral-close 뒤 closing-trust 2장 중 한 구성만 사용하고 설명 본문 중간에 분산하지 않는다. before-credential 사진만 승인 핵심어와 본문 맥락을 맞춘다. closing-trust 두 장은 글의 질환·부위와 맞지 않아도 되며 시각 검수된 실제 치료·진찰·상담·검사 장면이면 사용한다. 이 두 장은 직전 글 미사용 사진을 먼저 고르고 부족할 때만 직전 글의 승인 사진을 재사용해 사진을 빼지 않는다. 여기에 협약·수료증·기부·봉사 장면처럼 시각 검수를 마친 마무리 신뢰 사진 1장을 별도로 더하며, 진료 사진 수량에 포함하지 않고 진료시간 안내 전 마지막 이미지로 둔다. 마무리 신뢰 사진은 승인 문맥·alt와 바로 앞 문단이 같은 장면을 가리키며 직전 글 사진을 재사용하지 않는다. 진료 사진 자리에 로고·건물·제품·약·장비·빈 공간은 사용하지 않으며 모든 이미지의 보이는 캡션을 금지한다. 가치입증은 고정 6행 표로 유지하고, 모든 글은 clinic-info 운영정보 표에서 끝낸다."
+  "policy": "사용자가 제목과 평문을 승인한 뒤에만 HTML·이미지·디자인을 시작한다. 승인된 문장과 블록 순서는 바꾸지 않는다. 모든 글은 독자 질문 2개 이상, 금손한의원 소개 가치입증 표, 정확히 3분의 이득 예고, 제목의 n과 같은 개수의 번호 소제목, 전체 요약, CTA 순서로 만든다. 가치입증 표는 유일한 표이며 독자 질문 뒤, 3분 예고 앞에 둔다. 이미지는 승인된 번호 소제목 안의 관련 문단 뒤에만 넣고 전체 요약 뒤에는 넣지 않는다. CTA는 마지막 보이는 블록이며 그 뒤에 진료시간·운영정보·링크·지도·사진·표를 자동으로 붙이지 않는다. 모든 글은 중앙 정렬하고 하이라이트 3개, 밑줄 2~3개, 안전 경계 빨간 글씨 1~2개를 사용하며, 모든 이미지의 보이는 캡션은 금지한다."
 }

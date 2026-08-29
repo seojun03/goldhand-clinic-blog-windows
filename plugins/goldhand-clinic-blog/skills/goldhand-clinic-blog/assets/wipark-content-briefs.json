@@ -4,7 +4,7 @@
   "sourceBlogUrl": "https://blog.naver.com/wi-parkclinic",
   "cutoffInclusive": "2024-10-04",
   "liveReviewedOn": "2026-08-21",
-  "contentAuthority": "선택한 한 편의 주제·독자 질문·핵심 일반 정보·정보 공개 순서를 사용한다. 문장과 업체 고유 사실은 사용하지 않는다.",
+  "contentAuthority": "주제·독자 질문·핵심 일반 정보만 사용한다. 글의 순서는 제공하지 않으며 문장과 업체 고유 사실은 사용하지 않는다.",
   "alwaysBlocked": [
     "위석부부한의원 상호·지역·원장·경력·학력",
     "환자 수·소개율·감량 수치·치료 횟수·회복률·효과 배수",
@@ -21,7 +21,7 @@
         "치료를 받아도 다시 아픈 이유",
         "직장 생활을 하면서도 관리할 수 있는지"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO01-A1",
           "role": "treatment-response-timing",
@@ -47,7 +47,7 @@
           "meaning": ["치료와 생활 자세 함께 조정"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "짧은 기간의 반응만 보고 치료를 중단하면 경과를 다시 판단하기 어렵다.",
         "치료 뒤에도 모니터 높이·스마트폰 자세·오래 앉는 습관이 그대로면 같은 부위에 부담이 반복될 수 있다.",
         "일자목·거북목은 뼈의 배열만이 아니라 주변 근육의 긴장과 움직임을 함께 봐야 한다.",
@@ -66,7 +66,7 @@
         "갑자기 입이 돌아갔을 때 바로 진료가 필요한지",
         "한방 치료만으로 충분한지"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO03-A1",
           "role": "first-differential",
@@ -92,7 +92,7 @@
           "meaning": ["현재 상태와 다른 치료 필요성 함께 판단"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "갑작스러운 얼굴 마비는 중추성과 말초성을 먼저 구분해야 한다.",
         "팔·다리 힘 빠짐이나 말 어눌함 같은 증상이 동반되면 응급 평가가 우선이다.",
         "말초성 안면마비도 초기 평가와 치료 시기를 놓치지 않는 것이 중요하다.",
@@ -111,7 +111,7 @@
         "한의원 치료가 자신에게 맞는지",
         "약을 줄이거나 끊으면 다시 힘들어질지"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO04-A1",
           "role": "initial-history",
@@ -137,7 +137,7 @@
           "meaning": ["필요 시 병행 치료 또는 다른 평가 우선"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "증상 기간·현재 복용약·수면 양상·신체 증상을 먼저 확인한다.",
         "가슴 답답함·두근거림·소화불량 같은 신체 반응이 함께 나타나는지 살핀다.",
         "치료 반응은 사람마다 다르며 한 가지 치료만으로 판단하지 않는다.",
@@ -156,7 +156,7 @@
         "건강보험·자동차보험 적용 여부",
         "본인부담과 이용 횟수"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO05-A1",
           "role": "current-insurance-rule",
@@ -182,7 +182,7 @@
           "meaning": ["비적합 상태 구분"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "보험 적용 여부와 횟수·본인부담금은 시점에 따라 달라질 수 있어 발행 직전 공식 기준을 확인한다.",
         "근골격계 상태와 진단에 따라 추나요법의 적용 여부를 먼저 판단한다.",
         "가격만 보지 않고 현재 통증과 움직임에 추나요법이 맞는지 확인한다.",
@@ -201,7 +201,7 @@
         "계단을 내려갈 때 반복되는 통증",
         "검사상 큰 이상이 없는데 계속 아픈 이유"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO06-A1",
           "role": "walking-observation",
@@ -227,7 +227,7 @@
           "meaning": ["실제 동작이 편해졌는지 재평가"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "걷는 모습과 체중이 실리는 방향을 확인한다.",
         "발·발목·무릎·골반과 주변 근육의 연결을 함께 본다.",
         "영상검사에서 큰 이상이 없어도 움직임에 따른 통증은 남을 수 있다.",
@@ -246,7 +246,7 @@
         "옷 입기·머리 감기처럼 팔을 올리는 동작의 어려움",
         "물리치료를 받아도 변화가 더딘 이유"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO07-A1",
           "role": "pain-and-range",
@@ -272,7 +272,7 @@
           "meaning": ["오십견과 다른 원인 구분"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "오십견은 통증뿐 아니라 관절 가동범위 제한을 함께 본다.",
         "아프다고 전혀 움직이지 않거나 반대로 무리하게 스트레칭하는 두 극단을 피한다.",
         "통증·염증 상태와 어깨 주변 구조를 확인해 운동과 치료 순서를 정한다.",
@@ -291,7 +291,7 @@
         "더위 전에 미리 먹어야 하는지",
         "기력이 떨어진 뒤 먹어도 되는지"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO08-A1",
           "role": "before-summer-state",
@@ -317,7 +317,7 @@
           "meaning": ["모든 사람에게 같은 달 권유 금지"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "더위 전에 쉽게 지치는 사람은 소화·수면·평소 체력을 먼저 본다.",
         "한여름 이후 기력이 떨어진 사람은 땀·식욕·수면·회복 상태를 함께 본다.",
         "같은 보약이라도 시작 시점보다 현재 몸 상태가 처방을 결정한다.",
@@ -336,7 +336,7 @@
         "중단 뒤 식욕과 체중이 다시 늘 수 있는지",
         "주사 없이 체중을 유지하려면 무엇을 해야 하는지"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO09-A1",
           "role": "stopping-plan",
@@ -362,7 +362,7 @@
           "meaning": ["임의 대체 권유 금지"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "중단 뒤 식욕과 체중 변화가 생길 수 있어 처방 의료진과 전환 계획을 상의한다.",
         "주사를 사용하는 동안 식사량만 줄인 경우 생활 습관이 그대로 남아 있을 수 있다.",
         "식사·근력운동·수면·체중 기록을 함께 보며 유지 가능한 방식을 만든다.",
@@ -381,7 +381,7 @@
         "안면홍조 때문에 일상이 불편한 상황",
         "불면·피로·우울감이 함께 이어지는 상황"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO10-A1",
           "role": "symptom-range",
@@ -407,7 +407,7 @@
           "meaning": ["금손 실제 시행 확인 시에만 언급", "미확인 시 일반 선택 기준으로 전환"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "갱년기에는 호르몬 변화와 함께 여러 신체·수면·기분 증상이 나타날 수 있다.",
         "증상 강도와 기간, 현재 복용 중인 약과 건강 상태를 먼저 확인한다.",
         "한 가지 건강기능식품이나 치료만으로 모든 증상을 설명하지 않는다.",
@@ -426,7 +426,7 @@
         "과거 경험을 평생 안고 살아야 하는지",
         "약을 먹어도 계속 힘든 경우 무엇을 더 볼지"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO11-A1",
           "role": "mind-and-body-reactions",
@@ -452,7 +452,7 @@
           "meaning": ["정신건강의학과 평가 우선"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "트라우마 뒤에는 기억뿐 아니라 긴장·수면·호흡·통증 같은 신체 반응이 함께 나타날 수 있다.",
         "몸의 반응과 감정·수면 상태를 나누지 않고 함께 평가한다.",
         "과거 경험을 무리하게 말하게 하지 않고 안전한 속도로 접근한다.",
@@ -471,7 +471,7 @@
         "운동과 식사 조절에도 체중이 변하지 않는 상황",
         "예전 방식이 더는 통하지 않는 이유"
       ],
-      "orderedContentAtoms": [
+      "generalInformationAtoms": [
         {
           "id": "INFO12-A1",
           "role": "changed-conditions",
@@ -497,7 +497,7 @@
           "meaning": ["근력과 회복 함께 계획"]
         }
       ],
-      "orderedGeneralInformation": [
+      "generalInformationNotes": [
         "갱년기에는 호르몬·근육량·수면·활동량 변화가 체중 관리에 함께 영향을 줄 수 있다.",
         "개인의 건강 상태와 식사 패턴을 먼저 확인한다.",
         "겉모습만이 아니라 건강을 위한 지속 가능한 목표를 세운다.",

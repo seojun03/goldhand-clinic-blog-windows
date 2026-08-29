@@ -51,18 +51,15 @@ class GeneralInformationSelectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.briefs = json.loads((ASSETS / "wipark-content-briefs.json").read_text(encoding="utf-8"))
-        cls.profiles = json.loads((ASSETS / "reference-master-profiles.json").read_text(encoding="utf-8"))
         cls.empty_library = json.loads(
             (ASSETS / "user-general-information-references.json").read_text(encoding="utf-8")
         )
 
-    def select(self, topic: str, title: str, keyword: str = "동천동 한의원"):
+    def select(self, topic: str, title: str):
         return SELECT.select_information(
             topic,
             title,
-            keyword,
             self.briefs,
-            self.profiles,
             self.empty_library,
         )
 
@@ -94,6 +91,27 @@ class GeneralInformationSelectionTests(unittest.TestCase):
         self.assertEqual(result["status"], "stored-sufficient")
         self.assertEqual(result["titleContract"]["promisedAnswerCount"], 3)
         self.assertEqual(result["coverage"]["minimumAtomCount"], 3)
+
+    def test_any_positive_answer_count_is_supported(self) -> None:
+        one = self.select("불면증", "동천동 한의원 불면증 원인 1가지")
+        self.assertEqual(one["titleContract"]["promisedAnswerCount"], 1)
+        self.assertEqual(one["coverage"]["minimumAtomCount"], 1)
+        four = SELECT.select_information(
+            "불면증",
+            "동천동 한의원 불면증 원인 4가지",
+            self.briefs,
+            self.empty_library,
+            answer_count=4,
+        )
+        self.assertEqual(four["titleContract"]["requestedAnswerCount"], 4)
+        with self.assertRaisesRegex(ValueError, "1개 이상"):
+            SELECT.select_information(
+                "불면증",
+                "동천동 한의원 불면증 원인 2가지",
+                self.briefs,
+                self.empty_library,
+                answer_count=0,
+            )
 
     def test_sensitive_context_atoms_stay_closed(self) -> None:
         insomnia = self.select("불면증", "동천동 한의원 불면증 원인 2가지")
@@ -149,10 +167,8 @@ class GeneralInformationSelectionTests(unittest.TestCase):
         library["sources"] = [source("USER01", "가나다한의원"), source("USER02", "라마바한의원")]
         result = SELECT.select_information(
             "발바닥 통증",
-            "동천동 한의원 발바닥 통증 원인 1가지",
-            "동천동 한의원",
+            "동천동 한의원 발바닥 통증 원인 2가지",
             {"briefs": {}},
-            {"profiles": {}},
             library,
         )
         self.assertEqual({item["id"] for item in result["storedSources"]}, {"USER01", "USER02"})
@@ -207,9 +223,8 @@ class SourceBoundaryValidationTests(unittest.TestCase):
             "schemaVersion": 1,
             "topic": "불면증",
             "title": "동천동 한의원 불면증 원인 2가지",
-            "mainKeyword": "동천동 한의원",
             "numberedAnswerCount": 2,
-            "structureContract": "existing-goldhand-structure-unchanged",
+            "structureContract": "goldhand-single-information-delivery-structure-v1",
             "medicalClaimsIncludeTreatmentOrSafety": True,
             "contentSources": [
                 {

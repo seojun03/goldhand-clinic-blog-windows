@@ -7,8 +7,7 @@
   "failedPosts": [],
   "assetCount": 113,
   "safeAutoCount": 6,
-  "closingTrustCount": 7,
-  "policy": "All indexed official-blog image binaries are bundled in the plugin; only visually approved director-patient safeAuto assets may be selected as clinical photos, and separately reviewed director-or-credential assets may be selected as one closing trust photo",
+  "policy": "All indexed official-blog image binaries are bundled in the plugin; only visually approved director-patient safeAuto assets may be selected inside a numbered answer section after plain-text approval",
   "assets": [
     {
       "postOrder": 1,
@@ -93,18 +92,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 1,
@@ -191,18 +179,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 1,
@@ -293,18 +270,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 1,
@@ -391,18 +357,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 1,
@@ -488,18 +443,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 1,
@@ -584,18 +528,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 2,
@@ -679,18 +612,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 3,
@@ -772,18 +694,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 4,
@@ -866,18 +777,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 5,
@@ -961,22 +861,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "director-community-pose",
-      "closingTrustDirectorVisible": true,
-      "closingTrustDocumentVisible": true,
-      "closingTrustPriority": 115,
-      "closingTrustPlacementTerms": [
-        "한약 지원사업",
-        "한약 지원사업 기념촬영",
-        "초록우산 보호대상아동 지원"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장이 금손한의원에서 초록우산 관계자와 한약 지원사업 기념촬영을 한 장면",
-      "closingTrustContextText": "초록우산의 보호대상아동 한약 지원사업에 참여하고 기념촬영을 남겼습니다.",
-      "closingTrustSafetyNote": "공식 블로그에 공개된 지원사업 기념사진이며 환자·차트·연락처가 보이지 않음"
+      "trustPriority": 0
     },
     {
       "postOrder": 5,
@@ -1060,18 +945,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 6,
@@ -1149,18 +1023,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 7,
@@ -1244,22 +1107,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "director-community-pose",
-      "closingTrustDirectorVisible": true,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 100,
-      "closingTrustPlacementTerms": [
-        "의료봉사",
-        "의료봉사 기념촬영",
-        "광주영아일시보호소 의료봉사"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장이 광주영아일시보호소 의료봉사 현장에서 관계자와 기념촬영한 장면",
-      "closingTrustContextText": "광주영아일시보호소 의료봉사를 다녀온 뒤 현장에서 기념촬영을 남겼습니다.",
-      "closingTrustSafetyNote": "동행자 얼굴이 원본에서 가려진 공식 기념사진이며 환자·차트·연락처가 보이지 않음"
+      "trustPriority": 0
     },
     {
       "postOrder": 7,
@@ -1351,18 +1199,7 @@
         "소아 진료",
         "영아 건강",
         "아기 건강"
-      ],
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      ]
     },
     {
       "postOrder": 7,
@@ -1454,18 +1291,7 @@
         "영아 상담",
         "보호자 상담",
         "아기 진료"
-      ],
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      ]
     },
     {
       "postOrder": 8,
@@ -1556,18 +1382,7 @@
         "무릎 침 치료",
         "방문진료 침 치료",
         "다리 통증"
-      ],
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      ]
     },
     {
       "postOrder": 8,
@@ -1660,18 +1475,7 @@
         "복통 침 치료",
         "방문진료 침 치료",
         "복부 통증"
-      ],
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      ]
     },
     {
       "postOrder": 9,
@@ -1763,18 +1567,7 @@
         "거동이 불편한 환자 상담",
         "보호자 상담",
         "방문간호 상담"
-      ],
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      ]
     },
     {
       "postOrder": 9,
@@ -1860,18 +1653,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 9,
@@ -1965,18 +1747,7 @@
         "방문진료 검사",
         "왕진 진찰",
         "거동이 불편한 환자 검사"
-      ],
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      ]
     },
     {
       "postOrder": 9,
@@ -2059,18 +1830,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 9,
@@ -2153,18 +1913,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 11,
@@ -2248,22 +1997,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "credential-detail",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": true,
-      "closingTrustPriority": 125,
-      "closingTrustPlacementTerms": [
-        "일차의료 술기교육",
-        "일차의료 술기교육 수료증",
-        "방문진료 술기교육 수료"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장의 일차의료 술기교육 수료증",
-      "closingTrustContextText": "방문진료에 필요한 일차의료 술기교육을 수료하고 받은 수료증입니다.",
-      "closingTrustSafetyNote": "공식 블로그에 공개된 원장 본인의 수료증이며 환자정보가 없음"
+      "trustPriority": 0
     },
     {
       "postOrder": 11,
@@ -2347,18 +2081,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 11,
@@ -2442,18 +2165,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 11,
@@ -2537,18 +2249,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 11,
@@ -2632,18 +2333,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 14,
@@ -2715,18 +2405,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 15,
@@ -2782,22 +2461,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "director-agreement-pose",
-      "closingTrustDirectorVisible": true,
-      "closingTrustDocumentVisible": true,
-      "closingTrustPriority": 135,
-      "closingTrustPlacementTerms": [
-        "기념촬영",
-        "어린이집 협약 기념촬영",
-        "국공립 한우리어린이집 협약"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장과 국공립 한우리어린이집 관계자가 협약서를 들고 기념촬영한 장면",
-      "closingTrustContextText": "국공립 한우리어린이집과 협약을 맺고 기념촬영을 남겼습니다.",
-      "closingTrustSafetyNote": "공식 블로그에 공개된 협약 기념사진이며 환자·차트·연락처가 보이지 않음"
+      "trustPriority": 0
     },
     {
       "postOrder": 17,
@@ -2881,18 +2545,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 17,
@@ -2980,18 +2633,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 17,
@@ -3078,18 +2720,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3165,18 +2796,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3250,18 +2870,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3345,18 +2954,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3442,18 +3040,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3539,18 +3126,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3630,18 +3206,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3726,18 +3291,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3822,18 +3376,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 18,
@@ -3918,18 +3461,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4012,22 +3544,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "director-agreement-pose",
-      "closingTrustDirectorVisible": true,
-      "closingTrustDocumentVisible": true,
-      "closingTrustPriority": 140,
-      "closingTrustPlacementTerms": [
-        "업무협약",
-        "업무협약 기념촬영",
-        "ABC방문간호센터 업무협약"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장이 금손한의원에서 ABC방문간호센터 관계자와 업무협약서를 들고 기념촬영한 장면",
-      "closingTrustContextText": "ABC방문간호센터와 업무협약을 맺고 기념촬영을 남겼습니다.",
-      "closingTrustSafetyNote": "공식 블로그에 공개된 마스크 착용 협약 기념사진이며 환자·차트·연락처가 보이지 않음"
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4110,18 +3627,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4204,18 +3710,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4298,18 +3793,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4392,18 +3876,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4486,18 +3959,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4580,18 +4042,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4674,18 +4125,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4768,18 +4208,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4862,18 +4291,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 19,
@@ -4956,18 +4374,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 20,
@@ -5052,18 +4459,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 20,
@@ -5147,18 +4543,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 21,
@@ -5243,18 +4628,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 22,
@@ -5338,18 +4712,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 24,
@@ -5407,18 +4770,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 26,
@@ -5501,18 +4853,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 27,
@@ -5590,18 +4931,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 28,
@@ -5660,18 +4990,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 29,
@@ -5734,18 +5053,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 30,
@@ -5830,22 +5138,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "credential-detail",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": true,
-      "closingTrustPriority": 120,
-      "closingTrustPlacementTerms": [
-        "수료증",
-        "골타요법 교육 수료증",
-        "학회 회원증"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장의 골타요법 교육 수료증과 학회 회원증",
-      "closingTrustContextText": "골타요법 교육을 수료하고 받은 수료증과 학회 회원증입니다.",
-      "closingTrustSafetyNote": "공식 블로그에 공개된 원장 본인의 수료증과 회원증이며 환자정보가 없음"
+      "trustPriority": 0
     },
     {
       "postOrder": 31,
@@ -5929,22 +5222,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": true,
-      "closingTrustEligible": true,
-      "closingTrustRequiresReview": false,
-      "closingTrustSceneType": "director-community-pose",
-      "closingTrustDirectorVisible": true,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 110,
-      "closingTrustPlacementTerms": [
-        "기념사진",
-        "보호소 물품 기부 기념촬영",
-        "광주영아일시보호소 물품 기부"
-      ],
-      "closingTrustApprovedAlt": "박준희 원장이 광주영아일시보호소에 전달한 기부 물품 앞에서 기념촬영한 장면",
-      "closingTrustContextText": "광주영아일시보호소에 아이들에게 필요한 물품을 전달하고 기념사진을 남겼습니다.",
-      "closingTrustSafetyNote": "공식 블로그에 공개된 원장 기념사진이며 환자·차트·연락처가 보이지 않음"
+      "trustPriority": 0
     },
     {
       "postOrder": 32,
@@ -5983,18 +5261,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 33,
@@ -6034,18 +5301,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 41,
@@ -6102,18 +5358,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 45,
@@ -6155,18 +5400,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 46,
@@ -6210,18 +5444,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 47,
@@ -6304,18 +5527,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 48,
@@ -6356,18 +5568,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 49,
@@ -6407,18 +5608,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 50,
@@ -6458,18 +5648,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 52,
@@ -6513,18 +5692,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 53,
@@ -6607,18 +5775,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 54,
@@ -6697,18 +5854,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 55,
@@ -6751,18 +5897,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -6822,18 +5957,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -6893,18 +6017,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -6986,18 +6099,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7079,18 +6181,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7172,18 +6263,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7265,18 +6345,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7356,18 +6425,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7447,18 +6505,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7538,18 +6585,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7631,18 +6667,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 56,
@@ -7724,18 +6749,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -7815,18 +6829,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -7906,18 +6909,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -7997,18 +6989,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -8088,18 +7069,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -8179,18 +7149,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -8270,18 +7229,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -8361,18 +7309,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -8452,18 +7389,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 57,
@@ -8543,18 +7469,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 58,
@@ -8637,18 +7552,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 59,
@@ -8689,18 +7593,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 60,
@@ -8784,18 +7677,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 60,
@@ -8878,18 +7760,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 60,
@@ -8970,18 +7841,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 60,
@@ -9064,18 +7924,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 61,
@@ -9159,18 +8008,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 61,
@@ -9253,18 +8091,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 62,
@@ -9346,18 +8173,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 62,
@@ -9439,18 +8255,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 62,
@@ -9531,18 +8336,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 62,
@@ -9625,18 +8419,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 66,
@@ -9720,18 +8503,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 67,
@@ -9811,18 +8583,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 67,
@@ -9906,18 +8667,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 71,
@@ -10004,18 +8754,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     },
     {
       "postOrder": 73,
@@ -10078,18 +8817,7 @@
       "sceneType": "",
       "personInteraction": false,
       "directorVisible": false,
-      "trustPriority": 0,
-      "closingTrustReviewed": false,
-      "closingTrustEligible": false,
-      "closingTrustRequiresReview": true,
-      "closingTrustSceneType": "",
-      "closingTrustDirectorVisible": false,
-      "closingTrustDocumentVisible": false,
-      "closingTrustPriority": 0,
-      "closingTrustPlacementTerms": [],
-      "closingTrustApprovedAlt": "",
-      "closingTrustContextText": "",
-      "closingTrustSafetyNote": ""
+      "trustPriority": 0
     }
   ],
   "bundledAt": "2026-08-22T01:21:19+09:00",

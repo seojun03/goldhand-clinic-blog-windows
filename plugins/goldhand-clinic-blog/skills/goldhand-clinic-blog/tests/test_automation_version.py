@@ -197,11 +197,11 @@ class AutomationVersionTests(unittest.TestCase):
         self.assertNotIn("현재 버전 브리핑", skill_text)
         self.assertNotIn("금손한의원 블로그 자동화 v{현재 자동화 버전}을 시작합니다.", skill_text)
         self.assertNotIn("현재 버전: {현재 버전 브리핑}", skill_text)
-        self.assertIn("single version-and-update-time line", agent_text)
-        self.assertNotIn("Korean briefing", agent_text)
+        self.assertIn("output exactly the version line required by SKILL.md", agent_text)
+        self.assertNotIn("and Korean briefing", agent_text)
         self.assertLess(
             skill_text.index("## 시작 표시와 자동화 버전"),
-            skill_text.index("## 운영체제별 실행기"),
+            skill_text.index("## 절대 구조 조건"),
         )
 
     def test_current_skill_starts_with_ten_topic_recommendations_and_accepts_direct_input(self) -> None:
@@ -214,7 +214,6 @@ class AutomationVersionTests(unittest.TestCase):
             )
         )
         topic_question = "1~10번 중 작성할 주제를 선택하거나, 원하는 주제를 직접 입력해 주세요."
-        keyword_question = "메인키워드를 입력해 주세요."
         title_question = "1~5번 중 사용할 제목을 선택하거나, 원하는 제목을 직접 입력해 주세요."
         topic_contract = json.loads(
             (SKILL_DIR / "assets" / "topic-recommendation-contract.json").read_text(
@@ -233,28 +232,23 @@ class AutomationVersionTests(unittest.TestCase):
         ]
 
         self.assertIn(topic_question, skill_text)
-        self.assertIn(keyword_question, skill_text)
+        self.assertIn("메인키워드는 묻지 않는다", skill_text)
         self.assertIn(title_question, skill_text)
-        self.assertLess(skill_text.index(topic_question), skill_text.index(keyword_question))
-        self.assertLess(skill_text.index(keyword_question), skill_text.index(title_question))
+        self.assertLess(skill_text.index(topic_question), skill_text.index(title_question))
 
-        self.assertIn('--topic "{사용자 입력 주제}"', skill_text)
-        self.assertIn("사용자가 입력한 글 주제를 실제 글의 주제로 고정", skill_text)
-        self.assertIn("제목 후보 5개", skill_text)
-        self.assertIn("주제를 정확히 10개", skill_text)
-        self.assertIn("공백 제외 30자", skill_text)
-        self.assertIn("select_general_information.py", skill_text)
-        self.assertIn("search_naver_background.py", skill_text)
-        self.assertIn("한국어 네이버", skill_text)
-        self.assertIn("기존 글 구조", skill_text)
+        self.assertIn("정보형 주제 10개를 추천", skill_text)
+        self.assertIn("숫자형 제목을 정확히 5개 제안", skill_text)
+        self.assertIn("글자 수는 우선순위와 기본 작업에 없다", skill_text)
+        self.assertIn("한국어 자료", skill_text)
+        self.assertIn("환자나 원장이 실제로 말할 법한 생활어", skill_text)
         self.assertIn("clinic-facts.md", skill_text)
         self.assertNotIn("현재 검토된 정보글 범위에서 연결할 수 없는 주제입니다", skill_text)
         self.assertNotIn("1. 자동모드  2. 정밀작성모드", skill_text)
         self.assertNotIn("정밀작성모드", skill_text)
         self.assertNotIn("정밀작성모드", readme_text)
-        self.assertIn(topic_question, agent_text)
-        self.assertIn(keyword_question, agent_text)
-        self.assertIn(title_question, agent_text)
+        self.assertIn("offer exactly ten approved information topics and wait", agent_text)
+        self.assertNotIn("메인키워드를 입력해 주세요.", agent_text)
+        self.assertIn("offer exactly five natural Korean titles", agent_text)
         self.assertIn("주제 10개", readme_text)
         self.assertIn("제목 5개", readme_text)
         self.assertEqual(topic_contract["candidateCount"], 10)
@@ -265,8 +259,6 @@ class AutomationVersionTests(unittest.TestCase):
         self.assertEqual(topic_contract["selectionPrompt"], topic_question)
         self.assertTrue(topic_contract["customTopic"]["allowed"])
         self.assertTrue(topic_contract["customTopic"]["preserveExactUserWording"])
-        self.assertFalse(topic_contract["recentArticleHistoryReadBeforeRecommendations"])
-        self.assertFalse(topic_contract["recentArticleHistoryMayBlockOrReplace"])
         self.assertGreaterEqual(len(eligible_topics), topic_contract["candidateCount"])
         self.assertEqual(
             len({item["topicIdea"] for item in eligible_topics}),
@@ -288,15 +280,6 @@ class AutomationVersionTests(unittest.TestCase):
                 for prompt in manifest["interface"]["defaultPrompt"]
             )
         )
-
-    def test_current_skill_continues_with_callilife_style_original_when_artwork_is_missing(self) -> None:
-        skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
-        self.assertNotIn("- 현재 버전 브리핑:", skill_text)
-        self.assertIn("callilife 개별 작품을 찾지 못하거나", skill_text)
-        self.assertIn("링크를 요구하지 않는다", skill_text)
-        self.assertIn("callilife 그림체로 생성", skill_text)
-        self.assertIn("텍스트 중심 HTML로 전환", skill_text)
-        self.assertIn("복사용 HTML을 끝까지 완성", skill_text)
 
     def test_update_time_uses_fixed_korean_standard_time(self) -> None:
         self.assertEqual(

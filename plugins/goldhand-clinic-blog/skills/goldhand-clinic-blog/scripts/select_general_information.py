@@ -14,7 +14,6 @@ from typing import Any
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_BRIEFS = SKILL_DIR / "assets" / "wipark-content-briefs.json"
-DEFAULT_PROFILES = SKILL_DIR / "assets" / "reference-master-profiles.json"
 DEFAULT_USER_LIBRARY = SKILL_DIR / "assets" / "user-general-information-references.json"
 
 TOKEN_RE = re.compile(r"[0-9A-Za-z가-힣]{2,}")
@@ -117,9 +116,8 @@ def unique_strings(values: list[str]) -> list[str]:
     return result
 
 
-def query_terms(topic: str, title: str, keyword: str) -> set[str]:
-    title_without_keyword = normalize(title).replace(normalize(keyword), " ") if keyword else title
-    raw = f"{topic} {title_without_keyword}"
+def query_terms(topic: str, title: str) -> set[str]:
+    raw = f"{topic} {title}"
     result = tokens(raw)
     raw_compact = compact(raw)
     for canonical, aliases in TOPIC_ALIASES.items():
@@ -169,7 +167,7 @@ def text_score(value: str, terms: set[str]) -> int:
 
 
 def source_atoms(source: dict[str, Any]) -> list[dict[str, Any]]:
-    raw = source.get("generalInformationAtoms", source.get("orderedContentAtoms", []))
+    raw = source.get("generalInformationAtoms", [])
     if not isinstance(raw, list):
         return []
     atoms = [item for item in raw if isinstance(item, dict)]
@@ -178,24 +176,22 @@ def source_atoms(source: dict[str, Any]) -> list[dict[str, Any]]:
     return atoms
 
 
-def built_in_sources(briefs: dict[str, Any], profiles: dict[str, Any]) -> list[dict[str, Any]]:
+def built_in_sources(briefs: dict[str, Any]) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
-    profile_map = profiles.get("profiles", {}) if isinstance(profiles, dict) else {}
     for source_id, brief in briefs.get("briefs", {}).items():
         if not isinstance(brief, dict):
             continue
-        profile = profile_map.get(source_id, {}) if isinstance(profile_map, dict) else {}
         result.append(
             {
                 "id": str(source_id),
-                "sourceTitle": str(profile.get("sourceTitle", brief.get("topic", ""))),
+                "sourceTitle": str(brief.get("topic", "")),
                 "sourceUrl": str(brief.get("sourceUrl", "")),
                 "sourceType": "reviewed-reference-brief",
                 "sourceClinicName": "위석부부한의원",
                 "topic": str(brief.get("topic", "")),
                 "topicTags": [],
                 "readerConcerns": brief.get("readerConcerns", []),
-                "generalInformationAtoms": brief.get("orderedContentAtoms", []),
+                "generalInformationAtoms": brief.get("generalInformationAtoms", []),
                 "blockedFromSource": brief.get("blockedFromSource", []),
                 "blockedEntities": [
                     "위석부부한의원",
@@ -318,10 +314,8 @@ def promised_answer_count(title: str) -> int | None:
     return values[0] if len(set(values)) == 1 else -1
 
 
-def korean_web_queries(topic: str, title: str, keyword: str) -> list[str]:
+def korean_web_queries(topic: str, title: str) -> list[str]:
     title_angle = normalize(title)
-    if keyword:
-        title_angle = title_angle.replace(normalize(keyword), " ")
     title_angle = NUMBERED_PROMISE.sub(" ", title_angle)
     angle_words = [
         word
@@ -341,20 +335,19 @@ def korean_web_queries(topic: str, title: str, keyword: str) -> list[str]:
 def select_information(
     topic: str,
     title: str,
-    keyword: str,
     briefs: dict[str, Any],
-    profiles: dict[str, Any],
     user_library: dict[str, Any],
     *,
     answer_count: int | None = None,
 ) -> dict[str, Any]:
+    if answer_count is not None and answer_count < 1:
+        raise ValueError("답 개수는 1개 이상이어야 합니다.")
     topic = normalize(topic)
     title = normalize(title)
-    keyword = normalize(keyword)
-    raw_query = f"{topic} {title.replace(keyword, ' ') if keyword else title}".strip()
-    terms = query_terms(topic, title, keyword)
+    raw_query = f"{topic} {title}".strip()
+    terms = query_terms(topic, title)
     anchors = subject_anchor_terms(topic)
-    sources = built_in_sources(briefs, profiles) + user_sources(user_library)
+    sources = built_in_sources(briefs) + user_sources(user_library)
     matched_sources: list[dict[str, Any]] = []
     atom_candidates: list[dict[str, Any]] = []
 
@@ -427,17 +420,18 @@ def select_information(
     matched_sources.sort(key=lambda item: (-int(item["score"]), str(item["id"])))
     merged = merge_atoms(atom_candidates)
     inferred_count = promised_answer_count(title)
+    if inferred_count is not None and inferred_count < 1:
+        raise ValueError("확정 제목의 답 개수는 1가지 이상이어야 합니다.")
     required_answer_count = answer_count if answer_count is not None else inferred_count
     invalid_count = required_answer_count == -1
-    minimum_atoms = max(2, required_answer_count or 0) if not invalid_count else 2
+    minimum_atoms = max(1, required_answer_count or 0) if not invalid_count else 1
     stored_sufficient = bool(matched_sources) and len(merged) >= minimum_atoms and not invalid_count
-    queries = korean_web_queries(topic, title, keyword)
+    queries = korean_web_queries(topic, title)
     status = "stored-sufficient" if stored_sufficient else "stored-plus-web-required" if matched_sources else "web-required"
     return {
         "status": status,
         "topic": topic,
         "title": title,
-        "mainKeyword": keyword,
         "queryTerms": sorted(terms),
         "topicalAnchorTerms": sorted(anchors),
         "storedSources": matched_sources,
@@ -453,7 +447,7 @@ def select_information(
             "promisedAnswerCount": None if inferred_count in (None, -1) else inferred_count,
             "requestedAnswerCount": answer_count,
             "exactNumberedAnswerCountRequired": required_answer_count not in (None, -1),
-            "existingGoldhandArticleStructureMustRemainUnchanged": True,
+            "singleInformationStructureId": "goldhand-single-information-delivery-structure-v1",
         },
         "webSearch": {
             "required": not stored_sufficient,
@@ -466,7 +460,6 @@ def select_information(
             "requiresLogin": False,
             "minimumIndependentSources": 2,
             "officialKoreanMedicalSourceRequiredForTreatmentOrSafety": True,
-            "seoKeywordExcludedFromSearchQuery": True,
         },
         "sourcePolicy": {
             "multipleRelevantReferencesAllowed": True,
@@ -484,10 +477,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--topic", required=True)
     parser.add_argument("--title", default="")
-    parser.add_argument("--keyword", default="")
     parser.add_argument("--answer-count", type=int)
     parser.add_argument("--briefs", type=Path, default=DEFAULT_BRIEFS)
-    parser.add_argument("--profiles", type=Path, default=DEFAULT_PROFILES)
     parser.add_argument("--user-library", type=Path, default=DEFAULT_USER_LIBRARY)
     parser.add_argument("--json", action="store_true")
     return parser.parse_args()
@@ -497,14 +488,11 @@ def main() -> int:
     args = parse_args()
     try:
         briefs = json.loads(args.briefs.read_text(encoding="utf-8"))
-        profiles = json.loads(args.profiles.read_text(encoding="utf-8"))
         user_library = json.loads(args.user_library.read_text(encoding="utf-8"))
         result = select_information(
             args.topic,
             args.title,
-            args.keyword,
             briefs,
-            profiles,
             user_library,
             answer_count=args.answer_count,
         )

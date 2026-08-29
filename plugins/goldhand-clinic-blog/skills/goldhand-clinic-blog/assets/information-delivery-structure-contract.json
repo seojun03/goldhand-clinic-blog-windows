@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "contractId": "goldhand-single-information-delivery-structure-v1",
+  "authority": "references/information-delivery-structure.md",
+  "articleType": "정보전달형",
+  "onlyAllowedOrder": [
+    "title",
+    "reader-empathy-quotes",
+    "goldhand-value-proof-table",
+    "three-minute-solution-preview",
+    "numbered-answer-sections",
+    "closing-summary",
+    "cta"
+  ],
+  "readerEmpathyQuotes": {
+    "minimum": 2,
+    "mustBeQuestions": true,
+    "mustAppearBeforeValueProof": true
+  },
+  "valueProof": {
+    "heading": "금손한의원 소개",
+    "library": "assets/goldhand-value-proof-library.json",
+    "count": 1,
+    "mustAppearAfterEmpathy": true,
+    "mustAppearBeforeSolutionPreview": true
+  },
+  "solutionPreview": {
+    "count": 1,
+    "readingMinutes": 3,
+    "mustNameConcreteBenefitOrAvoidableLoss": true,
+    "medicalOutcomeGuaranteeForbidden": true
+  },
+  "numberedAnswers": {
+    "titlePromiseRequired": true,
+    "minimumCount": 1,
+    "mustEqualTitlePromise": true,
+    "continuousFromOne": true,
+    "unnumberedMainSectionsForbidden": true
+  },
+  "closing": {
+    "summaryCount": 1,
+    "ctaCount": 1,
+    "ctaMustBeFinalBlock": true,
+    "aggressiveVisitPressureForbidden": true,
+    "allowedInnerFlows": [
+      "helpful-then-thanks-then-direct-evaluation",
+      "n-points-benefit-then-next-step-then-thanks"
+    ],
+    "todaySaidCueRequired": false,
+    "topicSpecificRecapRequired": true,
+    "gratitudeCount": 1,
+    "gratitudeWordingIsNonBindingExample": true,
+    "exactGratitudeReuseAcrossManuscriptsForbidden": true,
+    "clinicNameOrRegionalKeywordForbidden": true,
+    "bookingInquiryPhoneOrVisitCueForbidden": true,
+    "neutralDirectEvaluationRequired": true,
+    "helpfulThenThanksThenDirectEvaluation": {
+      "summaryOrder": [
+        "topic-specific-content",
+        "helpfulness-wish",
+        "naturally-varied-thanks"
+      ],
+      "ctaOrder": [
+        "general-information-boundary",
+        "clinic-neutral-direct-evaluation-recommendation"
+      ]
+    },
+    "nPointsBenefitThenNextStepThenThanks": {
+      "summaryOrder": [
+        "title-matched-count",
+        "concrete-benefit-or-avoidable-loss"
+      ],
+      "ctaOrder": [
+        "clinic-neutral-low-pressure-next-step",
+        "naturally-varied-thanks"
+      ],
+      "countMustEqualTitlePromise": true
+    },
+    "nonBindingGratitudeExamples": [
+      "긴 글 읽어주셔서 진심으로 감사드립니다.",
+      "오늘 글도 끝까지 함께해 주셔서 고맙습니다.",
+      "여기까지 함께해 주셔서 감사드립니다."
+    ],
+    "examplePolicy": "예시는 감사의 역할만 보여 주며 그대로 복사하거나 순환 목록처럼 돌려 쓰지 않습니다."
+  },
+  "allOtherOrdersForbidden": true,
+  "structureReferences": [
+    "https://blog.naver.com/gyumiji0307/223487738117",
+    "https://blog.naver.com/helptaxking_/223702773986",
+    "https://blog.naver.com/rededu1143/223438237392",
+    "https://blog.naver.com/jinsoso7000/223454347466"
+  ],
+  "referencePolicy": "레퍼런스에서는 사용자 지정 구조의 각 블록 역할만 학습하며, 순서는 onlyAllowedOrder가 절대 기준이다."
+}

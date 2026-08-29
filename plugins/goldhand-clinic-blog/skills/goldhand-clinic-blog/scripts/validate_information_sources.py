@@ -55,20 +55,23 @@ def validate_manifest(data: dict[str, Any], article: str = "") -> dict[str, Any]
     issues: list[dict[str, str]] = []
     if data.get("schemaVersion") != 1:
         add(issues, "schema-version", "schemaVersion은 1이어야 합니다.")
-    if data.get("structureContract") != "existing-goldhand-structure-unchanged":
-        add(issues, "structure-contract", "기존 금손 글 구조 고정 계약이 필요합니다.")
-    for field in ("topic", "title", "mainKeyword"):
+    if data.get("structureContract") != "goldhand-single-information-delivery-structure-v1":
+        add(issues, "structure-contract", "단일 정보전달형 구조 계약이 필요합니다.")
+    for field in ("topic", "title"):
         if not clean(data.get(field, "")):
             add(issues, f"{field}-missing", f"{field}가 필요합니다.")
 
     title = clean(data.get("title", ""))
     promises = [int(match.group("count")) for match in NUMBERED_PROMISE.finditer(title)]
     answer_count = data.get("numberedAnswerCount")
-    if promises:
-        if not isinstance(answer_count, int):
-            add(issues, "numbered-answer-count", "숫자 약속 제목에는 numberedAnswerCount 정수가 필요합니다.")
-        elif any(value != answer_count for value in promises):
-            add(issues, "numbered-answer-mismatch", f"제목 약속 {promises}와 본문 답 {answer_count}개가 다릅니다.")
+    if not promises:
+        add(issues, "numbered-title-promise", "단일 정보전달형 제목에는 실제 답 개수 n이 필요합니다.")
+    elif len(set(promises)) != 1 or promises[0] < 1:
+        add(issues, "numbered-title-promise", "제목의 답 개수는 1 이상의 정수여야 합니다.")
+    if not isinstance(answer_count, int) or answer_count < 1:
+        add(issues, "numbered-answer-count", "numberedAnswerCount는 1 이상의 정수여야 합니다.")
+    elif promises and any(value != answer_count for value in promises):
+        add(issues, "numbered-answer-mismatch", f"제목 약속 {promises}와 본문 답 {answer_count}개가 다릅니다.")
 
     sources = data.get("contentSources")
     if not isinstance(sources, list) or not sources:
@@ -161,12 +164,9 @@ def validate_manifest(data: dict[str, Any], article: str = "") -> dict[str, Any]
         if not isinstance(queries, list) or not queries:
             add(issues, "web-queries", "한국어 네이버 검색어가 필요합니다.")
             queries = []
-        keyword_signature = compact(data.get("mainKeyword", ""))
         for query in queries:
             if HANGUL.search(clean(query)) is None:
                 add(issues, "web-query-korean", f"한국어가 없는 검색어: {query}")
-            if keyword_signature and keyword_signature in compact(query):
-                add(issues, "web-query-seo-keyword", f"정보 검색어에 메인키워드를 넣지 않습니다: {query}")
         web_sources = [source for source in sources if isinstance(source, dict) and source.get("retrievedBy") == "naver"]
         publishers = {compact(source.get("publisher", "")) for source in web_sources if compact(source.get("publisher", ""))}
         if len(web_sources) < 2 or len(publishers) < 2:

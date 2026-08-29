@@ -2,9 +2,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import subprocess
-import sys
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -19,7 +16,7 @@ def load_validator():
         SCRIPT_PATH,
     )
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"제목 추천 검증기를 불러올 수 없습니다: {SCRIPT_PATH}")
+        raise RuntimeError(SCRIPT_PATH)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -39,50 +36,25 @@ class TitleRecommendationTests(unittest.TestCase):
         cls.evidence = (SKILL_DIR / "references" / "clinic-facts.md").read_text(
             encoding="utf-8"
         )
-        cls.writing_intelligence = json.loads(
-            (SKILL_DIR / "assets" / "reference-writing-intelligence.json").read_text(
-                encoding="utf-8"
-            )
-        )
 
     def valid_payload(self) -> dict[str, object]:
-        authority = "verified-authority-plus-two-urgent-answers"
-        direct = "urgent-questions-with-direct-answer"
         return {
-            "workflowStage": "master-aware",
-            "topic": "수면을 방해하는 생활습관",
-            "mainKeyword": "동천동 한의원",
-            "referenceMasterId": "INFO03",
+            "topic": "다이어트 뒤 요요",
+            "informationDoctor": {
+                "queried": True,
+                "stage": "title",
+                "status": "stored-match",
+                "sourceProseLoaded": False,
+                "structureLoadedFromSources": False,
+                "singleStructureAuthority": "references/information-delivery-structure.md",
+                "matchedSourceIds": ["WIP-223606765259"],
+            },
             "candidates": [
-                {
-                    "title": "동천동 한의원 11년차가 경고하는 최악의 수면습관 3가지",
-                    "titleMechanismId": authority,
-                    "readerStake": "loss-prevention",
-                    "answerCount": 3,
-                },
-                {
-                    "title": "동천동 한의원 놓치면 손해인 숙면 원칙 2가지",
-                    "titleMechanismId": direct,
-                    "readerStake": "loss-prevention",
-                    "answerCount": 2,
-                },
-                {
-                    "title": "동천동 한의원 반드시 알아야 할 수면 신호 3가지",
-                    "titleMechanismId": direct,
-                    "readerStake": "benefit",
-                    "answerCount": 3,
-                },
-                {
-                    "title": "동천동 한의원 잠을 망치는 최악의 야식 1가지",
-                    "titleMechanismId": direct,
-                    "readerStake": "loss-prevention",
-                    "answerCount": 1,
-                },
-                {
-                    "title": "동천동 한의원 11년차가 경고하는 불면 습관",
-                    "titleMechanismId": authority,
-                    "readerStake": "loss-prevention",
-                },
+                {"title": "야식 뒤 다시 찌는 이유 2가지", "answerCount": 2},
+                {"title": "요요를 막으려면 먼저 바꿔야 할 습관 3가지", "answerCount": 3},
+                {"title": "다이어트가 끝난 뒤 식사량을 늘리는 방법 2가지", "answerCount": 2},
+                {"title": "살을 뺀 뒤 체중이 다시 오를 때 확인할 것 3가지", "answerCount": 3},
+                {"title": "굶어서 뺀 살이 다시 찌지 않게 지킬 습관 2가지", "answerCount": 2},
             ],
         }
 
@@ -91,156 +63,69 @@ class TitleRecommendationTests(unittest.TestCase):
             payload,
             contract=self.contract,
             evidence=self.evidence,
-            writing_intelligence=self.writing_intelligence,
         )
 
-    def fast_payload(self) -> dict[str, object]:
-        payload = self.valid_payload()
-        payload["workflowStage"] = "title-first"
-        payload["informationDoctor"] = {
-            "queried": True,
-            "stage": "title",
-            "status": "stored-match",
-            "sourceProseLoaded": False,
-            "editorialMasterLoaded": False,
-            "matchedSourceIds": ["WIP-223606765259"],
-        }
-        payload.pop("referenceMasterId")
-        for candidate in payload["candidates"]:
-            candidate.pop("titleMechanismId")
-        return payload
-
-    def test_five_strong_numeric_topic_titles_pass(self) -> None:
+    def test_five_numbered_titles_pass(self) -> None:
         result = self.validate(self.valid_payload())
         self.assertEqual(result["status"], "pass", result)
         self.assertEqual(result["metrics"]["candidateCount"], 5)
-        self.assertEqual(result["metrics"]["uniqueTitleCount"], 5)
-        self.assertGreaterEqual(result["metrics"]["careerCandidateCount"], 1)
-        self.assertGreaterEqual(result["metrics"]["numberedCandidateCount"], 3)
-
-    def test_title_first_passes_without_research_or_reference_master(self) -> None:
-        result = self.validate(self.fast_payload())
-        self.assertEqual(result["status"], "pass", result)
-        self.assertEqual(result["metrics"]["workflowStage"], "title-first")
-        self.assertIs(result["metrics"]["researchDeferred"], True)
-        self.assertIs(result["metrics"]["referenceMasterDeferred"], True)
-
-    def test_contract_defaults_missing_workflow_stage_to_title_first(self) -> None:
-        payload = self.fast_payload()
-        payload.pop("workflowStage")
-        result = self.validate(payload)
-        self.assertEqual(result["status"], "pass", result)
-        self.assertEqual(result["metrics"]["workflowStage"], "title-first")
-
-    def test_title_first_rejects_preselected_reference_metadata(self) -> None:
-        payload = self.fast_payload()
-        payload["referenceMasterId"] = "INFO03"
-        payload["candidates"][0]["titleMechanismId"] = "urgent-questions-with-direct-answer"
-        result = self.validate(payload)
-        issue_codes = {item["code"] for item in result["issues"]}
-        self.assertEqual(result["status"], "fail")
-        self.assertIn("title-first-reference-master-preselected", issue_codes)
-        self.assertIn("title-first-mechanism-preselected", issue_codes)
-
-    def test_title_first_requires_compact_information_doctor_query(self) -> None:
-        payload = self.fast_payload()
-        payload.pop("informationDoctor")
-        result = self.validate(payload)
-        self.assertIn(
-            "title-first-information-doctor-missing",
-            {item["code"] for item in result["issues"]},
+        self.assertEqual(result["metrics"]["numberedCandidateCount"], 5)
+        self.assertEqual(
+            result["metrics"]["singleStructureContractId"],
+            "goldhand-single-information-delivery-structure-v1",
         )
 
-        payload = self.fast_payload()
+    def test_information_doctor_must_not_load_source_prose_or_structure(self) -> None:
+        payload = self.valid_payload()
         payload["informationDoctor"]["sourceProseLoaded"] = True
-        payload["informationDoctor"]["generalInformationAtoms"] = [{"id": "A1"}]
+        payload["informationDoctor"]["structureLoadedFromSources"] = True
         result = self.validate(payload)
         codes = {item["code"] for item in result["issues"]}
-        self.assertIn("title-first-source-prose-loaded", codes)
-        self.assertIn("title-first-information-doctor-payload-too-large", codes)
+        self.assertIn("source-prose-loaded", codes)
+        self.assertIn("source-structure-loaded", codes)
 
-    def test_title_first_cli_does_not_load_writing_intelligence(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            payload_path = Path(temporary) / "title-recommendations.json"
-            payload_path.write_text(
-                json.dumps(self.fast_payload(), ensure_ascii=False),
-                encoding="utf-8",
-            )
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT_PATH),
-                    "--input",
-                    str(payload_path),
-                    "--evidence",
-                    str(Path(temporary) / "must-not-be-read-evidence.md"),
-                    "--writing-intelligence",
-                    str(Path(temporary) / "must-not-be-read.json"),
-                    "--json",
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        result = json.loads(completed.stdout)
-        self.assertEqual(result["metrics"]["workflowStage"], "title-first")
+    def test_title_number_must_match_answer_count(self) -> None:
+        payload = self.valid_payload()
+        payload["candidates"][0]["answerCount"] = 3
+        result = self.validate(payload)
+        nested = {
+            item["code"]
+            for item in result["candidateResults"][0]["validation"]["issues"]
+        }
+        self.assertIn("answer-count-mismatch", nested)
+
+    def test_positive_n_is_allowed_and_zero_is_rejected(self) -> None:
+        payload = self.valid_payload()
+        payload["candidates"][0] = {
+            "title": "야식 뒤 다시 찌는 이유 1가지",
+            "answerCount": 1,
+        }
+        result = self.validate(payload)
+        self.assertEqual(result["status"], "pass", result)
+
+        payload = self.valid_payload()
+        payload["candidates"][0] = {
+            "title": "야식 뒤 다시 찌는 이유 0가지",
+            "answerCount": 0,
+        }
+        result = self.validate(payload)
+        nested = {
+            item["code"]
+            for item in result["candidateResults"][0]["validation"]["issues"]
+        }
+        self.assertIn("numbered-promise-unsupported", nested)
+        self.assertIn("answer-count-unsupported", nested)
 
     def test_candidate_count_and_duplicate_titles_fail(self) -> None:
         payload = self.valid_payload()
-        candidates = payload["candidates"]
-        self.assertIsInstance(candidates, list)
-        candidates[4] = dict(candidates[0])
+        payload["candidates"][-1] = dict(payload["candidates"][0])
         result = self.validate(payload)
-        codes = {issue["code"] for issue in result["issues"]}
-        self.assertEqual(result["status"], "fail")
-        self.assertIn("duplicate-title", codes)
+        self.assertIn("duplicate-title", {item["code"] for item in result["issues"]})
 
         payload = self.valid_payload()
         payload["candidates"] = payload["candidates"][:4]
         result = self.validate(payload)
-        self.assertIn("candidate-count", {issue["code"] for issue in result["issues"]})
-
-    def test_weak_wording_or_missing_numeric_hook_fails(self) -> None:
-        payload = self.valid_payload()
-        payload["candidates"][0] = {
-            "title": "동천동 한의원 나쁜 수면 습관",
-            "titleMechanismId": "urgent-questions-with-direct-answer",
-            "readerStake": "loss-prevention",
-        }
-        result = self.validate(payload)
-        codes = {
-            issue["code"]
-            for issue in result["issues"]
-            if issue.get("candidateIndex") == 1
-        }
-        self.assertIn("strong-wording-missing", codes)
-        self.assertIn("weak-wording", codes)
-        self.assertIn("numeric-hook-missing", codes)
-
-    def test_core_title_rules_block_nonprefix_and_over_30_characters(self) -> None:
-        payload = self.valid_payload()
-        payload["candidates"][0]["title"] = (
-            "수면습관 동천동 한의원 11년차가 경고하는 최악의 습관 3가지"
-        )
-        result = self.validate(payload)
-        candidate_codes = {
-            issue["code"]
-            for issue in result["candidateResults"][0]["validation"]["issues"]
-        }
-        self.assertIn("title-keyword-prefix", candidate_codes)
-
-        payload = self.valid_payload()
-        payload["candidates"][0]["title"] = (
-            "동천동 한의원 11년차가 경고하는 최악의 수면습관과 야간생활과 회복방해요인 3가지"
-        )
-        result = self.validate(payload)
-        candidate_codes = {
-            issue["code"]
-            for issue in result["candidateResults"][0]["validation"]["issues"]
-        }
-        self.assertIn("title-too-long", candidate_codes)
+        self.assertIn("candidate-count", {item["code"] for item in result["issues"]})
 
 
 if __name__ == "__main__":

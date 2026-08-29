@@ -31,6 +31,27 @@ VISIBLE_SCREENSHOT_SENTENCE = (
     "보호자분께 어르신의 양쪽 상하지 근육 및 근력 상태 비교하면서 설명해 드리고, "
     "어르신께서 노력해주셔야 하는 부분과 가정에서 도와주셔야 할 부분 상세히 설명드렸습니다."
 )
+TITLE = "금손한의원 복사 과정에서 확인할 점 2가지"
+PROOF = json.loads(
+    (SKILL_DIR / "assets" / "goldhand-value-proof-library.json").read_text(encoding="utf-8")
+)
+
+
+def valid_structure_article(*, extra_body: str = "") -> str:
+    rows = "".join(f"<tr><td>{row}</td></tr>" for row in PROOF["fixedRows"])
+    return f'''<article data-goldhand-type="정보전달형">
+    <blockquote data-reference-role="reader-question">복사한 글이 중간에서 잘리지는 않을까요?</blockquote>
+    <blockquote data-reference-role="reader-question">사진 설명이 본문에 섞이지는 않을까요?</blockquote>
+    <table data-native-table-purpose="credential"><tr><th>{PROOF["headerText"]}</th></tr>{rows}</table>
+    <p data-reference-role="solution-preview">3분만 읽으면 복사 전에 무엇을 확인할지 알 수 있습니다.</p>
+    <h2 data-reference-role="section-heading">1. 전체 본문이 선택됐는지 확인합니다</h2>
+    <p>첫 번째 설명입니다.</p>
+    {extra_body}
+    <h2 data-reference-role="section-heading">2. 사진 문맥이 본문에 섞이지 않았는지 확인합니다</h2>
+    <p>두 번째 설명입니다.</p>
+    <section data-reference-role="closing-summary"><p>두 가지 확인 방법이 복사 오류를 줄이는 데 도움이 되었기를 바랍니다. 긴 글 읽어주셔서 진심으로 감사드립니다.</p></section>
+    <section data-reference-role="cta"><p>다만 이 글은 복사 오류를 이해하기 위한 일반적인 설명입니다. 혼자 확인하기 어렵다면 직접 진료를 받아보시길 권합니다.</p></section>
+    </article>'''
 
 
 def media_library() -> dict[str, dict[str, object]]:
@@ -81,17 +102,16 @@ class MediaContextLeakRegressionTests(unittest.TestCase):
         self.assertEqual(leaks, [])
 
     def test_article_validator_emits_visible_media_context_error(self) -> None:
-        article = (
-            f'<article data-goldhand-type="정보전달형"><img data-goldhand-media="{ASSET_ID}" src="data:,">'
-            f"<p>{VISIBLE_SCREENSHOT_SENTENCE}</p></article>"
+        article = valid_structure_article(
+            extra_body=(
+                f'<img data-goldhand-media="{ASSET_ID}" src="data:,">'
+                f"<p>{VISIBLE_SCREENSHOT_SENTENCE}</p>"
+            )
         )
 
         result = ARTICLE_VALIDATOR.validate_article(
             article,
-            "동천동 한의원 움직임을 살펴보는 기준",
-            "동천동 한의원",
-            min_chars=0,
-            max_chars=5000,
+            TITLE,
             media_library=media_library(),
         )
 
@@ -103,22 +123,21 @@ class MediaContextLeakRegressionTests(unittest.TestCase):
         self.assertIn(ASSET_ID, context_issues[0]["detail"])
 
     def test_copy_page_builder_blocks_the_screenshot_context_sentence(self) -> None:
-        article = (
-            f'<article><img data-goldhand-media="{ASSET_ID}" src="data:,">'
-            f"<p>{VISIBLE_SCREENSHOT_SENTENCE}</p></article>"
+        article = valid_structure_article(
+            extra_body=(
+                f'<img data-goldhand-media="{ASSET_ID}" src="data:,">'
+                f"<p>{VISIBLE_SCREENSHOT_SENTENCE}</p>"
+            )
         )
 
         with self.assertRaisesRegex(ValueError, rf"context 문장.*{ASSET_ID}"):
-            PAGE_BUILDER.build_page("금손한의원 문맥 노출 회귀 테스트", article)
+            PAGE_BUILDER.build_page(TITLE, article)
 
 
 class ClipboardRegressionTests(unittest.TestCase):
     @staticmethod
     def page() -> str:
-        return PAGE_BUILDER.build_page(
-            "금손한의원 복사 회귀 테스트",
-            "<article><p>전체 본문 첫 문장입니다.</p><p>전체 본문 두 번째 문장입니다.</p></article>",
-        )
+        return PAGE_BUILDER.build_page(TITLE, valid_structure_article())
 
     def test_local_file_branch_synchronously_selects_the_full_native_payload(self) -> None:
         page = self.page()

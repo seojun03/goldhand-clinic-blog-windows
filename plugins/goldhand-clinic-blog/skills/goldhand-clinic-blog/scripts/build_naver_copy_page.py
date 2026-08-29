@@ -24,11 +24,6 @@ IMAGE_HOST_CONFIG_ENV = "GOLDHAND_IMAGE_HOST_CONFIG"
 SKILL_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_MEDIA_LIBRARY = SKILL_DIR / "assets" / "media-library.json"
 PERSON_SCENE_PREFIX = "director-patient-"
-ALLOWED_CLOSING_TRUST_SCENES = {
-    "director-agreement-pose",
-    "director-community-pose",
-    "credential-detail",
-}
 LOGO_DESCRIPTOR = re.compile(r"(?:로고|logo)", re.I)
 IMAGE_OUTPUT_MODE_TEXT_ONLY = "text-only-fallback"
 ALLOWED_IMAGE_FALLBACK_REASONS = (
@@ -122,29 +117,12 @@ def strip_visible_image_captions(article: str) -> str:
     return re.sub(r"\s*<figcaption\b[^>]*>.*?</figcaption>\s*", "", article, flags=re.I | re.S)
 
 
-def strip_visible_trust_photo_context(article: str) -> str:
-    """Remove legacy trust-photo lead-in prose from preview and rich copy output."""
-
-    cleaned = re.sub(
-        r"\s*<(?P<tag>[a-z][\w:-]*)\b(?=[^>]*\bdata-reference-role\s*=\s*['\"]credential-trust-context['\"])[^>]*>.*?</(?P=tag)>\s*",
-        "",
-        article,
-        flags=re.I | re.S,
-    )
-    return re.sub(
-        r"\s*<p\b(?=[^>]*\bdata-preview-gap\s*=\s*['\"]true['\"])[^>]*>.*?</p>(?=\s*<figure\b(?=[^>]*\bdata-trust-photo\s*=\s*['\"]true['\"]))",
-        "",
-        cleaned,
-        flags=re.I | re.S,
-    )
-
-
 def make_text_only_fallback(article: str, reason: str) -> str:
     """Remove the whole image layer so a failed image run still yields clean HTML."""
 
     if reason not in ALLOWED_IMAGE_FALLBACK_REASONS:
         raise ValueError(f"허용되지 않은 이미지 fallback 사유입니다: {reason}")
-    cleaned = strip_visible_image_captions(strip_visible_trust_photo_context(article))
+    cleaned = strip_visible_image_captions(article)
     cleaned = re.sub(r"\s*<figure\b[^>]*>.*?</figure>\s*", "\n", cleaned, flags=re.I | re.S)
     cleaned = re.sub(r"\s*<img\b[^>]*>\s*", "\n", cleaned, flags=re.I | re.S)
     opening_match = re.search(r"<article\b[^>]*>", cleaned, flags=re.I | re.S)
@@ -155,19 +133,24 @@ def make_text_only_fallback(article: str, reason: str) -> str:
     return cleaned[:opening_match.start()] + opening + cleaned[opening_match.end():]
 
 
-def validate_credential_placement(article: str) -> None:
-    """Fail closed when the fixed clinic credential table is not before the body."""
+def validate_information_article_structure(article: str, title: str) -> None:
+    """Fail closed unless the article uses the one allowed information structure."""
 
-    validator_path = Path(__file__).with_name("validate_article.py")
-    spec = importlib.util.spec_from_file_location("goldhand_builder_article_validator", validator_path)
+    validator_path = Path(__file__).with_name("validate_information_article_structure.py")
+    spec = importlib.util.spec_from_file_location("goldhand_builder_information_structure", validator_path)
     if spec is None or spec.loader is None:
-        raise ValueError("금손한의원 소개 표 위치 검증기를 불러올 수 없습니다.")
+        raise ValueError("정보전달형 단일 구조 검증기를 불러올 수 없습니다.")
     validator = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(validator)
-    issues = validator.credential_placement_issues(article)
-    if issues:
-        codes = ", ".join(str(issue.get("code", "credential-placement")) for issue in issues)
-        raise ValueError(f"금손한의원 소개 표 위치가 올바르지 않습니다: {codes}")
+    try:
+        contract = json.loads(validator.DEFAULT_CONTRACT.read_text(encoding="utf-8"))
+        value_proof = json.loads(validator.DEFAULT_VALUE_PROOF.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"정보전달형 단일 구조 계약을 읽을 수 없습니다: {exc}") from exc
+    validation = validator.validate_html(article, title, contract, value_proof)
+    if validation.get("status") == "fail":
+        codes = ", ".join(str(issue.get("code", "information-structure")) for issue in validation.get("issues", []))
+        raise ValueError(f"정보전달형 단일 구조가 올바르지 않습니다: {codes}")
 
 
 def image_host_config() -> tuple[Path, str]:
@@ -436,19 +419,17 @@ def selected_media_context_leaks(
         asset = indexed.get(asset_id)
         if asset is None:
             continue
-        for field in ("context", "closingTrustContextText"):
-            source_tokens = re.findall(
-                r"[0-9A-Za-z가-힣]{2,}",
-                html.unescape(str(asset.get(field, ""))).lower(),
-            )
-            if len(source_tokens) < minimum_run:
-                continue
-            if any(
-                tuple(source_tokens[index : index + minimum_run]) in visible_runs
-                for index in range(len(source_tokens) - minimum_run + 1)
-            ):
-                leaks.append(asset_id)
-                break
+        source_tokens = re.findall(
+            r"[0-9A-Za-z가-힣]{2,}",
+            html.unescape(str(asset.get("context", ""))).lower(),
+        )
+        if len(source_tokens) < minimum_run:
+            continue
+        if any(
+            tuple(source_tokens[index : index + minimum_run]) in visible_runs
+            for index in range(len(source_tokens) - minimum_run + 1)
+        ):
+            leaks.append(asset_id)
     return leaks
 
 
@@ -469,23 +450,6 @@ def is_approved_director_patient_photo(asset: dict[str, object]) -> bool:
     )
 
 
-def is_approved_closing_trust_photo(asset: dict[str, object]) -> bool:
-    return (
-        asset.get("closingTrustEligible") is True
-        and asset.get("closingTrustReviewed") is True
-        and asset.get("closingTrustRequiresReview") is False
-        and str(asset.get("closingTrustSceneType", "")) in ALLOWED_CLOSING_TRUST_SCENES
-        and (
-            asset.get("closingTrustDirectorVisible") is True
-            or asset.get("closingTrustDocumentVisible") is True
-        )
-        and bool(str(asset.get("closingTrustApprovedAlt", "")).strip())
-        and bool(str(asset.get("closingTrustContextText", "")).strip())
-        and str(asset.get("url", "")).startswith("https://")
-        and bool(str(asset.get("sha256", "")).strip())
-    )
-
-
 def validate_person_media_policy(
     article: str,
     library: dict[str, object] | None = None,
@@ -494,9 +458,6 @@ def validate_person_media_policy(
 
     indexed = media_by_id(library or load_json_object(DEFAULT_MEDIA_LIBRARY))
     failures: list[str] = []
-    for index, tag in enumerate(re.findall(r"<img\b[^>]*>", article, flags=re.I | re.S), start=1):
-        if attribute_value(tag, "data-real-photo") == "true" and attribute_value(tag, "data-trust-photo") == "true":
-            failures.append(f"{index}번 사진은 실제 진료 사진과 마무리 신뢰 사진을 동시에 표시할 수 없습니다.")
     for index, tag in enumerate(
         re.findall(
             r"<img\b(?=[^>]*\bdata-real-photo\s*=\s*['\"]true['\"])[^>]*>",
@@ -517,26 +478,6 @@ def validate_person_media_policy(
             failures.append(f"{asset_id}의 파일 해시가 내장 라이브러리와 다릅니다.")
         if attribute_value(tag, "data-reference-source-url") != str(asset.get("url", "")):
             failures.append(f"{asset_id}의 공식 원본 URL이 내장 라이브러리와 다릅니다.")
-    for index, tag in enumerate(
-        re.findall(
-            r"<img\b(?=[^>]*\bdata-trust-photo\s*=\s*['\"]true['\"])[^>]*>",
-            article,
-            flags=re.I | re.S,
-        ),
-        start=1,
-    ):
-        asset_id = attribute_value(tag, "data-goldhand-media")
-        asset = indexed.get(asset_id)
-        if asset is None:
-            failures.append(f"{index}번 마무리 신뢰 사진의 내장 ID가 없습니다: {asset_id or 'missing-id'}")
-            continue
-        if not is_approved_closing_trust_photo(asset):
-            failures.append(f"{asset_id}는 검수된 협약·수료·기부·봉사 신뢰 사진이 아니므로 사용할 수 없습니다.")
-            continue
-        if attribute_value(tag, "data-media-sha256") != str(asset.get("sha256", "")):
-            failures.append(f"{asset_id}의 파일 해시가 내장 라이브러리와 다릅니다.")
-        if attribute_value(tag, "data-reference-source-url") != str(asset.get("url", "")):
-            failures.append(f"{asset_id}의 공식 원본 URL이 내장 라이브러리와 다릅니다.")
     leaks = selected_media_context_leaks(article, indexed)
     if leaks:
         failures.append(
@@ -546,42 +487,13 @@ def validate_person_media_policy(
         raise ValueError("실제 사진 정책 위반: " + " ".join(failures))
 
 
-def strip_legacy_closing_links(article: str) -> str:
-    opening = re.compile(
-        r"<section\b(?=[^>]*\bdata-goldhand-closing-links\s*=\s*['\"]true['\"])[^>]*>",
-        flags=re.I | re.S,
-    )
-    starts = list(opening.finditer(article))
-    if len(starts) > 1:
-        raise ValueError("이전 글말미 링크·지도 블록이 중복됐습니다.")
-    cleaned = article
-    if starts:
-        depth = 0
-        end = None
-        for tag in re.finditer(r"<section\b[^>]*>|</section\s*>", article[starts[0].start():], flags=re.I | re.S):
-            if tag.group(0).lower().startswith("<section"):
-                depth += 1
-            else:
-                depth -= 1
-                if depth == 0:
-                    end = starts[0].start() + tag.end()
-                    break
-        if end is None:
-            raise ValueError("이전 글말미 링크·지도 블록의 닫는 태그가 없습니다.")
-        cleaned = article[:starts[0].start()] + article[end:]
-    if not re.search(r"</article>\s*$", cleaned, flags=re.I):
-        raise ValueError("article 닫는 태그가 없습니다.")
-    return cleaned
-
-
 def build_page(
     title: str,
     article: str,
     platform_name: str | None = None,
 ) -> str:
-    article = strip_visible_trust_photo_context(article)
+    validate_information_article_structure(article, title)
     validate_person_media_policy(article)
-    article = strip_legacy_closing_links(article)
     escaped_title = html.escape(title, quote=True)
     escaped_shortcut = html.escape(paste_shortcut(platform_name), quote=True)
     return f'''<!doctype html>
@@ -807,7 +719,7 @@ def build_page(
           return `<tr class="se-tr" id="${{rowId}}">${{cells.map((cell)=>{{
             const cellId=nextSeId(), moduleId=nextSeId();
             const width=cell.style.width || `${{100/Math.max(cells.length,1)}}%`;
-            const height=cell.style.height || (source.getAttribute('data-native-table-purpose')==='clinic-info' ? '64px' : '40px');
+            const height=cell.style.height || '40px';
             const background=cell.style.backgroundColor ? ` background-color:${{cell.style.backgroundColor}};` : '';
             const cellStyle=`width:${{width}}; height:${{height}};${{background}} border:1px solid rgb(214, 214, 214);`;
             return `<td id="${{cellId}}" colspan="${{cell.colSpan || 1}}" rowspan="${{cell.rowSpan || 1}}" class="__se-unit se-cell" style="${{cellStyle}}"><div id="${{moduleId}}" class="se-module se-module-text">${{nativeParagraphs(cell,{{fontSize:15,lineHeight:'1.6',color:cell.style.color || 'rgb(77, 77, 77)',bold:/^(?:600|700|800|900|bold)$/i.test(cell.style.fontWeight || '')}})}}</div></td>`;
@@ -909,7 +821,6 @@ def main() -> int:
         article = strip_visible_image_captions(article_fragment(args.article_html.read_text(encoding="utf-8")))
         if args.text_only_fallback_reason:
             article = make_text_only_fallback(article, args.text_only_fallback_reason)
-        validate_credential_placement(article)
         article, automatic_fallback_reason = publish_or_text_only_fallback(article)
         target = output_path(args.title, args.output)
         target.parent.mkdir(parents=True, exist_ok=True)

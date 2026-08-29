@@ -88,7 +88,6 @@ class InformationDoctorTests(unittest.TestCase):
         result = QUERY.title_query(
             "불면증",
             {"briefs": {}},
-            {"profiles": {}},
             self.library(),
         )
         self.assertEqual(result["status"], "stored-match")
@@ -97,13 +96,16 @@ class InformationDoctorTests(unittest.TestCase):
         serialized = json.dumps(result, ensure_ascii=False)
         self.assertNotIn("서울 불면증 한의원", serialized)
         self.assertNotIn("generalInformationAtoms", serialized)
-        self.assertTrue(result["boundaries"]["editorialMasterLoaded"] is False)
+        self.assertTrue(result["boundaries"]["structureLoadedFromSources"] is False)
+        self.assertEqual(
+            result["boundaries"]["singleStructureAuthority"],
+            "references/information-delivery-structure.md",
+        )
 
     def test_title_query_does_not_force_cross_topic_source(self) -> None:
         result = QUERY.title_query(
             "이명",
             {"briefs": {}},
-            {"profiles": {}},
             self.library(),
         )
         self.assertEqual(result["status"], "no-stored-match")
@@ -130,7 +132,6 @@ class InformationDoctorTests(unittest.TestCase):
         result = QUERY.title_query(
             "교통사고 후유증",
             {"briefs": {}},
-            {"profiles": {}},
             library,
         )
         self.assertEqual(result["matchedSourceIds"], ["USER-TRAFFIC-01"])
@@ -154,15 +155,44 @@ class InformationDoctorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "원문 보관 필드"):
             STORE.upsert(self.library(), [source], refresh=False)
 
-    def test_structure_master_pool_remains_exactly_eleven(self) -> None:
-        profiles = json.loads(
-            (ASSETS / "reference-master-profiles.json").read_text(encoding="utf-8")
+    def test_title_query_supports_one_answer_when_only_one_distinct_atom_exists(self) -> None:
+        source = self.source()
+        source["generalInformationAtoms"] = source["generalInformationAtoms"][:1]
+        source["titleAngles"] = [
+            {
+                "angleId": "USER-SLEEP-01-T1",
+                "angle": "자주 깨는 밤을 만드는 생활 조건 한 가지",
+                "mechanism": "everyday-cause-count",
+                "supportedAnswerCount": 1,
+            }
+        ]
+        library = self.library()
+        library["sources"] = [source]
+        result = QUERY.title_query("불면증", {"briefs": {}}, library)
+        self.assertEqual(result["coverage"]["supportedAnswerCounts"], [1])
+        self.assertEqual(result["titleAngles"][0]["supportedAnswerCount"], 1)
+
+    def test_article_query_accepts_any_positive_answer_count(self) -> None:
+        result = QUERY.query(
+            stage="article",
+            topic="불면증",
+            title="불면증 원인 4가지",
+            answer_count=4,
+            briefs={"briefs": {}},
+            library=self.library(),
+            maximum_sources=12,
         )
-        self.assertEqual(len(profiles["profiles"]), 11)
-        self.assertEqual(
-            set(profiles["profiles"]),
-            {"INFO01", "INFO03", "INFO04", "INFO05", "INFO06", "INFO07", "INFO08", "INFO09", "INFO10", "INFO11", "INFO12"},
-        )
+        self.assertEqual(result["titleContract"]["requestedAnswerCount"], 4)
+        with self.assertRaisesRegex(ValueError, "1개 이상"):
+            QUERY.query(
+                stage="article",
+                topic="불면증",
+                title="불면증 원인 0가지",
+                answer_count=0,
+                briefs={"briefs": {}},
+                library=self.library(),
+                maximum_sources=12,
+            )
 
     def test_installed_information_library_has_reviewed_52_source_expansion(self) -> None:
         library = json.loads(
@@ -182,11 +212,10 @@ class InformationDoctorTests(unittest.TestCase):
 
     def test_real_traffic_query_does_not_mix_flu_aftereffects(self) -> None:
         briefs = json.loads((ASSETS / "wipark-content-briefs.json").read_text(encoding="utf-8"))
-        profiles = json.loads((ASSETS / "reference-master-profiles.json").read_text(encoding="utf-8"))
         library = json.loads(
             (ASSETS / "user-general-information-references.json").read_text(encoding="utf-8")
         )
-        result = QUERY.title_query("교통사고 후유증", briefs, profiles, library)
+        result = QUERY.title_query("교통사고 후유증", briefs, library)
         self.assertIn("WIP-224355735689", result["matchedSourceIds"])
         self.assertNotIn("WIP-223720354779", result["matchedSourceIds"])
 

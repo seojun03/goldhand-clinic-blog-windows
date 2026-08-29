@@ -19,7 +19,6 @@ from typing import Any
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_BRIEFS = SKILL_DIR / "assets" / "wipark-content-briefs.json"
-DEFAULT_PROFILES = SKILL_DIR / "assets" / "reference-master-profiles.json"
 DEFAULT_LIBRARY = SKILL_DIR / "assets" / "user-general-information-references.json"
 SELECTOR_PATH = Path(__file__).with_name("select_general_information.py")
 
@@ -59,7 +58,8 @@ def source_title_angles(source: dict[str, Any]) -> list[dict[str, Any]]:
         for index, item in enumerate(raw, start=1):
             if isinstance(item, str):
                 angle = clean(item)
-                if angle:
+                promised_count = SELECTOR.promised_answer_count(angle)
+                if angle and promised_count != -1 and (promised_count is None or promised_count >= 1):
                     result.append(
                         {
                             "angleId": f"{source.get('id', 'SOURCE')}-T{index}",
@@ -73,6 +73,9 @@ def source_title_angles(source: dict[str, Any]) -> list[dict[str, Any]]:
             angle = clean(item.get("angle", ""))
             if not angle:
                 continue
+            promised_count = SELECTOR.promised_answer_count(angle)
+            if promised_count == -1 or (promised_count is not None and promised_count < 1):
+                continue
             normalized = {
                 "angleId": clean(item.get("angleId", ""))
                 or f"{source.get('id', 'SOURCE')}-T{index}",
@@ -80,7 +83,9 @@ def source_title_angles(source: dict[str, Any]) -> list[dict[str, Any]]:
                 "mechanism": clean(item.get("mechanism", "reviewed-information-angle")),
             }
             count = item.get("supportedAnswerCount")
-            if isinstance(count, int) and 1 <= count <= 3:
+            if isinstance(count, int):
+                if count < 1:
+                    continue
                 normalized["supportedAnswerCount"] = count
             result.append(normalized)
     return result
@@ -89,14 +94,13 @@ def source_title_angles(source: dict[str, Any]) -> list[dict[str, Any]]:
 def title_query(
     topic: str,
     briefs: dict[str, Any],
-    profiles: dict[str, Any],
     library: dict[str, Any],
     *,
     maximum_sources: int = 12,
 ) -> dict[str, Any]:
     normalized_topic = SELECTOR.normalize(topic)
     anchors = SELECTOR.subject_anchor_terms(normalized_topic)
-    sources = SELECTOR.built_in_sources(briefs, profiles) + SELECTOR.user_sources(library)
+    sources = SELECTOR.built_in_sources(briefs) + SELECTOR.user_sources(library)
     matches: list[dict[str, Any]] = []
 
     for source in sources:
@@ -147,7 +151,7 @@ def title_query(
     angles = angles[:15]
 
     total_atoms = sum(int(match.get("atomCount", 0)) for match in matches)
-    supported_counts = list(range(1, min(3, total_atoms) + 1))
+    supported_counts = list(range(1, total_atoms + 1))
     status = "stored-match" if matches else "no-stored-match"
     return {
         "status": status,
@@ -169,7 +173,8 @@ def title_query(
             "sourceProseLoaded": False,
             "sourceTitlesReturned": False,
             "sourceClinicFactsReturned": False,
-            "editorialMasterLoaded": False,
+            "structureLoadedFromSources": False,
+            "singleStructureAuthority": "references/information-delivery-structure.md",
             "sourceTitleCopyBlocked": True,
             "titleMustBeNewGoldhandWording": True,
         },
@@ -181,23 +186,21 @@ def query(
     stage: str,
     topic: str,
     title: str,
-    keyword: str,
     answer_count: int | None,
     briefs: dict[str, Any],
-    profiles: dict[str, Any],
     library: dict[str, Any],
     maximum_sources: int,
 ) -> dict[str, Any]:
     if stage == "title":
-        return title_query(topic, briefs, profiles, library, maximum_sources=maximum_sources)
+        return title_query(topic, briefs, library, maximum_sources=maximum_sources)
     if not title:
         raise ValueError("article 단계에는 확정 제목이 필요합니다.")
+    if answer_count is not None and answer_count < 1:
+        raise ValueError("article 단계의 답 개수는 1개 이상이어야 합니다.")
     result = SELECTOR.select_information(
         topic,
         title,
-        keyword,
         briefs,
-        profiles,
         library,
         answer_count=answer_count,
     )
@@ -207,7 +210,8 @@ def query(
         "knowledgeDoctor": {
             "persistentStoreQueried": True,
             "sourceProseReloaded": False,
-            "editorialMasterSelectedByThisQuery": False,
+            "sourceStructureIgnored": True,
+            "singleStructureId": "goldhand-single-information-delivery-structure-v1",
         },
     }
 
@@ -217,11 +221,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--stage", choices=("title", "article"), default="title")
     parser.add_argument("--topic", required=True)
     parser.add_argument("--title", default="")
-    parser.add_argument("--keyword", default="")
     parser.add_argument("--answer-count", type=int)
     parser.add_argument("--maximum-sources", type=int, default=12)
     parser.add_argument("--briefs", type=Path, default=DEFAULT_BRIEFS)
-    parser.add_argument("--profiles", type=Path, default=DEFAULT_PROFILES)
     parser.add_argument("--library", type=Path, default=DEFAULT_LIBRARY)
     parser.add_argument("--json", action="store_true")
     return parser.parse_args()
@@ -231,16 +233,13 @@ def main() -> int:
     args = parse_args()
     try:
         briefs = json.loads(args.briefs.read_text(encoding="utf-8"))
-        profiles = json.loads(args.profiles.read_text(encoding="utf-8"))
         library = json.loads(args.library.read_text(encoding="utf-8"))
         result = query(
             stage=args.stage,
             topic=args.topic,
             title=args.title,
-            keyword=args.keyword,
             answer_count=args.answer_count,
             briefs=briefs,
-            profiles=profiles,
             library=library,
             maximum_sources=args.maximum_sources,
         )

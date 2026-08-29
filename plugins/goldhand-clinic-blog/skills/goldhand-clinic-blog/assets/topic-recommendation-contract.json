@@ -15,9 +15,6 @@
   "distinctTopicTextRequired": true,
   "maximizeTopicClusterDiversity": true,
   "researchRequiredBeforeRecommendations": false,
-  "referenceMasterRequiredBeforeRecommendations": false,
-  "recentArticleHistoryReadBeforeRecommendations": false,
-  "recentArticleHistoryMayBlockOrReplace": false,
   "displaySourceMetadata": false,
   "selectionPrompt": "1~10번 중 작성할 주제를 선택하거나, 원하는 주제를 직접 입력해 주세요.",
   "numberSelection": {
