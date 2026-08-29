@@ -56,9 +56,10 @@ class AutomationVersionTests(unittest.TestCase):
         )
         skill.write_text(
             "# 금손한의원 블로그 자동화\n\n"
-            "## 시작 브리핑과 자동화 버전\n\n"
+            "## 시작 표시와 자동화 버전\n\n"
             "- 현재 자동화 버전: `1.0`\n"
-            "- 현재 버전 브리핑: 테스트 브리핑\n",
+            "- 사용자에게는 아래 한 문장만 정확히 보인다.\n\n"
+            "  `버전 v{automationVersion} 업데이트 된 시각 {displayUpdatedAtKst}`\n",
             encoding="utf-8",
         )
         state.write_text(
@@ -98,6 +99,10 @@ class AutomationVersionTests(unittest.TestCase):
             )
             self.assertTrue(
                 json.loads(state.read_text(encoding="utf-8"))["sourceFingerprint"]
+            )
+            self.assertEqual(
+                json.loads(state.read_text(encoding="utf-8"))["displayUpdatedAtKst"],
+                "2026.08.27 09:00",
             )
 
     def test_crlf_skill_initializes_with_the_same_managed_version(self) -> None:
@@ -139,6 +144,7 @@ class AutomationVersionTests(unittest.TestCase):
             self.assertEqual(changed["currentVersion"], "1.1")
             self.assertTrue(changed["needsCachebuster"])
             self.assertIn("현재 자동화 버전: `1.1`", skill.read_text(encoding="utf-8"))
+            self.assertEqual(changed["displayUpdatedAtKst"], "2026.08.27 09:01")
             self.assertTrue(
                 json.loads(manifest.read_text(encoding="utf-8"))["version"].startswith(
                     "1.1.0+codex."
@@ -165,9 +171,13 @@ class AutomationVersionTests(unittest.TestCase):
             self.assertFalse(installed_retry["contentChanged"])
             self.assertFalse(installed_retry["needsCachebuster"])
             self.assertEqual(installed_retry["currentVersion"], "1.1")
+            self.assertEqual(installed_retry["displayUpdatedAtKst"], "2026.08.27 09:01")
 
-    def test_current_skill_starts_with_managed_version_briefing(self) -> None:
+    def test_current_skill_starts_with_only_version_and_update_time(self) -> None:
         skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        agent_text = (SKILL_DIR / "agents" / "openai.yaml").read_text(
+            encoding="utf-8"
+        )
         state = json.loads(
             (SKILL_DIR / "assets" / "automation-version.json").read_text(
                 encoding="utf-8"
@@ -176,12 +186,21 @@ class AutomationVersionTests(unittest.TestCase):
         managed = REFRESH.managed_skill_version(SKILL_DIR / "SKILL.md")
         self.assertEqual(managed, state["automationVersion"])
         self.assertIn(
-            "금손한의원 블로그 자동화 v{현재 자동화 버전}을 시작합니다.",
+            "버전 v{automationVersion} 업데이트 된 시각 {displayUpdatedAtKst}",
             skill_text,
         )
-        self.assertIn("현재 버전: {현재 버전 브리핑}", skill_text)
+        self.assertRegex(state["displayUpdatedAtKst"], r"^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$")
+        self.assertEqual(
+            state["displayUpdatedAtKst"],
+            REFRESH.display_updated_at_kst(state["updatedAt"]),
+        )
+        self.assertNotIn("현재 버전 브리핑", skill_text)
+        self.assertNotIn("금손한의원 블로그 자동화 v{현재 자동화 버전}을 시작합니다.", skill_text)
+        self.assertNotIn("현재 버전: {현재 버전 브리핑}", skill_text)
+        self.assertIn("single version-and-update-time line", agent_text)
+        self.assertNotIn("Korean briefing", agent_text)
         self.assertLess(
-            skill_text.index("## 시작 브리핑과 자동화 버전"),
+            skill_text.index("## 시작 표시와 자동화 버전"),
             skill_text.index("## 운영체제별 실행기"),
         )
 
@@ -272,15 +291,20 @@ class AutomationVersionTests(unittest.TestCase):
 
     def test_current_skill_continues_with_callilife_style_original_when_artwork_is_missing(self) -> None:
         skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
-        briefing_line = next(
-            line for line in skill_text.splitlines()
-            if line.startswith("- 현재 버전 브리핑:")
+        self.assertNotIn("- 현재 버전 브리핑:", skill_text)
+        self.assertIn("callilife 개별 작품을 찾지 못하거나", skill_text)
+        self.assertIn("링크를 요구하지 않는다", skill_text)
+        self.assertIn("callilife 그림체로 생성", skill_text)
+        self.assertIn("텍스트 중심 HTML로 전환", skill_text)
+        self.assertIn("복사용 HTML을 끝까지 완성", skill_text)
+
+    def test_update_time_uses_fixed_korean_standard_time(self) -> None:
+        self.assertEqual(
+            REFRESH.display_updated_at_kst("2026-08-29T03:01:00Z"),
+            "2026.08.29 12:01",
         )
-        self.assertIn("callilife 개별 작품을 찾지 못하거나", briefing_line)
-        self.assertIn("링크를 요구하지 않고", briefing_line)
-        self.assertIn("callilife 그림체로 생성해 끝까지 완성", briefing_line)
-        self.assertIn("텍스트 중심 HTML로 자동 전환", briefing_line)
-        self.assertIn("복사용 HTML을 끝까지 완성", briefing_line)
+        with self.assertRaisesRegex(ValueError, "시간대가 없습니다"):
+            REFRESH.display_updated_at_kst("2026-08-29T03:01:00")
 
 
 if __name__ == "__main__":

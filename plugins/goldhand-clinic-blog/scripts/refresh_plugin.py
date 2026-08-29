@@ -10,7 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -42,8 +42,10 @@ DYNAMIC_VERSION_STATE_KEYS = {
     "sourceFingerprint",
     "packageVersion",
     "updatedAt",
+    "displayUpdatedAtKst",
     "packageUpdatedAt",
 }
+KST = timezone(timedelta(hours=9))
 
 
 def fail(message: str) -> int:
@@ -57,6 +59,19 @@ def run(*args: str) -> None:
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def display_updated_at_kst(value: str) -> str:
+    normalized = value.strip()
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise ValueError(f"업데이트 시각이 ISO 8601 형식이 아닙니다: {value}") from exc
+    if parsed.tzinfo is None:
+        raise ValueError(f"업데이트 시각에 시간대가 없습니다: {value}")
+    return parsed.astimezone(KST).strftime("%Y.%m.%d %H:%M")
 
 
 def load_json_object(path: Path) -> dict:
@@ -221,7 +236,20 @@ def sync_automation_version(
     state["sourceFingerprint"] = fingerprint
     if initialized or content_changed:
         state["updatedAt"] = now or utc_now()
-    if initialized or content_changed or manifest_changed:
+    updated_at = str(state.get("updatedAt", "")).strip()
+    if not updated_at:
+        raise ValueError("자동화 버전 상태 파일에 updatedAt이 없습니다.")
+    display_updated_at = display_updated_at_kst(updated_at)
+    display_updated_at_changed = (
+        str(state.get("displayUpdatedAtKst", "")).strip() != display_updated_at
+    )
+    state["displayUpdatedAtKst"] = display_updated_at
+    if (
+        initialized
+        or content_changed
+        or manifest_changed
+        or display_updated_at_changed
+    ):
         state["packageVersion"] = ""
         state.pop("packageUpdatedAt", None)
     write_json_object(state_path, state)
@@ -231,6 +259,7 @@ def sync_automation_version(
         initialized
         or content_changed
         or manifest_changed
+        or display_updated_at_changed
         or not package_version
         or package_version != target_package_version
     )
@@ -239,6 +268,7 @@ def sync_automation_version(
         "currentVersion": current_version,
         "initialized": initialized,
         "contentChanged": content_changed,
+        "displayUpdatedAtKst": display_updated_at,
         "needsCachebuster": needs_cachebuster,
     }
 
