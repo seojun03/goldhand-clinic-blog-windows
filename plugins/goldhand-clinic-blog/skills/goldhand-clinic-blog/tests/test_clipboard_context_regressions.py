@@ -120,7 +120,7 @@ class ClipboardRegressionTests(unittest.TestCase):
             "<article><p>전체 본문 첫 문장입니다.</p><p>전체 본문 두 번째 문장입니다.</p></article>",
         )
 
-    def test_local_file_branch_is_synchronous_and_confirms_both_payloads(self) -> None:
+    def test_local_file_branch_synchronously_selects_the_full_native_payload(self) -> None:
         page = self.page()
         local_start = page.index("if (window.location.protocol === 'file:')")
         http_start = page.index("if (navigator.clipboard?.write", local_start)
@@ -129,70 +129,145 @@ class ClipboardRegressionTests(unittest.TestCase):
         self.assertIn("button.addEventListener('click', () =>", page)
         self.assertNotIn("button.addEventListener('click', async", page)
         self.assertNotIn("await copyImagesReady", page)
-        self.assertNotIn("nativeSelectionRoot", page)
-        self.assertIn("copyWithDataTransfer(htmlValue,plainValue)", local_branch)
+        self.assertIn("function nativeSelectionRoot(inputBuffer, nativeHtml)", page)
+        self.assertIn("inputBuffer.cloneNode(true)", page)
+        self.assertIn("selectionRoot.insertAdjacentHTML('beforeend',nativeHtml)", page)
+        self.assertIn(
+            "copyRenderedSelection(nativeSelectionRoot(inputBuffer,nativeHtml))",
+            local_branch,
+        )
+        self.assertIn("range.selectNodeContents(copyRoot)", page)
+        self.assertIn("selection.addRange(range)", page)
+        self.assertIn("document.body.appendChild(copyRoot)", page)
+        self.assertIn("copyRoot.remove()", page)
         self.assertNotIn("await", local_branch)
         self.assertNotIn(".then(", local_branch)
-        self.assertIn("setData('text/html',htmlValue)", page)
-        self.assertIn("setData('text/plain',plainValue)", page)
-        self.assertIn("getData('text/html')===htmlValue", page)
-        self.assertIn("getData('text/plain')===plainValue", page)
-        self.assertIn("return copied && payloadConfirmed", page)
+        self.assertNotIn("navigator.clipboard", local_branch)
+        self.assertNotIn("copyWithDataTransfer", page)
+        self.assertNotIn("document.addEventListener('copy'", page)
 
-    def test_html_validator_requires_new_clipboard_contract(self) -> None:
+    def test_html_validator_requires_selection_and_clipboard_item_contracts(self) -> None:
         required = HTML_VALIDATOR.REQUIRED_SNIPPETS
 
-        self.assertNotIn("native-selection-copy", required)
-        self.assertEqual(required["clipboard-data-transfer-copy"], "copyWithDataTransfer")
-        self.assertEqual(required["clipboard-html-payload"], "setData('text/html',htmlValue)")
-        self.assertEqual(required["clipboard-plain-payload"], "setData('text/plain',plainValue)")
-        self.assertEqual(required["clipboard-payload-confirmation"], "getData('text/html')===htmlValue")
+        self.assertNotIn("clipboard-data-transfer-copy", required)
+        self.assertNotIn("clipboard-payload-confirmation", required)
+        self.assertEqual(required["native-selection-root"], "nativeSelectionRoot")
+        self.assertEqual(
+            required["native-selection-copy"],
+            "copyRenderedSelection(nativeSelectionRoot(inputBuffer,nativeHtml))",
+        )
+        self.assertEqual(required["native-selection-input-buffer"], "inputBuffer.cloneNode(true)")
+        self.assertEqual(
+            required["native-selection-html"],
+            "selectionRoot.insertAdjacentHTML('beforeend',nativeHtml)",
+        )
+        self.assertEqual(required["native-selection-attach"], "document.body.appendChild(copyRoot)")
+        self.assertEqual(required["native-selection-range"], "range.selectNodeContents(copyRoot)")
+        self.assertEqual(required["native-selection-add-range"], "selection.addRange(range)")
+        self.assertEqual(required["native-selection-cleanup"], "copyRoot.remove()")
+        self.assertEqual(required["clipboard-html-payload"], "'text/html':new Blob([htmlValue]")
+        self.assertEqual(required["clipboard-plain-payload"], "'text/plain':new Blob([plainValue]")
 
     @unittest.skipUnless(shutil.which("node"), "Node.js가 없어 브라우저 복사 함수 실행 검사를 건너뜁니다.")
-    def test_data_transfer_copy_rejects_missing_or_failed_copy_events(self) -> None:
+    def test_selection_copy_replaces_stale_content_and_always_cleans_up(self) -> None:
         page = self.page()
-        function_start = page.index("function copyWithDataTransfer")
+        function_start = page.index("function nativeSelectionRoot")
         function_end = page.index("function copySuccessMessage", function_start)
         function_source = page[function_start:function_end]
         node_script = function_source + r"""
 function runScenario(mode) {
-  const listeners = {};
-  const values = new Map();
-  let prevented = false;
-  const clipboardData = {
-    clearData() { values.clear(); },
-    setData(type, value) { values.set(type, value); },
-    getData(type) { return values.get(type) || ''; },
+  class FakeElement {
+    constructor(tagName) {
+      this.tagName = tagName;
+      this.style = {};
+      this.children = [];
+      this.parentNode = null;
+      this.html = '';
+      this.outerHTML = '';
+      this.textContent = '';
+    }
+    appendChild(node) {
+      node.parentNode = this;
+      this.children.push(node);
+      return node;
+    }
+    cloneNode() {
+      const clone = new FakeElement(this.tagName);
+      clone.outerHTML = this.outerHTML;
+      clone.textContent = this.textContent;
+      return clone;
+    }
+    insertAdjacentHTML(position, html) {
+      if (position !== 'beforeend') throw new Error('unexpected-position');
+      this.html += html;
+    }
+    remove() {
+      if (!this.parentNode) return;
+      const index = this.parentNode.children.indexOf(this);
+      if (index >= 0) this.parentNode.children.splice(index, 1);
+      this.parentNode = null;
+    }
+    get isConnected() {
+      let current = this;
+      while (current) {
+        if (current === body) return true;
+        current = current.parentNode;
+      }
+      return false;
+    }
+  }
+  const body = new FakeElement('body');
+  const selection = {
+    ranges: [],
+    removeAllRanges() { this.ranges = []; },
+    addRange(range) { this.ranges = [range]; },
   };
+  const clipboard = {
+    html: '보호자분께 어르신의 양쪽 상하지 근육 및 근력 상태 비교하면서 설명해 드리고',
+  };
+  let connectedAtCopy = false;
+  let rangeCountAtCopy = 0;
   global.document = {
-    addEventListener(type, handler) { listeners[type] = handler; },
-    removeEventListener(type, handler) {
-      if (listeners[type] === handler) delete listeners[type];
+    body,
+    createElement(tagName) { return new FakeElement(tagName); },
+    createRange() {
+      return {
+        node: null,
+        selectNodeContents(node) { this.node = node; },
+      };
     },
     execCommand(command) {
       if (command !== 'copy') throw new Error('unexpected-command');
       if (mode === 'throw') throw new Error('copy-blocked');
-      if (mode === 'event') {
-        listeners.copy({
-          clipboardData,
-          preventDefault() { prevented = true; },
-        });
+      const range = selection.ranges[0];
+      connectedAtCopy = Boolean(range?.node?.isConnected);
+      rangeCountAtCopy = selection.ranges.length;
+      if (mode === 'success' && connectedAtCopy && rangeCountAtCopy === 1) {
+        const root = range.node;
+        clipboard.html = root.children.map((child) => child.outerHTML).join('') + root.html;
+        return true;
       }
-      return true;
+      return false;
     },
   };
-  const copied = copyWithDataTransfer('<p>전체 본문</p>', '전체 본문');
+  global.window = { getSelection() { return selection; } };
+  const inputBuffer = new FakeElement('span');
+  inputBuffer.outerHTML = '<span data-input-buffer="INPUT_BUFFER_DATA;Windows;blog.naver.com">&#8203;</span>';
+  const nativeHtml = '<div class="se-component">전체 본문 첫 문장입니다.</div><div class="se-component">전체 본문 두 번째 문장입니다.</div>';
+  const root = nativeSelectionRoot(inputBuffer, nativeHtml);
+  const copied = copyRenderedSelection(root);
   return {
     copied,
-    html: values.get('text/html') || '',
-    plain: values.get('text/plain') || '',
-    prevented,
-    listenerCount: Object.keys(listeners).length,
+    connectedAtCopy,
+    rangeCountAtCopy,
+    clipboardHtml: clipboard.html,
+    bodyChildren: body.children.length,
+    remainingRanges: selection.ranges.length,
   };
 }
 process.stdout.write(JSON.stringify({
-  event: runScenario('event'),
-  missingEvent: runScenario('missing-event'),
+  success: runScenario('success'),
+  failed: runScenario('failed'),
   thrown: runScenario('throw'),
 }));
 """
@@ -205,20 +280,25 @@ process.stdout.write(JSON.stringify({
         )
         result = json.loads(completed.stdout)
 
-        self.assertEqual(
-            result["event"],
-            {
-                "copied": True,
-                "html": "<p>전체 본문</p>",
-                "plain": "전체 본문",
-                "prevented": True,
-                "listenerCount": 0,
-            },
-        )
-        self.assertFalse(result["missingEvent"]["copied"])
-        self.assertEqual(result["missingEvent"]["listenerCount"], 0)
+        success = result["success"]
+        self.assertTrue(success["copied"])
+        self.assertTrue(success["connectedAtCopy"])
+        self.assertEqual(success["rangeCountAtCopy"], 1)
+        self.assertIn("INPUT_BUFFER_DATA", success["clipboardHtml"])
+        self.assertIn("전체 본문 첫 문장입니다.", success["clipboardHtml"])
+        self.assertIn("전체 본문 두 번째 문장입니다.", success["clipboardHtml"])
+        self.assertNotIn("상하지 근육", success["clipboardHtml"])
+        self.assertEqual(success["bodyChildren"], 0)
+        self.assertEqual(success["remainingRanges"], 0)
+
+        self.assertFalse(result["failed"]["copied"])
+        self.assertIn("상하지 근육", result["failed"]["clipboardHtml"])
+        self.assertEqual(result["failed"]["bodyChildren"], 0)
+        self.assertEqual(result["failed"]["remainingRanges"], 0)
         self.assertFalse(result["thrown"]["copied"])
-        self.assertEqual(result["thrown"]["listenerCount"], 0)
+        self.assertIn("상하지 근육", result["thrown"]["clipboardHtml"])
+        self.assertEqual(result["thrown"]["bodyChildren"], 0)
+        self.assertEqual(result["thrown"]["remainingRanges"], 0)
 
 
 if __name__ == "__main__":

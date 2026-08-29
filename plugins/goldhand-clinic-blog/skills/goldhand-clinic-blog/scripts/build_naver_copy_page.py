@@ -829,25 +829,34 @@ def build_page(
         return [...element.childNodes].map(nativeComponentsFromNode).join('');
       }}
       function prepareNativeNaverHtml(copyRoot) {{ return [...copyRoot.childNodes].map(nativeComponentsFromNode).join(''); }}
-      function copyWithDataTransfer(htmlValue, plainValue) {{
-        let payloadConfirmed=false;
-        const onCopy=(event) => {{
-          if (!event.clipboardData) return;
-          event.preventDefault();
-          event.clipboardData.clearData();
-          event.clipboardData.setData('text/html',htmlValue);
-          event.clipboardData.setData('text/plain',plainValue);
-          payloadConfirmed=(
-            event.clipboardData.getData('text/html')===htmlValue &&
-            event.clipboardData.getData('text/plain')===plainValue
-          );
-        }};
-        document.addEventListener('copy',onCopy,true);
+      function nativeSelectionRoot(inputBuffer, nativeHtml) {{
+        const selectionRoot=document.createElement('div');
+        selectionRoot.appendChild(inputBuffer.cloneNode(true));
+        selectionRoot.insertAdjacentHTML('beforeend',nativeHtml);
+        return selectionRoot;
+      }}
+      function copyRenderedSelection(copyRoot) {{
+        copyRoot.style.position='fixed';
+        copyRoot.style.left='-100000px';
+        copyRoot.style.top='0';
+        copyRoot.style.width='580px';
+        document.body.appendChild(copyRoot);
+        const selection=window.getSelection();
+        if (!selection) {{ copyRoot.remove(); return false; }}
         let copied=false;
-        try {{ copied=document.execCommand('copy'); }}
+        try {{
+          const range=document.createRange();
+          range.selectNodeContents(copyRoot);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          copied=document.execCommand('copy')===true;
+        }}
         catch {{ copied=false; }}
-        finally {{ document.removeEventListener('copy',onCopy,true); }}
-        return copied && payloadConfirmed;
+        finally {{
+          selection.removeAllRanges();
+          copyRoot.remove();
+        }}
+        return copied;
       }}
       function copySuccessMessage(plainValue) {{
         return `복사 완료 · 본문 ${{plainValue.length.toLocaleString()}}자 · 사진 ${{expectedImageCount}}장 · {escaped_shortcut}`;
@@ -866,7 +875,7 @@ def build_page(
         const htmlValue = `<meta charset="utf-8">${{inputBuffer.outerHTML}}${{nativeHtml}}`;
         const plainValue = prepared.innerText.replaceAll('\\u00a0','').replaceAll('\\u2060','').replace(/\\n{{3,}}/g,'\\n\\n').trim();
         if (window.location.protocol === 'file:') {{
-          if (copyWithDataTransfer(htmlValue,plainValue)) setState('done',copySuccessMessage(plainValue));
+          if (copyRenderedSelection(nativeSelectionRoot(inputBuffer,nativeHtml))) setState('done',copySuccessMessage(plainValue));
           else setState('error','복사 실패 · 클립보드가 바뀌지 않았습니다');
           return;
         }}
@@ -874,12 +883,12 @@ def build_page(
           navigator.clipboard.write([new ClipboardItem({{'text/html':new Blob([htmlValue],{{type:'text/html'}}),'text/plain':new Blob([plainValue],{{type:'text/plain'}})}})])
             .then(() => setState('done',copySuccessMessage(plainValue)))
             .catch(() => {{
-              if (copyWithDataTransfer(htmlValue,plainValue)) setState('done',copySuccessMessage(plainValue));
+              if (copyRenderedSelection(nativeSelectionRoot(inputBuffer,nativeHtml))) setState('done',copySuccessMessage(plainValue));
               else setState('error','복사 차단됨 · 클립보드가 바뀌지 않았습니다');
             }});
           return;
         }}
-        if (copyWithDataTransfer(htmlValue,plainValue)) setState('done',copySuccessMessage(plainValue));
+        if (copyRenderedSelection(nativeSelectionRoot(inputBuffer,nativeHtml))) setState('done',copySuccessMessage(plainValue));
         else setState('error','복사 차단됨 · 클립보드가 바뀌지 않았습니다');
       }});
       window.__goldhandCopyPreview = () => {{
