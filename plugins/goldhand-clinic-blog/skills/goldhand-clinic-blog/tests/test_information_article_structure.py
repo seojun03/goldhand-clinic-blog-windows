@@ -86,6 +86,17 @@ class InformationArticleStructureTests(unittest.TestCase):
         codes = {issue["code"] for issue in result["issues"]}
         self.assertIn("numbered-answer-mismatch", codes)
 
+    def test_confirmed_title_without_number_uses_distinct_answer_count(self) -> None:
+        title = "요요를 막으려면 생활 습관부터 바꿔야 합니다"
+        source = valid_plain().replace(TITLE, title, 1)
+        result = VALIDATOR.validate_plain(source, title, CONTRACT, PROOF)
+        self.assertEqual(result["status"], "pass", result["issues"])
+        self.assertEqual(result["metrics"]["numberedHeadingNumbers"], [1, 2])
+
+        article = valid_html()
+        html_result = VALIDATOR.validate_html(article, title, CONTRACT, PROOF)
+        self.assertEqual(html_result["status"], "pass", html_result["issues"])
+
     def test_positive_n_and_more_than_three_questions_are_supported(self) -> None:
         title = "요요를 막으려면 바꿔야 할 습관 4가지"
         source = valid_plain().replace(TITLE, title, 1)

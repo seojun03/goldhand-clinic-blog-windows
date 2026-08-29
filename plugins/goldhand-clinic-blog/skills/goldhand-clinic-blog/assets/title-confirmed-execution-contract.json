@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "contractId": "goldhand-title-confirmed-auto-completion-v1",
+  "lastUserInputGate": "title-confirmation",
+  "beforeTitleConfirmation": {
+    "topicSelectionMayWait": true,
+    "titleSelectionMayWait": true
+  },
+  "afterTitleConfirmation": {
+    "additionalUserQuestionsAllowed": false,
+    "plainTextApprovalRequired": false,
+    "visibleApprovalStatusAllowed": false,
+    "internalPlainTextReviewRequired": true,
+    "automaticProductionRequired": true,
+    "imageFailureFallback": "finish-without-images",
+    "finalDeliverables": [
+      "confirmed-title",
+      "finished-article",
+      "copy-ready-html",
+      "final-validation-result"
+    ]
+  },
+  "scenarioTests": [
+    {
+      "id": "recommended-numbered-title-selected",
+      "input": "사용자가 추천 제목 가운데 하나를 선택함",
+      "answerCountResolution": "use-title-promise",
+      "expectedNext": "automatic-full-production",
+      "mustAskUserAgain": false
+    },
+    {
+      "id": "direct-numbered-title",
+      "input": "사용자가 숫자가 들어간 제목을 직접 입력함",
+      "answerCountResolution": "use-title-promise",
+      "expectedNext": "automatic-full-production",
+      "mustAskUserAgain": false
+    },
+    {
+      "id": "direct-title-without-number",
+      "input": "사용자가 숫자가 없는 제목을 직접 입력함",
+      "answerCountResolution": "infer-from-distinct-supported-answers",
+      "expectedNext": "automatic-full-production",
+      "mustAskUserAgain": false
+    }
+  ]
+}

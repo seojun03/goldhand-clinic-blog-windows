@@ -2,8 +2,8 @@
 """Block known Goldhand Korean word-choice and collocation regressions.
 
 This is deliberately a regression guard, not a claim that a mechanical pass
-proves natural Korean. The independent spoken editor and the user approval gate
-remain mandatory.
+proves natural Korean. An independent spoken editor remains mandatory before
+the automatic production handoff.
 """
 
 from __future__ import annotations
@@ -88,14 +88,14 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
             errors.append("forwardTestGate는 기존 원고 3편 이상을 요구해야 합니다.")
         if gate.get("draftAndReviewRolesSeparated") is not True:
             errors.append("forwardTestGate는 초안과 검수 역할을 분리해야 합니다.")
-        if str(gate.get("statusBeforeUserApproval", "")) != "pending-user-reading":
-            errors.append("사용자 승인 전 상태는 pending-user-reading이어야 합니다.")
+        if str(gate.get("statusAfterInternalReview", "")) != "ready-for-automatic-production":
+            errors.append("내부 검수 뒤 상태는 ready-for-automatic-production이어야 합니다.")
     findings = contract.get("forwardTestFindings")
     if not isinstance(findings, dict):
         errors.append("forwardTestFindings가 필요합니다.")
     else:
-        if str(findings.get("status", "")) != "pending-user-reading":
-            errors.append("전진 검증 결과는 사용자 승인 전 pending-user-reading이어야 합니다.")
+        if str(findings.get("status", "")) != "internally-reviewed-ready-for-production":
+            errors.append("전진 검증 결과는 internally-reviewed-ready-for-production이어야 합니다.")
         manuscripts = findings.get("manuscripts")
         if not isinstance(manuscripts, list) or len(manuscripts) < 3:
             errors.append("전진 검증 결과에는 서로 다른 기존 원고 3편 이상이 필요합니다.")
@@ -132,8 +132,10 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
             for field in ("failedExcerpt", "revisedExcerpt", "why"):
                 if not str(item.get(field, "")).strip():
                     errors.append(f"전진 검증 {principle_id}: {field}이 필요합니다.")
-    if contract.get("userApprovalRequiredToCallUpdateSuccessful") is not True:
-        errors.append("자연스러움 업데이트 성공에는 사용자 승인이 필요합니다.")
+    if contract.get("titleConfirmationIsFinalUserGate") is not True:
+        errors.append("제목 확정이 마지막 사용자 확인 단계여야 합니다.")
+    if contract.get("plainTextApprovalGateForbidden") is not True:
+        errors.append("평문 승인 게이트가 금지되어야 합니다.")
     return errors
 
 
@@ -166,8 +168,11 @@ def validate_text(title: str, body: str, contract: dict[str, Any]) -> dict[str, 
         "mechanicalPassDoesNotProveNaturalness": bool(
             contract.get("mechanicalPassDoesNotProveNaturalness", True)
         ),
-        "userApprovalRequiredToCallUpdateSuccessful": bool(
-            contract.get("userApprovalRequiredToCallUpdateSuccessful", True)
+        "titleConfirmationIsFinalUserGate": bool(
+            contract.get("titleConfirmationIsFinalUserGate", False)
+        ),
+        "plainTextApprovalGateForbidden": bool(
+            contract.get("plainTextApprovalGateForbidden", False)
         ),
         "metrics": {
             "knownRegressionCount": len(issues),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a numbered Goldhand information-article title."""
+"""Validate a confirmed Goldhand information-article title."""
 
 from __future__ import annotations
 
@@ -61,11 +61,9 @@ def validate_title(
             add(issues, code, f"장식 문자를 제거하세요: {match.group(0)}")
 
     promises = [int(match.group("count")) for match in NUMBERED_PROMISE.finditer(title)]
-    if not promises:
-        add(issues, "numbered-promise-required", "단일 정보전달형 구조의 제목에는 실제 답 개수 n이 필요합니다.")
-    elif len(set(promises)) != 1:
+    if len(set(promises)) > 1:
         add(issues, "numbered-promise-ambiguous", f"제목에 서로 다른 답 개수가 함께 있습니다: {promises}")
-    elif promises[0] < 1:
+    elif promises and promises[0] < 1:
         add(issues, "numbered-promise-unsupported", "제목의 답 개수는 1 이상의 정수여야 합니다.")
 
     if answer_count is None:

@@ -156,7 +156,7 @@ def recommend(
         "requested": count,
         "selectedCount": len(selected),
         "missing": max(0, count - len(selected)),
-        "policy": "평문 승인 뒤 사용자가 이미지를 요청한 경우에만, 주제와 맞는 승인 진료 사진을 번호 소제목 설명 안에 배치합니다.",
+        "policy": "내부 평문 검수가 끝나면 주제와 맞는 시각 검수 진료 사진을 번호 소제목 설명 안에 자동 배치합니다. 적합한 사진이 없으면 이미지 없이 완성합니다.",
         "selected": selected,
     }
 

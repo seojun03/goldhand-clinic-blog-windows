@@ -192,7 +192,7 @@ def sync(library_path: Path, asset_dir: Path, workers: int) -> dict[str, Any]:
     payload["policy"] = (
         "All indexed official-blog image binaries are bundled in the plugin; "
         "only visually approved director-patient safeAuto assets may be selected "
-        "inside a numbered answer section after plain-text approval"
+        "automatically inside a numbered answer section after internal plain-text review"
     )
     library_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     validation_errors = validate_library(payload)

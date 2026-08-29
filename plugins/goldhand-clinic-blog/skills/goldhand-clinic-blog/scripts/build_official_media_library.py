@@ -319,7 +319,7 @@ def main() -> int:
             "safeAutoCount": sum(asset["safeAuto"] for asset in assets),
             "policy": (
                 "All indexed official-blog image binaries are bundled in the plugin; only visually approved "
-                "director-patient safeAuto assets may be selected inside a numbered answer section after plain-text approval"
+                "after internal plain-text review, director-patient safeAuto assets may be selected automatically inside a numbered answer section"
                 if fully_bundled
                 else "Metadata inventory; run sync_official_media_assets.py before packaging or use"
             ),

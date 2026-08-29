@@ -30,8 +30,8 @@
     "importantPhrasesUseYellowHighlightUnderlineOrRedText": true,
     "valueProofUsesOneColumnMultiRowTable": true,
     "valueProofRowsAreFixed": true,
-    "plainTextApprovalRequiredBeforeDesign": true,
-    "approvedSentencesAndOrderAreFrozen": true,
+    "internalPlainTextReviewRequiredBeforeDesign": true,
+    "internallyReviewedSentencesAndOrderAreFrozen": true,
     "credentialFollowsReaderQuestions": true,
     "credentialPrecedesThreeMinutePayoff": true,
     "numberedAnswerPromiseMatchesActualCount": true,
@@ -42,7 +42,7 @@
     "ctaIsFinalVisibleBlock": true,
     "contentAfterCtaAllowed": false,
     "finalWritingVoiceRehearIsRequired": true,
-    "finalWritingVoiceDoesNotChangeApprovedContentOrOrder": true,
+    "finalWritingVoiceDoesNotChangeInternallyReviewedContentOrOrder": true,
     "userOwnedCallilifeReferenceGeneratesGptImage": true
   },
   "readabilityEvidence": {
@@ -96,9 +96,9 @@
     "requiredGapAfterMobileGroup": true
   },
   "approvedSingleStructure": {
-    "productionBeginsAfterPlainTextApproval": true,
-    "approvedSentenceTextFrozen": true,
-    "approvedBlockOrderFrozen": true,
+    "productionBeginsAfterInternalPlainTextReview": true,
+    "internallyReviewedSentenceTextFrozen": true,
+    "internallyReviewedBlockOrderFrozen": true,
     "requiredBlockOrder": [
       "reader-question",
       "credential",
@@ -427,5 +427,5 @@
   "forbiddenMarkupAttributes": [
     "data-goldhand-box"
   ],
-  "policy": "사용자가 제목과 평문을 승인한 뒤에만 HTML·이미지·디자인을 시작한다. 승인된 문장과 블록 순서는 바꾸지 않는다. 모든 글은 독자 질문 2개 이상, 금손한의원 소개 가치입증 표, 정확히 3분의 이득 예고, 제목의 n과 같은 개수의 번호 소제목, 전체 요약, CTA 순서로 만든다. 가치입증 표는 유일한 표이며 독자 질문 뒤, 3분 예고 앞에 둔다. 이미지는 승인된 번호 소제목 안의 관련 문단 뒤에만 넣고 전체 요약 뒤에는 넣지 않는다. CTA는 마지막 보이는 블록이며 그 뒤에 진료시간·운영정보·링크·지도·사진·표를 자동으로 붙이지 않는다. 모든 글은 중앙 정렬하고 하이라이트 3개, 밑줄 2~3개, 안전 경계 빨간 글씨 1~2개를 사용하며, 모든 이미지의 보이는 캡션은 금지한다."
+  "policy": "제목이 확정되면 추가 질문 없이 내부 평문 작성과 독립 생활어 검수를 마친 뒤 HTML·이미지·디자인을 자동으로 시작한다. 내부 검수가 끝난 문장과 블록 순서는 바꾸지 않는다. 모든 글은 독자 질문 2개 이상, 금손한의원 소개 가치입증 표, 정확히 3분의 이득 예고, 제목에 숫자가 있으면 그 수와 같고 숫자가 없으면 실제 답 개수와 같은 번호 소제목, 전체 요약, CTA 순서로 만든다. 가치입증 표는 유일한 표이며 독자 질문 뒤, 3분 예고 앞에 둔다. 이미지는 번호 소제목 안의 관련 문단 뒤에만 넣고 전체 요약 뒤에는 넣지 않는다. CTA는 마지막 보이는 블록이며 그 뒤에 진료시간·운영정보·링크·지도·사진·표를 자동으로 붙이지 않는다. 모든 글은 중앙 정렬하고 하이라이트 3개, 밑줄 2~3개, 안전 경계 빨간 글씨 1~2개를 사용하며, 모든 이미지의 보이는 캡션은 금지한다."
 }

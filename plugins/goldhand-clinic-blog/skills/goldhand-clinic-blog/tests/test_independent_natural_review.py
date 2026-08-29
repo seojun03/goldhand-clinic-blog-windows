@@ -115,7 +115,7 @@ class IndependentNaturalReviewTests(unittest.TestCase):
             "remainingAwkwardPassages": [],
             "auditedSentenceCount": sentence_count,
             "sentenceIndexesChecked": list(range(1, sentence_count + 1)),
-            "userApprovalStatus": "pending-user-reading",
+            "productionHandoffStatus": "ready-for-automatic-production",
         }
         path = folder / "independent-review.json"
         path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -127,7 +127,8 @@ class IndependentNaturalReviewTests(unittest.TestCase):
             result = VALIDATOR.validate_receipt(path, receipt)
             self.assertEqual(result["status"], "pass", result["issues"])
             self.assertTrue(result["mechanicalPassDoesNotProveNaturalness"])
-            self.assertTrue(result["userApprovalRequired"])
+            self.assertFalse(result["plainTextApprovalRequired"])
+            self.assertTrue(result["automaticProductionHandoffReady"])
 
     def test_true_style_or_generic_review_is_not_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

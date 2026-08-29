@@ -3,7 +3,8 @@
   "contractId": "goldhand-natural-korean-regressions-v2",
   "scope": "user-corrections-generation-principles-and-known-regression-guard",
   "mechanicalPassDoesNotProveNaturalness": true,
-  "userApprovalRequiredToCallUpdateSuccessful": true,
+  "titleConfirmationIsFinalUserGate": true,
+  "plainTextApprovalGateForbidden": true,
   "forwardTestGate": {
     "appliesWhen": "자연스러운 한국어 생성 지침·회귀 계약·검수 방식을 수정했을 때",
     "minimumDistinctExistingManuscripts": 3,
@@ -11,8 +12,8 @@
     "reviewerInput": "확정 제목과 평문만",
     "acceptedReviewEvidence": "검수자가 실제 어색한 구절을 인용하고, 왜 한국어 화자가 잘 쓰지 않는지 설명한 뒤, 필요하면 고친 문장을 제시하고 전체 흐름을 다시 읽은 기록",
     "rejectedReviewEvidence": "같은 체크리스트에 true만 채운 기록, 기계 검사 통과, 초안 작성자의 자기평가",
-    "userVisibleOutput": "SEO 없는 최종 제목과 평문",
-    "statusBeforeUserApproval": "pending-user-reading",
+    "userVisibleOutput": "완성된 글과 최종 사용 산출물",
+    "statusAfterInternalReview": "ready-for-automatic-production",
     "forbiddenDraftInputs": [
       "main-keyword",
       "keyword-count",
@@ -91,7 +92,7 @@
       ]
     },
     {
-      "id": "reread-the-literal-surface-before-approval",
+      "id": "reread-the-literal-surface-before-production",
       "failureMechanism": "덝거나 같은 오탈자와 목적어·서술어 불일치는 뜻을 추측하게 만들며, 전체 흐름 검수만으로는 쉽게 지나칠 수 있습니다.",
       "generationSteps": [
         "최종 평문을 문장 단위로 다시 읽어 오탈자와 조사 누락을 확인합니다.",
@@ -172,8 +173,8 @@
     }
   ],
   "forwardTestFindings": {
-    "runId": "single-information-structure-v140-role-based-neutral-closing-three-plain-manuscripts",
-    "status": "pending-user-reading",
+    "runId": "single-information-structure-v142-title-confirmed-auto-production-three-plain-manuscripts",
+    "status": "internally-reviewed-ready-for-production",
     "artifactRootName": "goldhand-single-structure-forward-test",
     "manuscripts": [
       {

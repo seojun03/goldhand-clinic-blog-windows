@@ -57,7 +57,9 @@ class GoldhandCoreContractTests(unittest.TestCase):
             self.structure["authority"],
             "references/information-delivery-structure.md",
         )
-        self.assertTrue(self.structure["numberedAnswers"]["mustEqualTitlePromise"])
+        self.assertTrue(self.structure["numberedAnswers"]["generatedTitlePromiseRequired"])
+        self.assertTrue(self.structure["numberedAnswers"]["confirmedUserTitleMayOmitPromise"])
+        self.assertTrue(self.structure["numberedAnswers"]["mustEqualTitlePromiseWhenPresent"])
         self.assertTrue(self.structure["closing"]["ctaMustBeFinalBlock"])
         self.assertEqual(
             self.structure["closing"]["allowedInnerFlows"],
@@ -83,7 +85,7 @@ class GoldhandCoreContractTests(unittest.TestCase):
         )
         self.assertTrue(
             self.structure["closing"]["nPointsBenefitThenNextStepThenThanks"][
-                "countMustEqualTitlePromise"
+                "countMustEqualTitlePromiseWhenPresent"
             ]
         )
 
@@ -175,7 +177,8 @@ class GoldhandCoreContractTests(unittest.TestCase):
                 self.assertEqual(failed["status"], "fail")
                 self.assertEqual(approved["status"], "pass")
         self.assertTrue(self.natural["mechanicalPassDoesNotProveNaturalness"])
-        self.assertTrue(self.natural["userApprovalRequiredToCallUpdateSuccessful"])
+        self.assertTrue(self.natural["titleConfirmationIsFinalUserGate"])
+        self.assertTrue(self.natural["plainTextApprovalGateForbidden"])
 
     def test_medical_guarantees_and_pressure_cta_are_blocked(self) -> None:
         for phrase in ("완치", "무조건", "반드시 낫습니다", "효과를 보장합니다"):

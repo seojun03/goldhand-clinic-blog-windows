@@ -312,11 +312,13 @@ def validate_plain(
             add(issues, "reader-payoff-missing", "해결 예고에는 얻을 이득 또는 피할 손실이 구체적으로 보여야 합니다.")
 
     promise = promised_count(title)
-    if promise is None:
-        add(issues, "title-number-promise-missing", "확정 제목에는 서로 다른 답의 개수가 필요합니다.")
-    elif promise < int(contract.get("numberedAnswers", {}).get("minimumCount", 1)):
+    minimum_answers = int(contract.get("numberedAnswers", {}).get("minimumCount", 1))
+    if promise is not None and promise < minimum_answers:
         add(issues, "title-number-promise-unsupported", "확정 제목의 답 개수는 1 이상의 정수여야 합니다.")
-    expected_numbers = list(range(1, (promise or 0) + 1))
+    if len(heading_numbers) < minimum_answers:
+        add(issues, "numbered-answer-count", f"번호 소제목은 {minimum_answers}개 이상이어야 합니다.")
+    effective_count = promise if promise is not None else len(heading_numbers)
+    expected_numbers = list(range(1, effective_count + 1))
     if heading_numbers != expected_numbers:
         add(issues, "numbered-answer-mismatch", f"번호 소제목은 {expected_numbers}여야 하지만 현재 {heading_numbers}입니다.")
 
@@ -345,7 +347,7 @@ def validate_plain(
         closing_flow = validate_closing_flow(
             summary_text,
             cta_text,
-            promise,
+            effective_count,
             contract,
             issues,
         )
@@ -501,10 +503,12 @@ def validate_html(
                 "번호 답 안팎에 역할 없는 section·aside·header·footer·nav 블록을 추가할 수 없습니다.",
             )
     promise = promised_count(title)
-    expected_numbers = list(range(1, (promise or 0) + 1))
-    if promise is None:
-        add(issues, "title-number-promise-missing", "확정 제목에는 답 개수가 필요합니다.")
-    elif heading_numbers != expected_numbers:
+    minimum_answers = int(contract.get("numberedAnswers", {}).get("minimumCount", 1))
+    if len(heading_numbers) < minimum_answers:
+        add(issues, "numbered-answer-count", f"번호 소제목은 {minimum_answers}개 이상이어야 합니다.")
+    effective_count = promise if promise is not None else len(heading_numbers)
+    expected_numbers = list(range(1, effective_count + 1))
+    if heading_numbers != expected_numbers:
         add(issues, "numbered-answer-mismatch", f"번호 소제목은 {expected_numbers}여야 하지만 현재 {heading_numbers}입니다.")
 
     closing_flow = None
@@ -512,7 +516,7 @@ def validate_html(
         closing_flow = validate_closing_flow(
             visible_text(summaries[0].group(0)),
             visible_text(ctas[0].group(0)),
-            promise,
+            effective_count,
             contract,
             issues,
         )

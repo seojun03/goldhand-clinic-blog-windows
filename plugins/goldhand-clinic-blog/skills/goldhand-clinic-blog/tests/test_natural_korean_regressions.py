@@ -81,7 +81,8 @@ class NaturalKoreanRegressionTests(unittest.TestCase):
             "user-corrections-generation-principles-and-known-regression-guard",
         )
         self.assertIs(result["mechanicalPassDoesNotProveNaturalness"], True)
-        self.assertIs(result["userApprovalRequiredToCallUpdateSuccessful"], True)
+        self.assertIs(result["titleConfirmationIsFinalUserGate"], True)
+        self.assertIs(result["plainTextApprovalGateForbidden"], True)
         self.assertGreaterEqual(result["metrics"]["minimumForwardTestManuscripts"], 3)
         self.assertGreaterEqual(result["metrics"]["observedForwardTestManuscripts"], 3)
 
@@ -99,10 +100,10 @@ class NaturalKoreanRegressionTests(unittest.TestCase):
             self.assertTrue(item["failureMechanism"])
             self.assertTrue(item["generationPrincipleIds"])
         gate = CONTRACT["forwardTestGate"]
-        self.assertEqual(gate["statusBeforeUserApproval"], "pending-user-reading")
+        self.assertEqual(gate["statusAfterInternalReview"], "ready-for-automatic-production")
         self.assertIn("true", gate["rejectedReviewEvidence"])
         findings = CONTRACT["forwardTestFindings"]
-        self.assertEqual(findings["status"], "pending-user-reading")
+        self.assertEqual(findings["status"], "internally-reviewed-ready-for-production")
         self.assertGreaterEqual(len(findings["manuscripts"]), 3)
         self.assertTrue(
             all(item["concreteFindingCount"] > 0 for item in findings["manuscripts"])

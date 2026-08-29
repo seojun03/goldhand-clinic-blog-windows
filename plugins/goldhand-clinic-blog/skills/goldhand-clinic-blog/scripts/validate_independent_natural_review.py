@@ -3,8 +3,8 @@
 
 This validator does not decide whether prose sounds natural. It verifies that
 the review was performed by a separate role, cites real before/after wording,
-explains specific edits, rereads the whole draft, and leaves user approval
-pending. The final plain text must also satisfy the one allowed article
+explains specific edits, rereads the whole draft, and hands the frozen wording
+to automatic production. The final plain text must also satisfy the one allowed article
 structure and the permanent user-correction regression guard.
 """
 
@@ -127,9 +127,9 @@ def validate_receipt(receipt_path: Path, receipt: dict[str, Any]) -> dict[str, A
         if first != title:
             add(issues, "confirmed-title-changed", f"{label}의 첫 줄이 확정 제목과 다릅니다.")
         if HTML_TAG.search(text) or MARKDOWN_IMAGE.search(text):
-            add(issues, "production-format-before-approval", f"{label}에는 HTML이나 이미지 문법을 넣을 수 없습니다.")
+            add(issues, "production-format-in-plain-review", f"{label}에는 HTML이나 이미지 문법을 넣을 수 없습니다.")
         if re.search(r"(?m)^\s*\|.*\|\s*$", text):
-            add(issues, "markdown-table-before-approval", f"{label}에는 마크다운 표를 넣을 수 없습니다.")
+            add(issues, "markdown-table-in-plain-review", f"{label}에는 마크다운 표를 넣을 수 없습니다.")
 
     if before and final and normalize(before) == normalize(final):
         add(issues, "no-independent-revision", "초안과 최종 평문이 같아 실제 독립 수정 증거가 없습니다.")
@@ -198,8 +198,8 @@ def validate_receipt(receipt_path: Path, receipt: dict[str, Any]) -> dict[str, A
 
     if receipt.get("remainingAwkwardPassages") != []:
         add(issues, "unresolved-awkward-passages", "남은 어색한 구절이 있으면 사용자 제시 전 단계로 갈 수 없습니다.")
-    if receipt.get("userApprovalStatus") != "pending-user-reading":
-        add(issues, "user-approval-boundary", "사용자 직접 승인 전 상태는 pending-user-reading이어야 합니다.")
+    if receipt.get("productionHandoffStatus") != "ready-for-automatic-production":
+        add(issues, "automatic-production-handoff", "내부 검수 뒤에는 ready-for-automatic-production 상태여야 합니다.")
 
     structure_result: dict[str, Any] = {"status": "not-run", "issues": []}
     natural_result: dict[str, Any] = {"status": "not-run", "issues": []}
@@ -229,7 +229,8 @@ def validate_receipt(receipt_path: Path, receipt: dict[str, Any]) -> dict[str, A
         "status": "fail" if issues else "pass",
         "contractId": CONTRACT_ID,
         "mechanicalPassDoesNotProveNaturalness": True,
-        "userApprovalRequired": True,
+        "plainTextApprovalRequired": False,
+        "automaticProductionHandoffReady": not issues,
         "metrics": {
             "findingCount": len(findings),
             "flowCheckCount": len(flow_checks),
