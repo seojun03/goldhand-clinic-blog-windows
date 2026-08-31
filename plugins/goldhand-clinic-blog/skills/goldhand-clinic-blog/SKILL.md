@@ -9,7 +9,7 @@ description: 금손한의원 박준희 원장이 실제 한국인이 쓰는 생�
 
 ## 시작 표시와 자동화 버전
 
-- 현재 자동화 버전: `1.43`
+- 현재 자동화 버전: `1.46`
 - 활성화되면 먼저 `assets/automation-version.json`을 읽고 아래 한 문장만 정확히 표시한다.
 
   `버전 v{automationVersion} 업데이트 된 시각 {displayUpdatedAtKst}`
@@ -63,6 +63,17 @@ SEO, 키워드 횟수, 제목·본문 글자 수는 우선순위와 기본 작�
 - 마지막 `정리 → CTA`에서는 [information-delivery-structure.md](references/information-delivery-structure.md)에 정한 마무리 역할 A 또는 B만 사용한다. 이는 두 개의 글 구조나 고정 문구가 아니라, 같은 마지막 두 블록이 해야 할 일을 정한 기준이다.
 - 위 순서 외의 다른 글 배열은 사용하지 않는다.
 
+## 제목과 본문의 논리 일치
+
+제목 확정 직후 [title-answer-alignment.md](references/title-answer-alignment.md)를 읽고 적용한다. 제목은 표지가 아니라 본문이 답해야 하는 질문이다.
+
+- 자료를 찾기 전에 제목의 대상, 조건, 독자가 묻는 점, 답의 종류와 개수를 짧게 정리한다. `이유 2가지`면 서로 다른 원인 두 개가 필요하며, 원인 한 개와 관리법 한 개로 채우지 않는다.
+- 각 소제목의 직접 답을 먼저 확정한 뒤 해당 답을 설명하는 자료만 선택한다. 이전 글의 제목만 바꾸거나, 먼저 고른 무릎·다이어트 등의 자료에 제목을 끼워 맞추지 않는다.
+- 제목의 조건을 모든 핵심 답에서 설명한다. 예컨대 `교통사고 검사에서 이상이 없다는데도 아픈 이유`는 사고와 통증, 검사 결과가 통증을 전부 설명하지 못하는 이유를 연결해야 한다. 계단을 내려갈 때의 일반 무릎 통증 관리로 바뀌면 실패다. 사고로 생긴 무릎 손상을 관련 사례로 짧게 설명하는 것은 가능하지만 글 전체의 주제를 바꾸면 안 된다.
+- 각 번호 답을 따로 읽고 제목에 바로 답하는지, 두 답이 의미상 다른지 확인한다. 다른 부위·질환·사례는 답을 이해하는 데 꼭 필요한 설명일 때만 사용한다.
+- 독립 편집자가 제목과 최종 평문만 읽고 모든 번호 답 및 나머지 문단의 관련성을 검수한다. 관련 없는 부분은 지적만 남기지 말고 자료 선택부터 바로잡아 다시 쓴다. 키워드가 있다는 이유나 소제목 숫자가 맞는다는 이유만으로 통과시키지 않는다.
+- `independent-review.json`의 `titleAlignment`에 실제 검수 내용을 남기고 `validate_title_alignment.py`로 현재 문장과 연결한다. 누락·미완료·제목 변경·본문 변경 상태에서는 HTML을 완성하거나 이미지를 게시하지 않는다. 기계 검사는 검수 기록의 누락·재사용을 막는 것이며 의미 판단은 독립 편집자가 한다.
+
 ## 정보와 의료 경계
 
 - 저장 정보 원자를 주제와 제목에 맞게 모으고 의미 중복을 제거한다. 부족한 경우에만 한국어 자료를 보충한다.
@@ -83,7 +94,7 @@ SEO, 키워드 횟수, 제목·본문 글자 수는 우선순위와 기본 작�
 6. 마지막 정리와 CTA에는 `금손한의원`, 지역 한의원 키워드, `저희 한의원`, 예약·문의·전화·내원 유도를 넣지 않는다. 증상이 계속될 때 `직접 진료를 받아보시길 권합니다`처럼 병원 선택권을 독자에게 남긴다.
 7. 글 전체를 읽어 단일 구조의 순서, 소제목 답의 중복, 문단 흐름을 확인한다.
 8. 초안 작성과 다른 역할의 편집자가 제목과 평문만 받아 [natural-speech-rewrite-protocol.md](references/natural-speech-rewrite-protocol.md)로 독립 검수한다.
-9. 구조 검사와 생활어 회귀검사를 통과한 제목과 평문을 내부 최종본으로 동결하고, 사용자에게 중간 결과를 묻지 않은 채 최종 제작으로 넘긴다.
+9. 제목-답변 검수, 구조 검사와 생활어 회귀검사를 통과한 제목과 평문을 내부 최종본으로 동결하고, 사용자에게 중간 결과를 묻지 않은 채 최종 제작으로 넘긴다.
 
 모든 문장은 다음을 만족해야 한다.
 
@@ -121,6 +132,9 @@ SEO, 키워드 횟수, 제목·본문 글자 수는 우선순위와 기본 작�
 - 평문의 `[금손한의원 소개]` 블록을 같은 위치의 네이버 순정 표로 변환한다.
 - 공감 질문은 인용구, 번호 소제목은 순정 소제목으로 조립한다.
 - 이미지·강조·줄바꿈은 필수 블록의 순서를 바꾸지 않는 범위에서만 넣는다.
+- 한 글에 같은 원본 사진은 한 번만 사용한다. 소제목마다 별개로 사진을 고르지 말고 글 전체의 사용 목록을 유지한다. `recommend_media.py --used-media 이전선택.json`으로 이미 선택한 사진을 제외한다. 원본 ID·SHA-256·원본 주소가 같으면 파일명, CDN 주소, 크기, 자르기, 좌우 반전이 달라도 같은 사진이다. 변형할 때 원본 식별자를 보존한다.
+- 사진 수나 소제목 수를 채우려고 같은 사진을 반복하지 않는다. 맞는 서로 다른 사진이 부족하면 더 적게 쓰거나 해당 위치의 사진을 생략한다. 도입과 번호 답 사이에서도 중복을 허용하지 않는다.
+- HTML 조립 뒤 `validate_unique_images.py`로 전체 article을 검사한다. 복사 페이지 제작기는 이미지 게시 전과 게시 후 모두 같은 검사를 실행한다. 중복을 다른 파일명으로 우회하거나, 검사 실패를 이미지 실패 처리로 숨기지 않는다.
 - CTA 뒤에 운영정보 표, 지도, 관련 글을 자동으로 붙이지 않는다. 사용자가 별도로 요청한 연락처는 CTA 안에만 조립한다.
 - 제작 과정에서 문장을 고쳐야 하면 내부 평문 단계로 돌아가 구조와 생활어를 다시 검수한 뒤 자동으로 제작을 계속한다.
 
@@ -134,6 +148,7 @@ python3 scripts/validate_information_article_structure.py --input article.txt --
 python3 scripts/validate_natural_korean.py --input article.txt --title "확정 제목" --json
 # 제목과 초안 평문만 받은 독립 검수자가 실제 문장을 고친 뒤 실행
 python3 scripts/validate_independent_natural_review.py --input independent-review.json --json
+python3 scripts/validate_title_alignment.py --input article.txt --title "확정 제목" --review independent-review.json --json
 # 여러 검증 원고에서는 같은 감사 문장을 반복하지 않았는지 함께 검사
 python3 scripts/validate_closing_set.py --input article-1.txt article-2.txt article-3.txt --json
 ```
@@ -141,6 +156,9 @@ python3 scripts/validate_closing_set.py --input article-1.txt article-2.txt arti
 최종 제작 검증:
 
 ```bash
+# 동결 평문과 같은 HTML에 검수 기록 결합 (원문을 바꾸면 실패)
+python3 scripts/validate_title_alignment.py --input article.html --title "확정 제목" --review independent-review.json --html --attach-output article.html --json
+python3 scripts/validate_unique_images.py --input article.html --json
 python3 scripts/validate_information_article_structure.py --input article.html --title "확정 제목" --html --json
 python3 scripts/validate_article.py --input article.html --title "확정 제목" --json
 python3 scripts/validate_goldhand_voice.py --input article.html --json

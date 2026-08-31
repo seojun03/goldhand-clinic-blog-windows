@@ -67,6 +67,13 @@ def article_fragment(raw: str) -> str:
     return matches[0]
 
 
+
+def production_integrity(article: str, title: str) -> dict:
+    spec = importlib.util.spec_from_file_location("goldhand_production_integrity", Path(__file__).with_name("validate_production_integrity.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate(article, title)
+
 def structure_validation(article: str, title: str) -> dict[str, Any]:
     path = Path(__file__).with_name("validate_information_article_structure.py")
     spec = importlib.util.spec_from_file_location("goldhand_copy_information_structure", path)
@@ -111,6 +118,7 @@ def validate_html(raw: str, *, max_megabytes: float = 30.0) -> dict[str, Any]:
             add(issues, "error", "information-structure-load", str(exc))
 
     if article:
+        issues.extend(production_integrity(article, title)["issues"])
         for code, pattern in FORBIDDEN_OLD_STRUCTURE.items():
             if pattern.search(article):
                 add(issues, "error", code, "단일 정보전달 구조에 없는 이전 글 블록이나 메타데이터가 남아 있습니다.")

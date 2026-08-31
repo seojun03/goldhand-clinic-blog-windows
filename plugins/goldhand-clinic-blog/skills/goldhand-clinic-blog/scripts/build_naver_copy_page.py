@@ -133,6 +133,19 @@ def make_text_only_fallback(article: str, reason: str) -> str:
     return cleaned[:opening_match.start()] + opening + cleaned[opening_match.end():]
 
 
+
+def production_integrity(article: str, title: str) -> dict:
+    spec = importlib.util.spec_from_file_location("goldhand_production_integrity", Path(__file__).with_name("validate_production_integrity.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate(article, title)
+
+
+def validate_production_integrity(article: str, title: str) -> None:
+    result = production_integrity(article, title)
+    if result["status"] != "pass":
+        raise ValueError("제목·사진 제작 검증 실패: " + " / ".join(i["detail"] for i in result["issues"]))
+
 def validate_information_article_structure(article: str, title: str) -> None:
     """Fail closed unless the article uses the one allowed information structure."""
 
@@ -494,6 +507,7 @@ def build_page(
 ) -> str:
     validate_information_article_structure(article, title)
     validate_person_media_policy(article)
+    validate_production_integrity(article, title)
     escaped_title = html.escape(title, quote=True)
     escaped_shortcut = html.escape(paste_shortcut(platform_name), quote=True)
     return f'''<!doctype html>
@@ -583,6 +597,7 @@ def build_page(
             if (name.startsWith('data-goldhand-') || name.startsWith('data-reference-') ||
                 name.startsWith('data-editorial-') ||
                 name.startsWith('data-image-') ||
+                name === 'data-title-alignment' || name === 'data-media-sha256' ||
                 name === 'data-question-source' || name === 'data-mobile-group' ||
                 name === 'data-naver-native-component' || name.startsWith('data-native-table-')) {{
               element.removeAttribute(attribute.name);
@@ -819,6 +834,11 @@ def main() -> int:
     args = parse_args()
     try:
         article = strip_visible_image_captions(article_fragment(args.article_html.read_text(encoding="utf-8")))
+        # Reject stale title/body reviews and duplicate photos before any
+        # image upload, fallback removal, output directory or file mutation.
+        validate_information_article_structure(article, args.title)
+        validate_person_media_policy(article)
+        validate_production_integrity(article, args.title)
         if args.text_only_fallback_reason:
             article = make_text_only_fallback(article, args.text_only_fallback_reason)
         article, automatic_fallback_reason = publish_or_text_only_fallback(article)

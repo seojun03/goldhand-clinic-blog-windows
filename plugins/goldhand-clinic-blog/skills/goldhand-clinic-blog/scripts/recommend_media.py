@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Recommend approved Goldhand clinical photos for numbered answer sections.
 
-This selector runs only after the user approves the plain text and separately
-requests images. It never creates an introduction, credential, closing, or CTA
+This selector runs after the internal plain-text review, without another user gate. It never creates an introduction, credential, closing, or CTA
 photo block. Every selected photo is placed inside a numbered answer section.
 """
 
@@ -10,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -35,6 +35,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--topic", required=True)
     parser.add_argument("--count", type=int, default=1)
     parser.add_argument("--library", type=Path, default=DEFAULT_LIBRARY)
+    parser.add_argument("--used-media", type=Path, help="이 글에서 이미 선택한 추천 JSON; 중복 원본을 제외합니다.")
     parser.add_argument("--json", action="store_true")
     return parser.parse_args()
 
@@ -136,6 +137,7 @@ def recommend(
     *,
     topic: str,
     count: int,
+    used_media: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     if count < 1:
         raise ValueError("사진 수는 1 이상이어야 합니다.")
@@ -149,15 +151,30 @@ def recommend(
             continue
         ranked.append((score, int(raw.get("trustPriority", 0) or 0), -int(raw.get("postOrder", 0) or 0), raw))
     ranked.sort(key=lambda item: (item[0], item[1], item[2], str(item[3].get("id", ""))), reverse=True)
-    selected = [public_item(item[3], item[0]) for item in ranked[:count]]
+    spec = importlib.util.spec_from_file_location("goldhand_unique_media", Path(__file__).with_name("validate_unique_images.py"))
+    unique = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(unique)
+    seen = set()
+    for used in used_media or []:
+        seen.update(unique.asset_keys(used))
+    selected = []
+    for score, _, _, asset in ranked:
+        keys = unique.asset_keys(asset)
+        if seen & keys:
+            continue
+        selected.append(public_item(asset, score))
+        seen.update(keys)
+        if len(selected) == count:
+            break
     return {
-        "status": "complete" if len(selected) == count else "decision-required",
+        "status": "complete" if len(selected) == count else "partial" if selected else "no-matching-media",
         "placement": "numbered-section-body",
         "requested": count,
         "selectedCount": len(selected),
         "missing": max(0, count - len(selected)),
         "policy": "내부 평문 검수가 끝나면 주제와 맞는 시각 검수 진료 사진을 번호 소제목 설명 안에 자동 배치합니다. 적합한 사진이 없으면 이미지 없이 완성합니다.",
         "selected": selected,
+        "used": [*(used_media or []), *selected],
     }
 
 
@@ -165,10 +182,12 @@ def main() -> int:
     args = parse_args()
     try:
         library = load_json(args.library, required=True)
+        used_payload = load_json(args.used_media, required=True) if args.used_media else {}
         result = recommend(
             library,
             topic=args.topic,
             count=args.count,
+            used_media=used_payload.get("used", used_payload.get("selected", [])),
         )
     except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
         print(f"미디어 추천 실패: {exc}", file=sys.stderr)
@@ -179,7 +198,7 @@ def main() -> int:
         print(f"status: {result['status']} ({result['selectedCount']}/{result['requested']})")
         for item in result["selected"]:
             print(f"{item['id']}\t{item['approvedAlt']}\t{item['bundledFile'] or item['url']}")
-    return 0 if result["status"] == "complete" else 1
+    return 0
 
 
 if __name__ == "__main__":

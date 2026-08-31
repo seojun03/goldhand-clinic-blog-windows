@@ -18,7 +18,10 @@
       "finished-article",
       "copy-ready-html",
       "final-validation-result"
-    ]
+    ],
+    "independentTitleAnswerReviewRequired": true,
+    "reviewBoundToFinalProseRequired": true,
+    "uniqueSourcePhotosPerArticleRequired": true
   },
   "scenarioTests": [
     {

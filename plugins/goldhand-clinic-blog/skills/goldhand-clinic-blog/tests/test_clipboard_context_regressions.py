@@ -39,19 +39,21 @@ PROOF = json.loads(
 
 def valid_structure_article(*, extra_body: str = "") -> str:
     rows = "".join(f"<tr><td>{row}</td></tr>" for row in PROOF["fixedRows"])
-    return f'''<article data-goldhand-type="정보전달형">
+    article = f'''<article data-goldhand-type="정보전달형">
     <blockquote data-reference-role="reader-question">복사한 글이 중간에서 잘리지는 않을까요?</blockquote>
     <blockquote data-reference-role="reader-question">사진 설명이 본문에 섞이지는 않을까요?</blockquote>
     <table data-native-table-purpose="credential"><tr><th>{PROOF["headerText"]}</th></tr>{rows}</table>
     <p data-reference-role="solution-preview">3분만 읽으면 복사 전에 무엇을 확인할지 알 수 있습니다.</p>
     <h2 data-reference-role="section-heading">1. 전체 본문이 선택됐는지 확인합니다</h2>
-    <p>첫 번째 설명입니다.</p>
+    <p>복사할 때 제목 아래부터 마지막 문장까지 모두 선택됐는지 확인합니다.</p>
     {extra_body}
     <h2 data-reference-role="section-heading">2. 사진 문맥이 본문에 섞이지 않았는지 확인합니다</h2>
-    <p>두 번째 설명입니다.</p>
+    <p>내부 사진 메모가 독자가 읽는 본문에 섞이지 않았는지 확인합니다.</p>
     <section data-reference-role="closing-summary"><p>두 가지 확인 방법이 복사 오류를 줄이는 데 도움이 되었기를 바랍니다. 긴 글 읽어주셔서 진심으로 감사드립니다.</p></section>
     <section data-reference-role="cta"><p>다만 이 글은 복사 오류를 이해하기 위한 일반적인 설명입니다. 혼자 확인하기 어렵다면 직접 진료를 받아보시길 권합니다.</p></section>
     </article>'''
+    from test_title_media_integrity import ALIGN, reviewed_fixture
+    return ALIGN.attach(article, TITLE, reviewed_fixture(article, TITLE, True))
 
 
 def media_library() -> dict[str, dict[str, object]]:

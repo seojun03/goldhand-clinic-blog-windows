@@ -47,6 +47,7 @@ def load_script(name: str) -> ModuleType:
 
 STRUCTURE = load_script("validate_information_article_structure")
 NATURAL = load_script("validate_natural_korean")
+ALIGNMENT = load_script("validate_title_alignment")
 
 
 def normalize(value: str) -> str:
@@ -205,6 +206,8 @@ def validate_receipt(receipt_path: Path, receipt: dict[str, Any]) -> dict[str, A
     natural_result: dict[str, Any] = {"status": "not-run", "issues": []}
     sentence_count = 0
     if final and title:
+        alignment = ALIGNMENT.validate(final, title, receipt.get("titleAlignment"))
+        issues.extend(alignment["issues"])
         structure_contract = json.loads((ASSETS / "information-delivery-structure-contract.json").read_text(encoding="utf-8"))
         proof = json.loads((ASSETS / "goldhand-value-proof-library.json").read_text(encoding="utf-8"))
         natural_contract = json.loads((ASSETS / "natural-korean-regression-contract.json").read_text(encoding="utf-8"))

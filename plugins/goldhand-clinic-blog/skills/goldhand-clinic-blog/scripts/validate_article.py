@@ -139,6 +139,13 @@ def selected_media_context_leaks(
     return leaks
 
 
+
+def production_integrity(article: str, title: str) -> dict:
+    spec = importlib.util.spec_from_file_location("goldhand_production_integrity", Path(__file__).with_name("validate_production_integrity.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate(article, title)
+
 def structure_validation(article: str, title: str) -> dict[str, Any]:
     path = Path(__file__).with_name("validate_information_article_structure.py")
     spec = importlib.util.spec_from_file_location("goldhand_information_structure", path)
@@ -262,6 +269,7 @@ def validate_article(
     library = media_library if media_library is not None else load_media_library()
     for leak in selected_media_context_leaks(article, library):
         add(issues, "error", "visible-media-context-leak", f"{leak['assetId']} 사진의 내부 {leak['field']} 문장이 본문에 노출됐습니다: {leak['excerpt']}")
+    issues.extend(production_integrity(article, title)["issues"])
     image_metrics = image_checks(article, issues)
 
     errors = sum(item["severity"] == "error" for item in issues)

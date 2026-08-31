@@ -117,6 +117,8 @@ class IndependentNaturalReviewTests(unittest.TestCase):
             "sentenceIndexesChecked": list(range(1, sentence_count + 1)),
             "productionHandoffStatus": "ready-for-automatic-production",
         }
+        from test_title_media_integrity import reviewed_fixture
+        receipt["titleAlignment"] = reviewed_fixture(final, TITLE)
         path = folder / "independent-review.json"
         path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
         return path, receipt
