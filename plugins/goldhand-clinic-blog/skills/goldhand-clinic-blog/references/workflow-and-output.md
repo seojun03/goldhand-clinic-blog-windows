@@ -6,18 +6,21 @@
 버전 표시
 → 주제 확정
 → 숫자형 제목 5개 제안 또는 사용자 제목 확정
-→ 정보와 의료 경계 정리
+→ 선택한 주제에 대해 중요하게 생각하는 N가지 인터뷰와 답변 대기
+→ 사용자 핵심 내용 확정
+→ 필요한 보충 정보와 의료 경계 정리
 → 생활어 메모
 → 단일 구조 평문
 → 구조 검사
-→ 독립 생활어 검수
+→ 독립 생활어·제목 검수
+→ 사용자 핵심 내용 중심 여부 별도 검수
 → 내부 최종 평문 동결
 → 네이버 순정 HTML·이미지·디자인 자동 제작
 → 최종 검증과 결과 제시
 ```
 
 메인키워드, SEO, 글자 수는 기본 단계가 아니다.
-제목 확정이 마지막 사용자 입력 단계다. 그 뒤에는 승인이나 추가 선택을 묻지 않는다.
+제목 확정 다음에 [사용자 핵심 내용 인터뷰](topic-priority-interview.md)를 한다. 주제 원문과 제목의 N가지를 사용해 질문하고 기다린다. 답변과 필요한 누락·충돌 확인이 끝난 뒤에는 승인이나 제작 선택을 묻지 않는다.
 
 ## 평문 구조
 
@@ -48,16 +51,17 @@ HTML, 이미지, 모바일 줄바꿈은 넣지 않는다.
 
 ## 정보 수집
 
-- 저장 정보 박사에서 주제와 제목에 맞는 일반 정보 원자만 조회한다.
+- 인터뷰 답변의 각 핵심 내용을 번호 답의 중심으로 정한 뒤, 저장 정보 박사에서 그 내용을 설명하는 주제·제목 관련 정보만 조회한다.
+- 사용자 내용의 의미·강도·순서를 보존한다. 자료에 맞춰 사용자 항목을 대체하거나 도입·결론에만 덧붙이지 않는다.
 - 여러 자료의 같은 뜻은 합친다.
 - 부족한 경우에만 한국어 자료를 보충한다.
 - 다른 업체의 사실·사례·문장·CTA는 사용하지 않는다.
 - 금손 사실은 `clinic-facts.md`만 사용한다.
 - 정보 출처는 글 구조를 결정하지 않는다.
 
-## 제목 확정 뒤 자동 진행
+## 인터뷰 답변 뒤 자동 진행
 
-제목이 확정되면 평문은 내부 검수용으로만 작성한다. `평문 승인 대기`를 출력하거나 평문·이미지·HTML 진행 여부를 묻지 않고 최종 제작까지 이어간다.
+제목 확정 뒤 인터뷰 답변을 받고, 사용자가 중요하게 생각하는 내용을 중심으로 평문을 내부 검수용으로 작성한다. `평문 승인 대기`를 출력하거나 평문·이미지·HTML 진행 여부를 묻지 않고 최종 제작까지 이어간다.
 
 ## 최종 제작
 
@@ -76,6 +80,7 @@ HTML, 이미지, 모바일 줄바꿈은 넣지 않는다.
 내부 평문 검증:
 
 ```bash
+python3 scripts/topic_priority_interview.py --topic "선택한 주제" --title "확정 제목" --input user-priorities.json --article article.txt --review independent-review.json
 python3 scripts/validate_title.py --title "확정 제목" --answer-count N --json
 python3 scripts/validate_information_article_structure.py --input article.txt --title "확정 제목" --json
 python3 scripts/validate_natural_korean.py --input article.txt --title "확정 제목" --json
@@ -87,6 +92,7 @@ python3 scripts/validate_closing_set.py --input article-1.txt article-2.txt arti
 
 ```bash
 python3 scripts/validate_information_article_structure.py --input article.html --title "확정 제목" --html --json
+python3 scripts/topic_priority_interview.py --topic "선택한 주제" --title "확정 제목" --input user-priorities.json --article article.html --html --review independent-review.json
 python3 scripts/validate_article.py --input article.html --title "확정 제목" --json
 python3 scripts/validate_goldhand_voice.py --input article.html --json
 python3 scripts/build_naver_copy_page.py --title "확정 제목" --article-html article.html

@@ -40,10 +40,10 @@
     "unnumberedMainSectionsForbidden": true
   },
   "interaction": {
-    "titleConfirmationIsFinalUserInputGate": true,
     "additionalQuestionsAfterTitleForbidden": true,
     "plainTextApprovalRequired": false,
-    "executionContract": "assets/title-confirmed-execution-contract.json"
+    "executionContract": "assets/title-confirmed-execution-contract.json",
+    "userPriorityInterviewIsFinalUserInputGate": true
   },
   "closing": {
     "summaryCount": 1,

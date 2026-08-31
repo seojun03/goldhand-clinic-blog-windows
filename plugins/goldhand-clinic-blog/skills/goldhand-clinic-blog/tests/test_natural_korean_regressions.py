@@ -81,7 +81,7 @@ class NaturalKoreanRegressionTests(unittest.TestCase):
             "user-corrections-generation-principles-and-known-regression-guard",
         )
         self.assertIs(result["mechanicalPassDoesNotProveNaturalness"], True)
-        self.assertIs(result["titleConfirmationIsFinalUserGate"], True)
+        self.assertIs(result["userPriorityInterviewIsFinalUserGate"], True)
         self.assertIs(result["plainTextApprovalGateForbidden"], True)
         self.assertGreaterEqual(result["metrics"]["minimumForwardTestManuscripts"], 3)
         self.assertGreaterEqual(result["metrics"]["observedForwardTestManuscripts"], 3)

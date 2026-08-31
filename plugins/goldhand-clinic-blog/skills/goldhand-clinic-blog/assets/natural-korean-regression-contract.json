@@ -3,7 +3,6 @@
   "contractId": "goldhand-natural-korean-regressions-v2",
   "scope": "user-corrections-generation-principles-and-known-regression-guard",
   "mechanicalPassDoesNotProveNaturalness": true,
-  "titleConfirmationIsFinalUserGate": true,
   "plainTextApprovalGateForbidden": true,
   "forwardTestGate": {
     "appliesWhen": "자연스러운 한국어 생성 지침·회귀 계약·검수 방식을 수정했을 때",
@@ -354,5 +353,6 @@
     "paragraphsDoNotSoundLikeQuestionnaireOrNotice",
     "paragraphTransitionsFlowNaturally",
     "styleMarkersNotUsedAsProofOfNaturalness"
-  ]
+  ],
+  "userPriorityInterviewIsFinalUserGate": true
 }

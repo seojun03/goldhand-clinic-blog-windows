@@ -177,7 +177,7 @@ class GoldhandCoreContractTests(unittest.TestCase):
                 self.assertEqual(failed["status"], "fail")
                 self.assertEqual(approved["status"], "pass")
         self.assertTrue(self.natural["mechanicalPassDoesNotProveNaturalness"])
-        self.assertTrue(self.natural["titleConfirmationIsFinalUserGate"])
+        self.assertTrue(self.natural["userPriorityInterviewIsFinalUserGate"])
         self.assertTrue(self.natural["plainTextApprovalGateForbidden"])
 
     def test_medical_guarantees_and_pressure_cta_are_blocked(self) -> None:

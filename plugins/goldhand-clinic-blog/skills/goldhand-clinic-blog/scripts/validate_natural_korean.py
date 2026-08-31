@@ -132,8 +132,8 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
             for field in ("failedExcerpt", "revisedExcerpt", "why"):
                 if not str(item.get(field, "")).strip():
                     errors.append(f"전진 검증 {principle_id}: {field}이 필요합니다.")
-    if contract.get("titleConfirmationIsFinalUserGate") is not True:
-        errors.append("제목 확정이 마지막 사용자 확인 단계여야 합니다.")
+    if contract.get("userPriorityInterviewIsFinalUserGate") is not True:
+        errors.append("사용자 핵심 내용 인터뷰가 마지막 필수 입력 단계여야 합니다.")
     if contract.get("plainTextApprovalGateForbidden") is not True:
         errors.append("평문 승인 게이트가 금지되어야 합니다.")
     return errors
@@ -168,8 +168,8 @@ def validate_text(title: str, body: str, contract: dict[str, Any]) -> dict[str, 
         "mechanicalPassDoesNotProveNaturalness": bool(
             contract.get("mechanicalPassDoesNotProveNaturalness", True)
         ),
-        "titleConfirmationIsFinalUserGate": bool(
-            contract.get("titleConfirmationIsFinalUserGate", False)
+        "userPriorityInterviewIsFinalUserGate": bool(
+            contract.get("userPriorityInterviewIsFinalUserGate", False)
         ),
         "plainTextApprovalGateForbidden": bool(
             contract.get("plainTextApprovalGateForbidden", False)
