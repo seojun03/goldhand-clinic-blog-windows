@@ -1,15 +1,18 @@
 {
   "schemaVersion": 1,
-  "contractId": "goldhand-topic-recommendations-v1",
+  "contractId": "goldhand-topic-recommendations-v2",
   "defaultWorkflowStage": "topic-recommendation-first",
   "candidateCount": 10,
   "numberedOutputRequired": true,
-  "displayFormat": "{number}. {topicIdea}",
+  "displayFormat": "{number}. {keyword}",
+  "keywordOnly": true,
+  "displayOrder": "source-order",
+  "descriptionsQuestionsAndSubtitlesForbidden": true,
   "numberingStart": 1,
   "numberingEnd": 10,
-  "sourceAsset": "beomeo-topic-idea-library.json",
-  "sourceCollection": "topicIdeas",
-  "sourceTextField": "topicIdea",
+  "sourceAsset": "topic-keyword-library.json",
+  "sourceCollection": "topicKeywords",
+  "sourceTextField": "keyword",
   "autoEligibleRequired": true,
   "informationTopicOnly": true,
   "distinctTopicTextRequired": true,
@@ -20,7 +23,8 @@
   "numberSelection": {
     "minimum": 1,
     "maximum": 10,
-    "preserveExactCandidateText": true
+    "preserveExactCandidateText": true,
+    "mustNotReplaceWithDetailedTopicIdea": true
   },
   "customTopic": {
     "allowed": true,

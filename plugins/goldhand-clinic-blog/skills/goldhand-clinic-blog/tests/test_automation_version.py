@@ -228,7 +228,7 @@ class AutomationVersionTests(unittest.TestCase):
         eligible_topics = [
             item
             for item in topic_library[topic_contract["sourceCollection"]]
-            if item.get("autoEligible") is True and item.get("topicIdea")
+            if item.get("autoEligible") is True and item.get(topic_contract["sourceTextField"])
         ]
 
         self.assertIn(topic_question, skill_text)
@@ -236,7 +236,7 @@ class AutomationVersionTests(unittest.TestCase):
         self.assertIn(title_question, skill_text)
         self.assertLess(skill_text.index(topic_question), skill_text.index(title_question))
 
-        self.assertIn("정보형 주제 10개를 추천", skill_text)
+        self.assertIn("짧은 주제 키워드 10개를 추천", skill_text)
         self.assertIn("숫자형 제목을 정확히 5개 제안", skill_text)
         self.assertIn("글자 수는 우선순위와 기본 작업에 없다", skill_text)
         self.assertIn("한국어 자료", skill_text)
@@ -246,14 +246,19 @@ class AutomationVersionTests(unittest.TestCase):
         self.assertNotIn("1. 자동모드  2. 정밀작성모드", skill_text)
         self.assertNotIn("정밀작성모드", skill_text)
         self.assertNotIn("정밀작성모드", readme_text)
-        self.assertIn("offer exactly ten approved information topics and wait", agent_text)
+        self.assertIn("offer exactly ten short topic keywords in source order and wait", agent_text)
         self.assertNotIn("메인키워드를 입력해 주세요.", agent_text)
         self.assertIn("offer exactly five natural Korean titles", agent_text)
-        self.assertIn("주제 10개", readme_text)
+        self.assertIn("주제 키워드 10개", readme_text)
         self.assertIn("제목 5개", readme_text)
         self.assertEqual(topic_contract["candidateCount"], 10)
         self.assertTrue(topic_contract["numberedOutputRequired"])
-        self.assertEqual(topic_contract["displayFormat"], "{number}. {topicIdea}")
+        self.assertEqual(topic_contract["displayFormat"], "{number}. {keyword}")
+        self.assertTrue(topic_contract["keywordOnly"])
+        self.assertTrue(topic_contract["descriptionsQuestionsAndSubtitlesForbidden"])
+        self.assertFalse(topic_contract["researchRequiredBeforeRecommendations"])
+        self.assertTrue(topic_contract["numberSelection"]["preserveExactCandidateText"])
+        self.assertTrue(topic_contract["numberSelection"]["mustNotReplaceWithDetailedTopicIdea"])
         self.assertEqual(topic_contract["numberingStart"], 1)
         self.assertEqual(topic_contract["numberingEnd"], 10)
         self.assertEqual(topic_contract["selectionPrompt"], topic_question)
@@ -261,16 +266,34 @@ class AutomationVersionTests(unittest.TestCase):
         self.assertTrue(topic_contract["customTopic"]["preserveExactUserWording"])
         self.assertGreaterEqual(len(eligible_topics), topic_contract["candidateCount"])
         self.assertEqual(
-            len({item["topicIdea"] for item in eligible_topics}),
+            len({item["keyword"] for item in eligible_topics}),
             len(eligible_topics),
         )
         self.assertGreaterEqual(
             len({item["topicCluster"] for item in eligible_topics}),
             5,
         )
+        # Check the actual menu assembled from the configured source, not just metadata.
+        rendered = [
+            topic_contract["displayFormat"].format(number=number, **item)
+            for number, item in enumerate(eligible_topics[:topic_contract["candidateCount"]], 1)
+        ]
+        self.assertEqual(rendered, [
+            "1. 다이어트", "2. 교통사고", "3. 비염", "4. 추나요법", "5. 목 통증",
+            "6. 허리 통증", "7. 소화불량", "8. 공진단", "9. 경옥고", "10. 아이 성장",
+        ])
+        detail_library = json.loads(
+            (SKILL_DIR / "assets" / topic_library["relatedTopicSourceAsset"]).read_text(encoding="utf-8")
+        )
+        approved_idea_ids = {
+            item["id"] for item in detail_library["topicIdeas"] if item.get("autoEligible") is True
+        }
+        for item in eligible_topics:
+            self.assertTrue(item["relatedTopicIdeaIds"])
+            self.assertTrue(set(item["relatedTopicIdeaIds"]) <= approved_idea_ids)
         self.assertTrue(
             any(
-                "주제 10개" in prompt and "직접 입력" in prompt
+                "주제 키워드 10개" in prompt and "직접 입력" in prompt
                 for prompt in manifest["interface"]["defaultPrompt"]
             )
         )

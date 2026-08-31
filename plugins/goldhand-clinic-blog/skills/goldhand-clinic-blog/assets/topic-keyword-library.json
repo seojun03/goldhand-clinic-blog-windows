@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sourceRole": "topic-keyword-recommendations-only",
+  "relatedTopicSourceAsset": "beomeo-topic-idea-library.json",
+  "topicKeywords": [
+    {"keyword": "다이어트", "topicCluster": "weight-management", "autoEligible": true, "relatedTopicIdeaIds": ["BTI021", "BTI022", "BTI023", "BTI024", "BTI025", "BTI026", "BTI027", "BTI028", "BTI029"]},
+    {"keyword": "교통사고", "topicCluster": "traffic-accident", "autoEligible": true, "relatedTopicIdeaIds": ["BTI005", "BTI006", "BTI007", "BTI008"]},
+    {"keyword": "비염", "topicCluster": "respiratory", "autoEligible": true, "relatedTopicIdeaIds": ["BTI014", "BTI015"]},
+    {"keyword": "추나요법", "topicCluster": "chuna", "autoEligible": true, "relatedTopicIdeaIds": ["BTI001", "BTI002", "BTI003"]},
+    {"keyword": "목 통증", "topicCluster": "pain", "autoEligible": true, "relatedTopicIdeaIds": ["BTI004", "BTI010"]},
+    {"keyword": "허리 통증", "topicCluster": "pain", "autoEligible": true, "relatedTopicIdeaIds": ["BTI001", "BTI009"]},
+    {"keyword": "소화불량", "topicCluster": "digestive", "autoEligible": true, "relatedTopicIdeaIds": ["BTI011", "BTI012"]},
+    {"keyword": "공진단", "topicCluster": "tonic", "autoEligible": true, "relatedTopicIdeaIds": ["BTI016"]},
+    {"keyword": "경옥고", "topicCluster": "tonic", "autoEligible": true, "relatedTopicIdeaIds": ["BTI016"]},
+    {"keyword": "아이 성장", "topicCluster": "growth", "autoEligible": true, "relatedTopicIdeaIds": ["BTI019", "BTI020"]}
+  ]
+}
